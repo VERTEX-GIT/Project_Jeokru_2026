@@ -1,9 +1,15 @@
 # Project_Jukru_2026
 2026년 버텍스 게임부 프로젝트 중 하나.   
-
+     
      
 ---
 
+**주의사항**
+- 처음으로 유니티 열 때는 **새 유니티 파일 만들지 말고**, 이 레포지토리 받은 후 **'Add->Add project from disk'** 하기
+- 용도에 맞는 브랜치 만들고(ex: feat/player-move) 다 만들면 main에 합칠 것임. **기능 다 만들면 Pull Request** 하세요!
+- **마감 기한은 9/30일 입니다.**
+
+---
 
 ## Commit Convention
 커밋 컨벤션: 커밋할 때 앞에 붙이는 거 규칙  
@@ -38,13 +44,29 @@
 
 ## Pull Request(PR)
 main에 연결하기 위해선 필수적으로 Pull Request를 해야한다. (그리고 내가 강제로 그렇게만 가능하게 설정해두었다!)  
-다른 브랜치에서 작업해서 완성한 결과물을 최종적으로 main에 합쳐야 하는데, 그걸 막 합쳐서 개판나지 않기 위해 존재하는 것이 PR이다.  
+다른 브랜치에서 작업해서 완성한 결과물을 최종적으로 main에 merge 해야 하는데, 그걸 막 합쳐서 개판나지 않기 위해 존재하는 것이 PR이다.  
 아래에 기재된 내용을 따라 PR을 하면 된다.  
+   
+<img width="745" height="456" alt="image" src="https://github.com/user-attachments/assets/00ab614b-1ade-4403-837d-38a672017817" />
+   
+1. 깃허브 리포지토리에서 자신이 작업하던 브랜치를 선택한 후, Compare & pull request를 누른다.  
+2. 'Create Pull Request'를 누른다.
 
-(나중에 추가함 ㅈㅅ)  
+<img width="1391" height="1174" alt="image" src="https://github.com/user-attachments/assets/6badcaee-5c6b-4b74-b882-eb5dd96c2094" />
+
+3. 승인해줄 때까지 기다린다! (내가 승인 안하면 main에 merge 못 함. **'Review Required', 'Merging is blocked' 뜨는 게 정상이다**)
+
+<img width="1337" height="1001" alt="image" src="https://github.com/user-attachments/assets/6e56eaa5-439c-4502-a44b-9fe49584a207" />
+
+4. 만약 Changes Requested라면, 피드백 한 사항을 수정한다.  
+5. 수정하고 나에게 말해주면, 내가 확인하고 Approve 할 것이다!  
+6. 만약 승인이 났음에도 Merge되지 않았다면 직접 merge한다. (왠만하면 승인과 동시에 내가 merge 할 것이다.) 
+
+<img width="692" height="409" alt="image" src="https://github.com/user-attachments/assets/4572c605-f38c-4bff-aa97-033340a2c3fa" />
+
 
 ## Issue
-버그, 새 기능 추가 및 개선 사항 제안, 해야 할 일이다. 깃허브 Issue 탭에서 추가 가능하다.  
+버그, 새 기능 추가 및 개선 사항 제안, 해야 할 일 등을 기록한 것이다. 깃허브 Issue 탭에서 추가 가능하다.  
 작업이 진행 중이면 Open, 끝나면 Close 라고 하며, 깃허브에서도 그렇게 설정해야한다.  
   
 <img width="1186" height="386" alt="image" src="https://github.com/user-attachments/assets/2b1fc8d6-485d-40ae-8a5d-aba1b4c1ecb4" />
