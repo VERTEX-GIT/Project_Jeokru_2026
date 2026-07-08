@@ -7,13 +7,13 @@
 **주의사항**
 - 처음으로 유니티 열 때는 **새 유니티 파일 만들지 말고**, 이 레포지토리 받은 후 **'Add->Add project from disk'** 하기
 - 용도에 맞는 브랜치 만들고(ex: feat/player-move) 다 만들면 main에 합칠 것임. **기능 다 만들면 Pull Request** 하세요!
-- **마감 기한은 9/30일 입니다.**
+- **9/30일에 이거 전시해야 합니다.**
 
 ---
 
 ## Commit Convention
 커밋 컨벤션: 커밋할 때 앞에 붙이는 거 규칙  
-(ex: feat: 모재현이 니케하는 것 구현)  
+(ex: feat: 플레이어 이동 구현)  
 
 - feat: 새로운 기능 추가  
 - fix: 버그 수정
@@ -44,7 +44,9 @@
 
 ## Pull Request(PR)
 main에 연결하기 위해선 필수적으로 Pull Request를 해야한다. (그리고 내가 강제로 그렇게만 가능하게 설정해두었다!)  
-다른 브랜치에서 작업해서 완성한 결과물을 최종적으로 main에 merge 해야 하는데, 그걸 막 합쳐서 개판나지 않기 위해 존재하는 것이 PR이다.  
+다른 브랜치에서 작업해서 완성한 결과물을 최종적으로 main에 merge 해야 하는데,  
+그걸 막 합쳐서 개판나지 않기 위해 존재하는 것이 PR이다.  
+     
 아래에 기재된 내용을 따라 PR을 하면 된다.  
    
 <img width="745" height="456" alt="image" src="https://github.com/user-attachments/assets/00ab614b-1ade-4403-837d-38a672017817" />
