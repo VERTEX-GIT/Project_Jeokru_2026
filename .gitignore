@@ -38,6 +38,9 @@
 .vs/
 .vscode/
 
+# Codex local workspace data
+/.codex/
+
 # Gradle cache directory
 .gradle/
 
