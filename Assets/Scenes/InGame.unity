@@ -5612,6 +5612,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae17f21882a64fafb69b882a8df2ca40, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TileOccupancyManager
+  coordinateManager: {fileID: 172909986}
 --- !u!4 &1351250974
 Transform:
   m_ObjectHideFlags: 0
