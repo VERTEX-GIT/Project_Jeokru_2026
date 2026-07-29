@@ -31,30 +31,54 @@ public sealed class FactoryWorkArea : MonoBehaviour
         }
     }
 
-    // 작업 영역 등록 가능 여부 검사
+    // 공장 작업 영역을 등록할 수 있는지 검사
     public bool CanRegisterWorkArea(Vector3Int anchorCell)
     {
-        if (IsRegistered || placement == null || placement.ObjectType != TileObjectType.Facility || !TryGetOccupancyManager(out TileOccupancyManager manager))
+        if (IsRegistered ||
+            placement == null ||
+            placement.ObjectType != TileObjectType.Facility ||
+            !TryGetOccupancyManager(out TileOccupancyManager manager))
         {
             return false;
         }
 
-        List<Vector3Int> candidateCells = CalculateWorkCells(anchorCell, manager.CoordinateManager); // 검사할 작업 후보 타일
+        List<Vector3Int> candidateCells =
+            CalculateWorkCells(
+                anchorCell,
+                manager.CoordinateManager);
 
-        return manager.CanRegisterWorkArea(this, candidateCells);
+        if (candidateCells.Count != 16)
+        {
+            return false;
+        }
+
+        return manager.CanRegisterWorkArea(
+            this,
+            candidateCells);
     }
 
-    // 작업 타일 Dictionary에 추가
+    // 공장의 작업 영역을 Dictionary에 등록
     public bool RegisterWorkArea(Vector3Int anchorCell)
     {
-        if (!CanRegisterWorkArea(anchorCell) || !TryGetOccupancyManager(out TileOccupancyManager manager))
+        if (!CanRegisterWorkArea(anchorCell) ||
+            !TryGetOccupancyManager(out TileOccupancyManager manager))
         {
             return false;
         }
 
-        List<Vector3Int> candidateCells = CalculateWorkCells(anchorCell, manager.CoordinateManager); // 실제 등록할 작업 타일
+        List<Vector3Int> candidateCells =
+            CalculateWorkCells(
+                anchorCell,
+                manager.CoordinateManager);
 
-        if (!manager.TryRegisterWorkArea(this, candidateCells))
+        if (candidateCells.Count != 16)
+        {
+            return false;
+        }
+
+        if (!manager.TryRegisterWorkArea(
+                this,
+                candidateCells))
         {
             return false;
         }
@@ -87,27 +111,36 @@ public sealed class FactoryWorkArea : MonoBehaviour
     }
 
     // 공장 작업 영역 좌표 계산
-    private List<Vector3Int> CalculateWorkCells(Vector3Int anchorCell, TileCoordinateManager coordinateManager)
+    private List<Vector3Int> CalculateWorkCells(
+        Vector3Int anchorCell,
+        TileCoordinateManager coordinateManager)
     {
-        List<Vector3Int> cells = new(); // 맵 안에 존재하는 작업 좌표 목록
+        List<Vector3Int> cells = new();
 
-        for (int x = -1; x <= placement.Size.x; x++)
+        // 공장 3×3과 주변 작업 영역을 포함한 5×5 검사
+        for (int x = -2; x <= 2; x++)
         {
-            for (int y = -1; y <= placement.Size.y; y++)
+            for (int y = -2; y <= 2; y++)
             {
-                bool isInsideFactory = x >= 0 && x < placement.Size.x && y >= 0 && y < placement.Size.y; // 공장 점유 영역 여부
+                bool isInsideFactory =
+                    Mathf.Abs(x) <= 1 &&
+                    Mathf.Abs(y) <= 1;
 
                 if (isInsideFactory)
                 {
                     continue;
                 }
 
-                Vector3Int cell = anchorCell + new Vector3Int(x, y, 0); // 현재 작업 후보 좌표
+                Vector3Int cell =
+                    anchorCell + new Vector3Int(x, y, 0);
 
-                if (coordinateManager.HasTile(cell))
+                // 작업 영역이 하나라도 맵 밖이면 유효하지 않은 배치
+                if (!coordinateManager.HasTile(cell))
                 {
-                    cells.Add(cell);
+                    return new List<Vector3Int>();
                 }
+
+                cells.Add(cell);
             }
         }
 

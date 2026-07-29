@@ -1,0 +1,115 @@
+{
+    "version": 1,
+    "name": "GamePlay",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "e5722465-f6fa-41fc-830b-19d17220b57d",
+            "actions": [
+                {
+                    "name": "PointerPosition",
+                    "type": "Value",
+                    "id": "318fb446-f97c-4d83-b3ba-aa786d7df994",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PrimaryClick",
+                    "type": "Button",
+                    "id": "a281eee3-5a28-4514-a4b7-6e5f88ee087a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CancelSelection",
+                    "type": "Button",
+                    "id": "ba812b05-d957-4165-8a96-06420777ed03",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UnitPlacementMode",
+                    "type": "Button",
+                    "id": "b1d1669e-b337-4fe1-b5f3-de1c9ca5d086",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FactoryPlacementMode",
+                    "type": "Button",
+                    "id": "1fe9864d-803d-4f23-9ce7-92c96d282f81",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "aa8a4232-7abb-4177-8930-648011c316da",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointerPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bf3c7856-79b5-48f8-be22-31ba6fa741a5",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "abd1b0fb-41e7-4612-8488-3e719deba7a2",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CancelSelection",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "78c185c3-83d6-466a-9cb2-c34b4e2b914e",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "UnitPlacementMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f062d7f7-7464-4242-baab-76b8e2dfcabb",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FactoryPlacementMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
