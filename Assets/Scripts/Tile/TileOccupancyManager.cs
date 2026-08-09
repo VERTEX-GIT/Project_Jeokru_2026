@@ -168,6 +168,56 @@ public sealed class TileOccupancyManager : MonoBehaviour
         return occupants.ContainsKey(cell);
     }
 
+    // 경로 탐색에서 고정 장애물로 취급할 시설이 있는지 확인
+    public bool HasFacility(Vector3Int cell)
+    {
+        return occupants.TryGetValue(cell, out TileObjectPlacement occupant) &&
+               occupant != null &&
+               occupant.ObjectType == TileObjectType.Facility;
+    }
+
+    // 유닛의 이동 목적지 예약
+    public bool TryReserve(
+        Vector3Int cell,
+        TileObjectPlacement unit)
+    {
+        if (coordinateManager == null ||
+            unit == null ||
+            unit.ObjectType != TileObjectType.Unit)
+        {
+            return false;
+        }
+
+        if (!coordinateManager.HasTile(cell) ||
+            occupants.ContainsKey(cell) ||
+            unitReservations.ContainsKey(cell))
+        {
+            return false;
+        }
+
+        unitReservations.Add(cell, unit);
+        return true;
+    }
+
+    // 해당 유닛이 소유한 목적지 예약 해제
+    public void ReleaseReservation(
+        Vector3Int cell,
+        TileObjectPlacement unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+
+        if (unitReservations.TryGetValue(
+                cell,
+                out TileObjectPlacement currentUnit) &&
+            currentUnit == unit)
+        {
+            unitReservations.Remove(cell);
+        }
+    }
+
     // 해당 타일이 유닛의 목적지로 예약되었는지 확인
     public bool IsReserved(Vector3Int cell)
     {

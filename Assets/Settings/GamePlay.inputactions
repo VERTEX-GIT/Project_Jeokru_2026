@@ -25,9 +25,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "CancelSelection",
+                    "name": "MoveCommand",
                     "type": "Button",
-                    "id": "ba812b05-d957-4165-8a96-06420777ed03",
+                    "id": "211b455c-17f3-4129-9949-a58177d55be7",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -77,17 +77,6 @@
                 },
                 {
                     "name": "",
-                    "id": "abd1b0fb-41e7-4612-8488-3e719deba7a2",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CancelSelection",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "78c185c3-83d6-466a-9cb2-c34b4e2b914e",
                     "path": "<Keyboard>/1",
                     "interactions": "",
@@ -105,6 +94,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "FactoryPlacementMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d9323c48-fa7d-40a1-a4e9-4c3d22ec9d4e",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveCommand",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

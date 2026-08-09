@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 635118626172871287}
   - component: {fileID: 7224569810767069955}
   - component: {fileID: 2466824059280597571}
+  - component: {fileID: 8435799684733257262}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -136,6 +137,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitSelectable
   selectionIndicator: {fileID: 8277902838959079874}
+--- !u!114 &8435799684733257262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7600ee00db8a6774a99d0a21c042bde4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
+  moveSpeed: 3
+  occupancyManager: {fileID: 0}
 --- !u!1 &8277902838959079874
 GameObject:
   m_ObjectHideFlags: 0

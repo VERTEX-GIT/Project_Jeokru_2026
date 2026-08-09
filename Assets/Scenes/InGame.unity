@@ -119,6 +119,25 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &18090466 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+  m_PrefabInstance: {fileID: 3739334710730683037}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &18090472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18090466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7600ee00db8a6774a99d0a21c042bde4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
+  moveSpeed: 3
+  occupancyManager: {fileID: 1351250975}
 --- !u!1 &172909982
 GameObject:
   m_ObjectHideFlags: 0
@@ -5773,6 +5792,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1839302840}
   - component: {fileID: 1839302841}
+  - component: {fileID: 1839302842}
   m_Layer: 0
   m_Name: UnitCommandSystem
   m_TagString: Untagged
@@ -5809,10 +5829,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitSelectionController
   pointerPositionAction: {fileID: -2498673659626704896, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
   primaryClickAction: {fileID: -3180170889602687853, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
-  cancelSelectionAction: {fileID: 6027660612843295948, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
+  moveCommandAction: {fileID: 0}
   worldCamera: {fileID: 519420031}
   occupancyManager: {fileID: 1351250975}
   placementController: {fileID: 1331440349}
+  destinationAssigner: {fileID: 1839302842}
+--- !u!114 &1839302842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839302839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 108f2f9bdffa5b647a47ce99b85a9a65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitDestinationAssigner
+  occupancyManager: {fileID: 1351250975}
+  searchRadius: 8
 --- !u!1001 &3739334710730683037
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5876,7 +5911,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 18090472}
   m_SourcePrefab: {fileID: 100100000, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
 --- !u!1001 &8708414765670502757
 PrefabInstance:

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 포인터 입력으로 유닛 선택을 전환하고 현재 선택 목록을 관리
+// 포인터 입력으로 유닛 선택을 관리하고 선택된 유닛에 이동 명령을 전달
 [DisallowMultipleComponent]
 public sealed class UnitSelectionController : MonoBehaviour
 {
@@ -12,7 +12,7 @@ public sealed class UnitSelectionController : MonoBehaviour
     [SerializeField]
     private InputActionReference primaryClickAction; // 선택 입력
     [SerializeField]
-    private InputActionReference cancelSelectionAction; // 선택 해제 입력
+    private InputActionReference moveCommandAction; // 이동 명령 입력
 
     [Header("References")]
     [SerializeField]
@@ -21,13 +21,18 @@ public sealed class UnitSelectionController : MonoBehaviour
     private TileOccupancyManager occupancyManager;
     [SerializeField]
     private ObjectPlacementController placementController;
+    [SerializeField]
+    private UnitDestinationAssigner destinationAssigner;
 
     private readonly List<UnitSelectable> selectedUnits = new();
+
+    // Inspector 참조 또는 동일 액션 맵에서 찾은 실제 이동 명령 액션
+    private InputAction moveCommandInput;
 
     // 외부에서는 선택 목록을 읽기 전용으로 제공
     public IReadOnlyList<UnitSelectable> SelectedUnits => selectedUnits;
 
-    // Inspector에서 연결되지 않은 카메라와 점유 관리자 탐색
+    // 누락된 씬 참조를 탐색하고 사용할 이동 명령 액션 결정
     private void Awake()
     {
         if (worldCamera == null)
@@ -46,14 +51,23 @@ public sealed class UnitSelectionController : MonoBehaviour
                 FindAnyObjectByType<TileOccupancyManager>();
         }
 
-        if (placementController != null &&
-            placementController.CurrentMode != PlacementMode.None)
+        if (placementController == null)
         {
-            return;
+            placementController =
+                FindAnyObjectByType<ObjectPlacementController>();
         }
+        if (destinationAssigner == null)
+        {
+            destinationAssigner =
+                FindAnyObjectByType<UnitDestinationAssigner>();
+        }
+
+        moveCommandInput = moveCommandAction != null
+            ? moveCommandAction.action
+            : primaryClickAction?.action.actionMap?.FindAction("MoveCommand");
     }
 
-    // 선택 관련 입력 액션을 활성화하고 콜백 등록
+    // 선택 및 이동 관련 입력 액션을 활성화하고 콜백 등록
     private void OnEnable()
     {
         if (primaryClickAction != null)
@@ -62,10 +76,10 @@ public sealed class UnitSelectionController : MonoBehaviour
             primaryClickAction.action.Enable();
         }
 
-        if (cancelSelectionAction != null)
+        if (moveCommandInput != null)
         {
-            cancelSelectionAction.action.performed += OnCancelSelection;
-            cancelSelectionAction.action.Enable();
+            moveCommandInput.performed += OnMoveCommand;
+            moveCommandInput.Enable();
         }
 
         if (pointerPositionAction != null)
@@ -74,7 +88,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
     }
 
-    // 입력 콜백을 해제하고 모든 유닛 선택 해제
+    // 선택 및 이동 입력 콜백을 해제하고 모든 유닛 선택 해제
     private void OnDisable()
     {
         if (primaryClickAction != null)
@@ -83,10 +97,10 @@ public sealed class UnitSelectionController : MonoBehaviour
             primaryClickAction.action.Disable();
         }
 
-        if (cancelSelectionAction != null)
+        if (moveCommandInput != null)
         {
-            cancelSelectionAction.action.performed -= OnCancelSelection;
-            cancelSelectionAction.action.Disable();
+            moveCommandInput.performed -= OnMoveCommand;
+            moveCommandInput.Disable();
         }
 
         if (pointerPositionAction != null)
@@ -97,43 +111,55 @@ public sealed class UnitSelectionController : MonoBehaviour
         ClearSelection();
     }
 
+    // 배치 모드가 아닐 때 클릭한 유닛의 선택을 전환하고 빈 타일 클릭 시 전체 선택 해제
     private void OnPrimaryClick(
         InputAction.CallbackContext context)
     {
-        // 유닛 또는 공장 배치 모드에서는
-        // 같은 좌클릭 입력으로 유닛을 선택하지 않는다.
         if (placementController != null &&
             placementController.CurrentMode != PlacementMode.None)
         {
             return;
         }
 
-        TryToggleUnitAtPointer();
-    }
-
-    private void OnCancelSelection(
-        InputAction.CallbackContext context)
-    {
-        // 배치 모드에서의 우클릭 처리는 현재 없지만,
-        // 선택 해제를 막고 싶다면 여기에도 같은 검사를 넣으면 된다.
-        ClearSelection();
-    }
-
-    // 포인터가 가리키는 유닛의 선택 상태 전환
-    private void TryToggleUnitAtPointer()
-    {
         if (!TryGetPointerCell(out Vector3Int pointerCell))
         {
             return;
         }
 
-        if (!occupancyManager.TryGetOccupant(
+        if (occupancyManager.TryGetOccupant(
                 pointerCell,
                 out TileObjectPlacement occupant))
+        {
+            TryToggleUnit(occupant);
+            return;
+        }
+
+        ClearSelection();
+    }
+
+    // 배치 모드가 아닐 때 오브젝트가 점유하지 않은 포인터 타일을 기준으로 이동 명령 전달
+    private void OnMoveCommand(
+        InputAction.CallbackContext context)
+    {
+        if (placementController != null &&
+            placementController.CurrentMode != PlacementMode.None)
         {
             return;
         }
 
+        if (!TryGetPointerCell(out Vector3Int pointerCell) ||
+            occupancyManager.HasOccupant(pointerCell))
+        {
+            return;
+        }
+
+        TryIssueMoveCommand(pointerCell);
+    }
+
+    // 포인터가 가리키는 유닛의 선택 상태 전환
+    private void TryToggleUnit(
+        TileObjectPlacement occupant)
+    {
         if (occupant == null ||
             occupant.ObjectType != TileObjectType.Unit)
         {
@@ -147,6 +173,21 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         ToggleSelection(selectable);
+    }
+
+    // 선택된 유닛들에게 이동 명령을 발행
+    private void TryIssueMoveCommand(
+    Vector3Int destinationCell)
+    {
+        if (selectedUnits.Count == 0 ||
+            destinationAssigner == null)
+        {
+            return;
+        }
+
+        destinationAssigner.IssueMoveCommand(
+            selectedUnits,
+            destinationCell);
     }
 
     // 화면 포인터 좌표를 맵 안의 타일 셀 좌표로 변환
