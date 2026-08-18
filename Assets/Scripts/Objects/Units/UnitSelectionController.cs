@@ -137,7 +137,8 @@ public sealed class UnitSelectionController : MonoBehaviour
         ClearSelection();
     }
 
-    // 배치 모드가 아닐 때 오브젝트가 점유하지 않은 포인터 타일을 기준으로 이동 명령 전달
+    // 배치 모드가 아닐 때 우클릭 위치에 따라
+    // 일반 이동 또는 공장 작업 명령 전달
     private void OnMoveCommand(
         InputAction.CallbackContext context)
     {
@@ -147,12 +148,30 @@ public sealed class UnitSelectionController : MonoBehaviour
             return;
         }
 
-        if (!TryGetPointerCell(out Vector3Int pointerCell) ||
-            occupancyManager.HasOccupant(pointerCell))
+        if (!TryGetPointerCell(
+                out Vector3Int pointerCell))
         {
             return;
         }
 
+        // 오브젝트를 우클릭한 경우
+        if (occupancyManager.TryGetOccupant(
+                pointerCell,
+                out TileObjectPlacement occupant))
+        {
+            // 공장이면 공장 작업 명령
+            if (occupant.ObjectType ==
+                    TileObjectType.Facility &&
+                occupant.TryGetComponent(
+                    out FactoryCore factory))
+            {
+                TryIssueFactoryCommand(factory);
+            }
+
+            return;
+        }
+
+        // 빈 타일이면 일반 이동
         TryIssueMoveCommand(pointerCell);
     }
 
@@ -188,6 +207,22 @@ public sealed class UnitSelectionController : MonoBehaviour
         destinationAssigner.IssueMoveCommand(
             selectedUnits,
             destinationCell);
+    }
+
+    // 선택된 유닛들에게 공장 작업 이동 명령 전달
+    private void TryIssueFactoryCommand(
+        FactoryCore factory)
+    {
+        if (selectedUnits.Count == 0 ||
+            destinationAssigner == null ||
+            factory == null)
+        {
+            return;
+        }
+
+        destinationAssigner.IssueFactoryCommand(
+            selectedUnits,
+            factory);
     }
 
     // 화면 포인터 좌표를 맵 안의 타일 셀 좌표로 변환

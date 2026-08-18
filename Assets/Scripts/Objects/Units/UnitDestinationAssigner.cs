@@ -80,11 +80,160 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
 
         foreach (Assignment assignment in assignments)
         {
-            assignment.Unit.Movement.TryMoveTo(assignment.Cell);
+            if (assignment.Unit.Movement.TryMoveTo(
+                    assignment.Cell))
+            {
+                assignment.Unit.Core?.ClearTarget();
+            }
         }
     }
 
-    // 선택 순서를 보존하면서 현재 이동 명령을 받을 수 있는 유닛만 수집
+    // 선택된 유닛들을 공장의 사용 가능한 작업 타일에 배정
+    public void IssueFactoryCommand(
+        IReadOnlyList<UnitSelectable> selectedUnits,
+        FactoryCore factory)
+    {
+        if (occupancyManager == null ||
+            pathfinder == null ||
+            selectedUnits == null ||
+            factory == null ||
+            !factory.TryGetComponent(
+                out FactoryWorkArea workArea) ||
+            !factory.TryGetComponent(
+                out TileObjectPlacement factoryPlacement) ||
+            !workArea.IsRegistered)
+        {
+            return;
+        }
+
+        List<UnitInfo> units =
+            CollectMovableUnits(selectedUnits);
+
+        // UnitCore가 없는 유닛은 공장 작업 명령 대상에서 제외
+        units.RemoveAll(unit => unit.Core == null);
+
+        if (units.Count == 0)
+        {
+            return;
+        }
+
+        List<Assignment> assignments = new();
+        HashSet<int> assignedUnits = new();
+        HashSet<Vector3Int> assignedCells = new();
+
+        // 이미 이 공장의 작업 타일에 정지해 있는 유닛
+        foreach (UnitInfo unit in units)
+        {
+            if (!unit.Movement.IsMoving &&
+                unit.Placement.IsPlaced &&
+                workArea.Contains(unit.Placement.AnchorCell))
+            {
+                unit.Core.SetTarget(factory.gameObject);
+
+                assignedUnits.Add(unit.Order);
+                assignedCells.Add(
+                    unit.Placement.AnchorCell);
+            }
+        }
+
+        // 이미 이 공장의 작업 타일로 이동 중이라면
+        // 목적지를 다시 배정하지 않는다.
+        foreach (UnitInfo unit in units)
+        {
+            if (assignedUnits.Contains(unit.Order))
+            {
+                continue;
+            }
+
+            if (unit.Movement.IsMoving &&
+                unit.Core.CurrentTarget == factory.gameObject &&
+                workArea.Contains(
+                    unit.Movement.DestinationCell))
+            {
+                assignedUnits.Add(unit.Order);
+                assignedCells.Add(
+                    unit.Movement.DestinationCell);
+            }
+        }
+
+        List<CandidateInfo> candidates =
+            CollectFactoryCandidates(
+                workArea,
+                units,
+                assignedUnits,
+                assignedCells);
+
+        MatchRemainingUnits(
+            factoryPlacement.AnchorCell,
+            units,
+            candidates,
+            assignments,
+            assignedUnits,
+            assignedCells);
+
+        assignments.Sort(
+            (left, right) =>
+                left.Unit.Order.CompareTo(
+                    right.Unit.Order));
+
+        foreach (Assignment assignment in assignments)
+        {
+            if (assignment.Unit.Movement.TryMoveTo(
+                    assignment.Cell))
+            {
+                assignment.Unit.Core.SetTarget(
+                    factory.gameObject);
+            }
+        }
+    }
+
+    // 공장의 비어 있고 도달 가능한 작업 타일 수집
+    private List<CandidateInfo> CollectFactoryCandidates(
+        FactoryWorkArea workArea,
+        List<UnitInfo> units,
+        HashSet<int> assignedUnits,
+        HashSet<Vector3Int> assignedCells)
+    {
+        List<CandidateInfo> result = new();
+
+        foreach (Vector3Int cell in workArea.WorkCells)
+        {
+            if (assignedCells.Contains(cell) ||
+                !IsAvailableDestination(cell))
+            {
+                continue;
+            }
+
+            Dictionary<Vector3Int, int> distances =
+                pathfinder.BuildDistanceMap(cell);
+
+            bool reachesAnyUnit = false;
+
+            foreach (UnitInfo unit in units)
+            {
+                if (!assignedUnits.Contains(unit.Order) &&
+                    distances.ContainsKey(unit.Cell))
+                {
+                    reachesAnyUnit = true;
+                    break;
+                }
+            }
+
+            if (!reachesAnyUnit)
+            {
+                continue;
+            }
+
+            result.Add(
+                new CandidateInfo(
+                    cell,
+                    distances));
+        }
+
+        return result;
+    }
+
+    // 선택 순서를 보존하면서 현재 명령을 받을 수 있는 유닛 수집
     private List<UnitInfo> CollectMovableUnits(
         IReadOnlyList<UnitSelectable> selectedUnits)
     {
@@ -96,14 +245,21 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
 
             if (selectable == null ||
                 !selectable.TryGetComponent(out UnitMovement movement) ||
-                movement.IsMoving ||
                 !selectable.TryGetComponent(out TileObjectPlacement placement) ||
-                !placement.IsPlaced)
+                (!movement.IsMoving && !placement.IsPlaced))
             {
                 continue;
             }
 
-            result.Add(new UnitInfo(movement, placement.AnchorCell, i));
+            selectable.TryGetComponent(out UnitCore core);
+
+            result.Add(
+                new UnitInfo(
+                    movement,
+                    placement,
+                    core,
+                    movement.CurrentCommandCell,
+                    i));
         }
 
         return result;
@@ -319,12 +475,21 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
     private sealed class UnitInfo
     {
         public readonly UnitMovement Movement;
+        public readonly TileObjectPlacement Placement;
+        public readonly UnitCore Core;
         public readonly Vector3Int Cell;
         public readonly int Order;
 
-        public UnitInfo(UnitMovement movement, Vector3Int cell, int order)
+        public UnitInfo(
+            UnitMovement movement,
+            TileObjectPlacement placement,
+            UnitCore core,
+            Vector3Int cell,
+            int order)
         {
             Movement = movement;
+            Placement = placement;
+            Core = core;
             Cell = cell;
             Order = order;
         }
