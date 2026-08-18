@@ -11,11 +11,13 @@ public sealed class UnitSelectable : MonoBehaviour
     public bool IsSelected { get; private set; }
 
     private TileObjectPlacement placement;
+    private UnitCore unitCore;
 
     // 배치 컴포넌트를 가져오고 선택 상태 초기화
     private void Awake()
     {
         placement = GetComponent<TileObjectPlacement>();
+        unitCore = GetComponent<UnitCore>();
 
         IsSelected = false;
 
@@ -29,8 +31,11 @@ public sealed class UnitSelectable : MonoBehaviour
     public bool CanSelect()
     {
         return placement != null &&
-               placement.IsPlaced &&
-               placement.ObjectType == TileObjectType.Unit;
+            placement.IsPlaced &&
+            placement.ObjectType == TileObjectType.Unit &&
+            unitCore != null &&
+            unitCore.Data != null &&
+            unitCore.Data.Team == UnitTeam.Ally;
     }
 
     // 선택 가능한 유닛을 선택 상태로 변경

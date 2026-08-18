@@ -5854,7 +5854,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitSelectionController
   pointerPositionAction: {fileID: -2498673659626704896, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
   primaryClickAction: {fileID: -3180170889602687853, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
-  moveCommandAction: {fileID: 0}
+  moveCommandAction: {fileID: -2274060388013722648, guid: b327009c32cba264e864cf329eb58aaf, type: 3}
   worldCamera: {fileID: 519420031}
   occupancyManager: {fileID: 1351250975}
   placementController: {fileID: 1331440349}

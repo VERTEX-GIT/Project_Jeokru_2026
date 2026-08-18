@@ -244,6 +244,9 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
             UnitSelectable selectable = selectedUnits[i];
 
             if (selectable == null ||
+                !selectable.TryGetComponent(out UnitCore unitCore) ||
+                unitCore.Data == null ||
+                unitCore.Data.Team != UnitTeam.Ally ||
                 !selectable.TryGetComponent(out UnitMovement movement) ||
                 !selectable.TryGetComponent(out TileObjectPlacement placement) ||
                 (!movement.IsMoving && !placement.IsPlaced))
@@ -251,13 +254,11 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
                 continue;
             }
 
-            selectable.TryGetComponent(out UnitCore core);
-
             result.Add(
                 new UnitInfo(
                     movement,
                     placement,
-                    core,
+                    unitCore,
                     movement.CurrentCommandCell,
                     i));
         }

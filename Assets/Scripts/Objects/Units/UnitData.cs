@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum UnitTeam
+{
+    Ally,
+    Enemy
+}
+
 public enum UnitAttackType
 {
     Melee,
@@ -17,6 +23,9 @@ public sealed class UnitData : ScriptableObject
 
     [SerializeField]
     private GameObject unitPrefab;
+
+    [SerializeField]
+    private UnitTeam team;
 
     [Header("능력치")]
     [SerializeField]
@@ -53,6 +62,7 @@ public sealed class UnitData : ScriptableObject
 
     public string UnitName => unitName;
     public GameObject UnitPrefab => unitPrefab;
+    public UnitTeam Team => team;
 
     public float MaxHp => maxHp;
     public float MoveSpeed => moveSpeed;
