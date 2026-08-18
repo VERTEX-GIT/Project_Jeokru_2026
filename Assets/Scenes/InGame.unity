@@ -119,25 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &18090466 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
-  m_PrefabInstance: {fileID: 3739334710730683037}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &18090472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 18090466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7600ee00db8a6774a99d0a21c042bde4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
-  moveSpeed: 3
-  occupancyManager: {fileID: 1351250975}
 --- !u!1 &172909982
 GameObject:
   m_ObjectHideFlags: 0
@@ -5904,17 +5885,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8277902838959079874, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
+    - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+      propertyPath: occupancyManager
+      value: 
+      objectReference: {fileID: 1351250975}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 18090472}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
 --- !u!1001 &8708414765670502757
 PrefabInstance:

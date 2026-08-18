@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 635118626172871287}
   - component: {fileID: 7224569810767069955}
   - component: {fileID: 2466824059280597571}
-  - component: {fileID: 8435799684733257262}
+  - component: {fileID: 5164241042533012317}
+  - component: {fileID: 3846165126221685422}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -137,7 +138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitSelectable
   selectionIndicator: {fileID: 8277902838959079874}
---- !u!114 &8435799684733257262
+--- !u!114 &5164241042533012317
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -151,6 +152,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
   moveSpeed: 3
   occupancyManager: {fileID: 0}
+--- !u!114 &3846165126221685422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce766de9c4ddc19409ed5a5d30f5f2b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCore
+  <Data>k__BackingField: {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
+  <IsActive>k__BackingField: 1
+  <CurrentTarget>k__BackingField: {fileID: 0}
+  <isMoving>k__BackingField: 0
+  <DestinationCell>k__BackingField: {x: 0, y: 0, z: 0}
 --- !u!1 &8277902838959079874
 GameObject:
   m_ObjectHideFlags: 0
