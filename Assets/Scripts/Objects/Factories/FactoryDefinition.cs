@@ -14,6 +14,10 @@ public class FactoryDefinition : ScriptableObject
     private string displayName;
 
     [Header("Production")]
+
+    [SerializeField]
+    private ResourceType productionType;
+
     [SerializeField]
     [Min(0.1f)]
     private float baseProductionTime = 60f;
@@ -37,6 +41,7 @@ public class FactoryDefinition : ScriptableObject
 
     public FactoryType FactoryType => factoryType;
     public string DisplayName => displayName;
+    public ResourceType ProductionType => productionType;
     public float BaseProductionTime => baseProductionTime;
     public int ProductionAmount => productionAmount;
     public int MaxHealth => maxHealth;

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FactoryDefinition
   factoryType: 0
   displayName: Test Display Name
+  productionType: 0
   baseProductionTime: 60
   productionAmount: 1
   maxHealth: 100

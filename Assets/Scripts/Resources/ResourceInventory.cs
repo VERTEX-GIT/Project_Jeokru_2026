@@ -11,6 +11,8 @@ public class ResourceInventory : MonoBehaviour
 
     // 자원 보유량
     private readonly Dictionary<ResourceType, int> resourceAmounts = new();
+    // 이벤트: 자원 보유량 변경 시 호출
+    public event Action<ResourceType, int> ResourceAmountChanged;
 
     /* =< 기본 메서드 >======================================================================================== */
 
@@ -36,8 +38,8 @@ public class ResourceInventory : MonoBehaviour
 
     /* =< 자원 메서드 >========================================================================================= */
 
-    // 자원 보유량 초기화
-    public void InitResourceAmounts()
+    // 자원 보유량 리셋
+    public void ResetResourceAmounts()
     {
         foreach (ResourceType resourceType in Enum.GetValues(typeof(ResourceType)))
         {
@@ -61,6 +63,8 @@ public class ResourceInventory : MonoBehaviour
 
         resourceAmounts[resourceType] = GetResourceAmount(resourceType) + amount;
 
+        ResourceAmountChanged?.Invoke(resourceType, GetResourceAmount(resourceType));
+
 
         return true;
     }
@@ -74,6 +78,11 @@ public class ResourceInventory : MonoBehaviour
         }
 
         Dictionary<ResourceType, int> totals = CalculateTotals(resources);
+
+        if (totals.Count == 0)
+        {
+            return false;
+        }
 
         // 여러 자원 수 만큼 단일 자원 추가 메서드 호출
         foreach (KeyValuePair<ResourceType, int> resource in totals)
@@ -93,6 +102,8 @@ public class ResourceInventory : MonoBehaviour
         }
 
         resourceAmounts[resourceType] = GetResourceAmount(resourceType) - amount;
+
+        ResourceAmountChanged?.Invoke(resourceType, GetResourceAmount(resourceType));
 
         return true;
     }
@@ -125,6 +136,11 @@ public class ResourceInventory : MonoBehaviour
         }
 
         Dictionary<ResourceType, int> totals = CalculateTotals(costs);
+
+        if (totals.Count == 0)
+        {
+            return false;
+        }
 
         foreach (KeyValuePair<ResourceType, int> cost in totals)
         {
