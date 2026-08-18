@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5903746932094219148}
   - component: {fileID: 6446080319276119375}
   - component: {fileID: -8106775801962366442}
+  - component: {fileID: 513355408488972395}
   m_Layer: 0
   m_Name: Factory
   m_TagString: Untagged
@@ -150,3 +151,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryCore
   definition: {fileID: 0}
+--- !u!114 &513355408488972395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc20965b460bebd48bde64fa274ad239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryWorkerManager
