@@ -17,7 +17,7 @@ MonoBehaviour:
   productionType: 0
   baseProductionTime: 60
   productionAmount: 1
-  maxHealth: 100
+  maxHealth: 1000
   defense: 0
   installationCosts:
   - resourceType: 0

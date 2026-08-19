@@ -22,5 +22,5 @@ MonoBehaviour:
   defense: 0
   attackCooldown: 1
   attackType: 1
-  attackRange: 3
-  preferredDistance: 3
+  attackRange: 4
+  preferredDistance: 4

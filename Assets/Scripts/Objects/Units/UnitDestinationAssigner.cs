@@ -83,16 +83,33 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
             if (assignment.Unit.Movement
                     .TryMoveTo(assignment.Cell))
             {
-                assignment.Unit.Core?.SetAutoCombat(false);
-                assignment.Unit.Core?.ClearTarget();
+                if (assignment.Unit.Core == null)
+                {
+                    continue;
+                }
+
+                assignment.Unit.Core
+                    .SetPlayerMoveCommandActive(true);
+
+                assignment.Unit.Core
+                    .SetAutoCombat(false);
+
+                assignment.Unit.Core
+                    .ClearTarget();
+
+                if (assignment.Unit.Core.TryGetComponent(
+                        out UnitWorkRecovery recovery))
+                {
+                    recovery.ClearInterruptedWork();
+                }
             }
         }
     }
 
     // 선택된 유닛들을 공장의 사용 가능한 작업 타일에 배정
     public void IssueFactoryCommand(
-        IReadOnlyList<UnitSelectable> selectedUnits,
-        FactoryCore factory)
+    IReadOnlyList<UnitSelectable> selectedUnits,
+    FactoryCore factory)
     {
         if (occupancyManager == null ||
             pathfinder == null ||
@@ -127,12 +144,23 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
         {
             if (!unit.Movement.IsMoving &&
                 unit.Placement.IsPlaced &&
-                workArea.Contains(unit.Placement.AnchorCell))
+                workArea.Contains(
+                    unit.Placement.AnchorCell))
             {
+                unit.Core.SetPlayerMoveCommandActive(false);
                 unit.Core.SetAutoCombat(false);
-                unit.Core.SetTarget(factory.gameObject);
+                unit.Core.SetTarget(
+                    factory.gameObject);
 
-                assignedUnits.Add(unit.Order);
+                if (unit.Core.TryGetComponent(
+                        out UnitWorkRecovery recovery))
+                {
+                    recovery.ClearInterruptedWork();
+                }
+
+                assignedUnits.Add(
+                    unit.Order);
+
                 assignedCells.Add(
                     unit.Placement.AnchorCell);
             }
@@ -142,19 +170,29 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
         // 목적지를 다시 배정하지 않는다.
         foreach (UnitInfo unit in units)
         {
-            if (assignedUnits.Contains(unit.Order))
+            if (assignedUnits.Contains(
+                    unit.Order))
             {
                 continue;
             }
 
             if (unit.Movement.IsMoving &&
-                unit.Core.CurrentTarget == factory.gameObject &&
+                unit.Core.CurrentTarget ==
+                    factory.gameObject &&
                 workArea.Contains(
                     unit.Movement.DestinationCell))
             {
                 unit.Core.SetAutoCombat(false);
 
-                assignedUnits.Add(unit.Order);
+                if (unit.Core.TryGetComponent(
+                        out UnitWorkRecovery recovery))
+                {
+                    recovery.ClearInterruptedWork();
+                }
+
+                assignedUnits.Add(
+                    unit.Order);
+
                 assignedCells.Add(
                     unit.Movement.DestinationCell);
             }
@@ -180,14 +218,22 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
                 left.Unit.Order.CompareTo(
                     right.Unit.Order));
 
-        foreach (Assignment assignment in assignments)
+        foreach (Assignment assignment
+                in assignments)
         {
             if (assignment.Unit.Movement.TryMoveTo(
                     assignment.Cell))
             {
                 assignment.Unit.Core.SetAutoCombat(false);
+
                 assignment.Unit.Core.SetTarget(
                     factory.gameObject);
+
+                if (assignment.Unit.Core.TryGetComponent(
+                        out UnitWorkRecovery recovery))
+                {
+                    recovery.ClearInterruptedWork();
+                }
             }
         }
     }

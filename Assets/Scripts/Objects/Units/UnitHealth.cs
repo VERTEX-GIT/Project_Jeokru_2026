@@ -54,6 +54,12 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             return;
         }
 
+        if (TryGetComponent(
+                out UnitWorkRecovery workRecovery))
+        {
+            workRecovery.TrySaveCurrentWork();
+        }
+
         TryRetargetToAttacker(attacker);
     }
 
@@ -63,6 +69,13 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         if (attacker == null ||
             unitCore == null ||
             unitCore.Data == null)
+        {
+            return;
+        }
+
+        // 플레이어가 직접 내린 이동 명령 수행 중에는
+        // 피격으로 전투 타겟을 설정하지 않는다.
+        if (unitCore.IsPlayerMoveCommandActive)
         {
             return;
         }

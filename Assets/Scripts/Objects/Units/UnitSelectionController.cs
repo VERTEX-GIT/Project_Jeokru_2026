@@ -116,16 +116,28 @@ public sealed class UnitSelectionController : MonoBehaviour
         InputAction.CallbackContext context)
     {
         if (placementController != null &&
-            placementController.CurrentMode != PlacementMode.None)
+            placementController.CurrentMode !=
+                PlacementMode.None)
         {
             return;
         }
 
-        if (!TryGetPointerCell(out Vector3Int pointerCell))
+        // 실제 월드 위치에 유닛이 있다면
+        // 이동 중 여부와 관계없이 우선 선택
+        if (TryGetUnitUnderPointer(
+                out UnitSelectable selectable))
+        {
+            ToggleSelection(selectable);
+            return;
+        }
+
+        if (!TryGetPointerCell(
+                out Vector3Int pointerCell))
         {
             return;
         }
 
+        // 정지 중인 타일 오브젝트 판정
         if (occupancyManager.TryGetOccupant(
                 pointerCell,
                 out TileObjectPlacement occupant))
@@ -284,6 +296,40 @@ public sealed class UnitSelectionController : MonoBehaviour
 
         return occupancyManager.CoordinateManager
             .HasTile(cell);
+    }
+
+    private bool TryGetUnitUnderPointer(
+        out UnitSelectable selectable)
+    {
+        selectable = null;
+
+        if (worldCamera == null ||
+            pointerPositionAction == null)
+        {
+            return false;
+        }
+
+        Vector2 screenPosition =
+            pointerPositionAction.action
+                .ReadValue<Vector2>();
+
+        Vector3 worldPosition =
+            worldCamera.ScreenToWorldPoint(
+                screenPosition);
+
+        Collider2D hit =
+            Physics2D.OverlapPoint(
+                worldPosition);
+
+        if (hit == null)
+        {
+            return false;
+        }
+
+        selectable =
+            hit.GetComponentInParent<UnitSelectable>();
+
+        return selectable != null;
     }
 
     // 유닛의 현재 상태에 따라 선택 또는 선택 해제

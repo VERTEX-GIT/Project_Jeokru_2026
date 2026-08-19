@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 8878496777682533438}
   - component: {fileID: -1706343692188511794}
   - component: {fileID: -7999307707097842433}
+  - component: {fileID: 1395412719836097015}
   m_Layer: 0
   m_Name: Unit_Ally
   m_TagString: Untagged
@@ -262,6 +263,18 @@ MonoBehaviour:
   <CooldownRemaining>k__BackingField: 0
   projectilePrefab: {fileID: 6775409285779183715, guid: 04e2fd2751f47fd448048731121c62eb, type: 3}
   projectileSpawnPoint: {fileID: 726084371705134374}
+--- !u!114 &1395412719836097015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384747a6d288d474a81e31ffa4dd29b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitWorkRecovery
 --- !u!1 &8277902838959079874
 GameObject:
   m_ObjectHideFlags: 0

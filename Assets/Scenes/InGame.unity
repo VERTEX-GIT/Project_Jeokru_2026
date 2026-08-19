@@ -5705,7 +5705,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6038,6 +6038,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Unit_Enemy (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 498002034028064540, guid: 51873a1fc02d3de4299bd63963773680, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 726084371705134374, guid: 51873a1fc02d3de4299bd63963773680, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.92
@@ -6292,7 +6296,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6369,7 +6373,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6446,7 +6450,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager

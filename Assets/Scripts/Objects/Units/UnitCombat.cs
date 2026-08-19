@@ -120,24 +120,120 @@ public sealed class UnitCombat : MonoBehaviour
         GameObject target =
             unitCore.CurrentTarget;
 
-        if (!IsTargetInAttackRange(target))
+        // 현재 타겟이 공격 범위 안에 있어야 공격 자체가 발동
+        if (target == null ||
+            !IsTargetInAttackRange(target))
         {
             return;
         }
 
-        if (!target.TryGetComponent(
-                out IDamageable damageable) ||
-            !damageable.IsAlive)
+        bool hitAnyTarget = false;
+
+        // 공격 범위 안의 모든 상대 유닛에게 피해
+        UnitCore[] units =
+            FindObjectsByType<UnitCore>(
+                FindObjectsSortMode.None);
+
+        foreach (UnitCore candidate in units)
+        {
+            if (!CanHitUnit(candidate))
+            {
+                continue;
+            }
+
+            if (!IsUnitInAttackRange(candidate))
+            {
+                continue;
+            }
+
+            if (!candidate.TryGetComponent(
+                    out IDamageable damageable) ||
+                !damageable.IsAlive)
+            {
+                continue;
+            }
+
+            damageable.TakeDamage(
+                unitCore.Data.AttackPower,
+                gameObject);
+
+            hitAnyTarget = true;
+        }
+
+        // 적군이 공장을 현재 타겟으로 삼고 있다면
+        // 공장도 근거리 공격 대상이 될 수 있음
+        if (unitCore.Data.Team == UnitTeam.Enemy &&
+            target.TryGetComponent(
+                out FactoryHealth factoryHealth) &&
+            factoryHealth.IsAlive &&
+            IsTargetInAttackRange(target))
+        {
+            factoryHealth.TakeDamage(
+                unitCore.Data.AttackPower,
+                gameObject);
+
+            hitAnyTarget = true;
+        }
+
+        if (!hitAnyTarget)
         {
             return;
         }
-
-        damageable.TakeDamage(
-            unitCore.Data.AttackPower,
-            gameObject);
 
         CooldownRemaining =
             unitCore.Data.AttackCooldown;
+    }
+
+    private bool IsUnitInAttackRange(
+        UnitCore targetUnit)
+    {
+        if (targetUnit == null ||
+            coordinateManager == null ||
+            placement == null ||
+            !targetUnit.TryGetComponent(
+                out UnitMovement targetMovement) ||
+            !targetUnit.TryGetComponent(
+                out TileObjectPlacement targetPlacement))
+        {
+            return false;
+        }
+
+        Vector3Int attackerCell =
+            GetCurrentUnitCell();
+
+        Vector3Int targetCell;
+
+        if (targetMovement.IsMoving)
+        {
+            targetCell =
+                coordinateManager.WorldToCell(
+                    targetUnit.transform.position);
+        }
+        else
+        {
+            targetCell =
+                targetPlacement.AnchorCell;
+        }
+
+        return IsCellInsideRange(
+            attackerCell,
+            targetCell,
+            unitCore.Data.AttackRange);
+    }
+
+    private bool CanHitUnit(
+        UnitCore candidate)
+    {
+        if (candidate == null ||
+            candidate == unitCore ||
+            !candidate.IsActive ||
+            candidate.Data == null)
+        {
+            return false;
+        }
+
+        return candidate.Data.Team !=
+            unitCore.Data.Team;
     }
 
     private bool IsTargetInAttackRange(

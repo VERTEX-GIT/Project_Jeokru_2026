@@ -16,6 +16,9 @@ public sealed class UnitCore : MonoBehaviour
     public bool IsAutoCombat { get; private set; }
 
     [field: SerializeField]
+    public bool IsPlayerMoveCommandActive { get; private set; }
+
+    [field: SerializeField]
     public GameObject CurrentTarget { get; private set; }
 
     [field: SerializeField]
@@ -66,6 +69,11 @@ public sealed class UnitCore : MonoBehaviour
     public void SetAutoCombat(bool enabled)
     {
         IsAutoCombat = enabled;
+    }
+
+    public void SetPlayerMoveCommandActive(bool active)
+    {
+        IsPlayerMoveCommandActive = active;
     }
 
     public void SetTarget(GameObject target)

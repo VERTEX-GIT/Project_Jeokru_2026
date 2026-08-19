@@ -232,6 +232,11 @@ public sealed class UnitMovement : MonoBehaviour
         path.Clear();
         waypointIndex = 0;
         IsMoving = false;
+
+        if (unitCore != null && unitCore.IsPlayerMoveCommandActive)
+        {
+            unitCore.SetPlayerMoveCommandActive(false);
+        }
     }
 
         public void CancelMovement()

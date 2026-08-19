@@ -31,7 +31,6 @@ public sealed class UnitSelectable : MonoBehaviour
     public bool CanSelect()
     {
         return placement != null &&
-            placement.IsPlaced &&
             placement.ObjectType == TileObjectType.Unit &&
             unitCore != null &&
             unitCore.IsActive &&
