@@ -307,6 +307,12 @@ public sealed class UnitCombat : MonoBehaviour
             return;
         }
 
+        if (movement != null &&
+        movement.IsMoving)
+        {
+            return;
+        }
+
         GameObject target =
             unitCore.CurrentTarget;
 

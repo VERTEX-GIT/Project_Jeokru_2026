@@ -218,50 +218,72 @@ public sealed class UnitMovement : MonoBehaviour
     // 목적지 예약을 해제하고 도착 셀에 유닛 점유를 다시 등록
     private void CompleteMovement()
     {
-        occupancyManager.ReleaseReservation(DestinationCell, placement);
+        occupancyManager.ReleaseReservation(
+            DestinationCell,
+            placement);
+
         hasDestinationReservation = false;
 
+        // 정상적으로 목적지 점유 등록
         if (!placement.TryPlace(DestinationCell))
         {
-            // 예기치 않은 점유 충돌 시에도 목적지 소유권을 가능한 한 보존한다.
-            hasDestinationReservation =
-                occupancyManager.TryReserve(DestinationCell, placement);
-            Debug.LogError($"{name}: 이동 완료 후 {DestinationCell} 점유 등록 실패", this);
+            Debug.LogError(
+                $"{name}: 이동 완료 후 " +
+                $"{DestinationCell} 점유 등록 실패. " +
+                "현재 위치 주변의 빈 타일로 복구합니다.",
+                this);
+
+            // 목적지 점유가 실패했다면
+            // 현재 월드 위치 기준으로 안전한 타일에 재배치
+            TryPlaceAtCurrentPosition();
         }
 
         path.Clear();
         waypointIndex = 0;
         IsMoving = false;
 
-        if (unitCore != null && unitCore.IsPlayerMoveCommandActive)
+        if (unitCore != null &&
+            unitCore.IsPlayerMoveCommandActive)
         {
             unitCore.SetPlayerMoveCommandActive(false);
         }
     }
 
-        public void CancelMovement()
+    public void CancelMovement()
+    {
+        if (!IsMoving)
         {
-            if (!IsMoving)
+            if (unitCore != null &&
+                unitCore.IsPlayerMoveCommandActive)
             {
-                return;
+                unitCore.SetPlayerMoveCommandActive(false);
             }
 
-            if (hasDestinationReservation &&
-                occupancyManager != null)
-            {
-                occupancyManager.ReleaseReservation(
-                    DestinationCell,
-                    placement);
-
-                hasDestinationReservation = false;
-            }
-
-            path.Clear();
-            waypointIndex = 0;
-            IsMoving = false;
-
-            TryPlaceAtCurrentPosition();
+            return;
         }
+
+        if (hasDestinationReservation &&
+            occupancyManager != null)
+        {
+            occupancyManager.ReleaseReservation(
+                DestinationCell,
+                placement);
+
+            hasDestinationReservation = false;
+        }
+
+        path.Clear();
+        waypointIndex = 0;
+        IsMoving = false;
+
+        if (unitCore != null &&
+            unitCore.IsPlayerMoveCommandActive)
+        {
+            unitCore.SetPlayerMoveCommandActive(false);
+        }
+
+        TryPlaceAtCurrentPosition();
+    }
 
     private void TryPlaceAtCurrentPosition()
     {

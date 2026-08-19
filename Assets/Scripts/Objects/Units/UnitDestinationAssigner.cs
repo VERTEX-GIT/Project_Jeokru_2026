@@ -264,8 +264,14 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
                 continue;
             }
 
-            // 여기 추가
+            ally.SetPlayerMoveCommandActive(false);
             ally.SetAutoCombat(true);
+
+            if (ally.TryGetComponent(
+                    out UnitWorkRecovery recovery))
+            {
+                recovery.ClearInterruptedWork();
+            }
 
             UnitCore nearestEnemy =
                 FindNearestEnemy(

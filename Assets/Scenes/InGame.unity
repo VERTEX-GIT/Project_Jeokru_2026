@@ -5704,8 +5704,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+      propertyPath: <Data>k__BackingField
+      value: 
+      objectReference: {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
+    - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6250,6 +6254,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Unit (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 635118626172871287, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
       value: 
@@ -6296,7 +6304,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6326,6 +6334,10 @@ PrefabInstance:
     - target: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: m_Name
       value: Unit (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 635118626172871287, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6373,7 +6385,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6450,7 +6462,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3846165126221685422, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: <IsAutoCombat>k__BackingField
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5164241042533012317, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
       propertyPath: occupancyManager
@@ -6540,9 +6552,9 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 1351250974}
   - {fileID: 3739334710730683037}
+  - {fileID: 991926913}
   - {fileID: 775002476}
   - {fileID: 2060733991}
-  - {fileID: 991926913}
   - {fileID: 1862397075}
   - {fileID: 8708414765670502757}
   - {fileID: 169830906}

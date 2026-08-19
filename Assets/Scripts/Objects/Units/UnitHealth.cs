@@ -50,7 +50,7 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
 
         if (CurrentHp <= 0f)
         {
-            HandleBasicUnitDown();
+            HandleDeath();
             return;
         }
 
@@ -97,9 +97,33 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         unitCore.SetTarget(attacker);
     }
 
-    private void HandleBasicUnitDown()
+    private void HandleDeath()
+    {
+        if (unitCore == null ||
+            unitCore.Data == null)
+        {
+            return;
+        }
+
+        // 기본 아군만 게임에서 제거하지 않고 활동 정지
+        if (unitCore.Data.Team == UnitTeam.Ally &&
+            unitCore.Data.IsBasicUnit)
+        {
+            HandleBasicAllyDown();
+            return;
+        }
+
+        // 비기본 아군과 모든 적군은 제거
+        Destroy(gameObject);
+    }
+
+    private void HandleBasicAllyDown()
     {
         unitCore.SetUnitActive(false);
+
+        unitCore.SetAutoCombat(false);
+        unitCore.SetPlayerMoveCommandActive(false);
+        unitCore.ClearTarget();
 
         if (TryGetComponent(
                 out UnitMovement movement))
@@ -111,6 +135,12 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
                 out UnitSelectable selectable))
         {
             selectable.Deselect();
+        }
+
+        if (TryGetComponent(
+                out UnitWorkRecovery recovery))
+        {
+            recovery.ClearInterruptedWork();
         }
     }
 }
