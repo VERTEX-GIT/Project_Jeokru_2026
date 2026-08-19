@@ -157,17 +157,32 @@ public sealed class UnitTargetFollower : MonoBehaviour
             return false;
         }
 
-        // 유닛 타겟
         if (target.TryGetComponent(
+                out UnitCore targetCore) &&
+            target.TryGetComponent(
                 out UnitMovement targetMovement) &&
             target.TryGetComponent(
                 out TileObjectPlacement targetPlacement))
         {
-            // 이동 중이라면 현재 위치가 아니라
-            // 최종 목적지 타일을 추적 기준으로 사용
-            cell = targetMovement.IsMoving
-                ? targetMovement.DestinationCell
-                : targetPlacement.AnchorCell;
+            if (!targetMovement.IsMoving)
+            {
+                cell = targetPlacement.AnchorCell;
+                return true;
+            }
+
+            // 타겟도 전투 중이라면 서로의 DestinationCell을
+            // 참조하는 순환을 막기 위해 현재 위치 타일을 사용한다.
+            if (targetCore.CurrentTarget != null)
+            {
+                cell = coordinateManager.WorldToCell(
+                    target.transform.position);
+
+                return true;
+            }
+
+            // 일반 이동 중인 타겟은 기존 규칙대로
+            // 최종 목적지 타일을 기준으로 추적한다.
+            cell = targetMovement.DestinationCell;
 
             return true;
         }
@@ -191,15 +206,38 @@ public sealed class UnitTargetFollower : MonoBehaviour
             return false;
         }
 
-        // 이미 올바른 유지거리 타일에 도착해 있으면 정지 유지
+        // 이동 중 유지거리 후보 타일에 들어왔다면
+        // 그 타일을 최종 목적지로 확정한다.
+        if (movement.IsMoving)
+        {
+            Vector3Int currentCell =
+                coordinateManager.WorldToCell(
+                    transform.position);
+
+            if (candidates.Contains(currentCell))
+            {
+                if (movement.DestinationCell ==
+                    currentCell)
+                {
+                    return true;
+                }
+
+                return movement.TryMoveTo(
+                    currentCell);
+            }
+        }
+
+        // 이미 유지거리 타일 중앙에 정지해 있다면 유지
         if (!movement.IsMoving &&
             placement.IsPlaced &&
-            candidates.Contains(placement.AnchorCell))
+            candidates.Contains(
+                placement.AnchorCell))
         {
             return true;
         }
 
-        return TryMoveToBestCandidate(candidates);
+        return TryMoveToBestCandidate(
+            candidates);
     }
 
     private bool TryMoveToBestCandidate(

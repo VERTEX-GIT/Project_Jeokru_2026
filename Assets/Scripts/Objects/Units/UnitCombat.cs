@@ -162,10 +162,19 @@ public sealed class UnitCombat : MonoBehaviour
             target.TryGetComponent(
                 out TileObjectPlacement targetPlacement))
         {
-            Vector3Int targetCell =
-                targetMovement.IsMoving
-                    ? targetMovement.DestinationCell
-                    : targetPlacement.AnchorCell;
+            Vector3Int targetCell;
+
+            if (targetMovement.IsMoving)
+            {
+                targetCell =
+                    coordinateManager.WorldToCell(
+                        target.transform.position);
+            }
+            else
+            {
+                targetCell =
+                    targetPlacement.AnchorCell;
+            }
 
             return IsCellInsideRange(
                 attackerCell,
