@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b701df0f8df8ea4ca5fb35af715ea7e, type: 3}
+  m_Name: UnitData_Ally
+  m_EditorClassIdentifier: Assembly-CSharp::UnitData
+  unitName: 
+  unitPrefab: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
+  team: 0
+  isBasicUnit: 1
+  maxHp: 100
+  moveSpeed: 3
+  attackPower: 10
+  defense: 0
+  attackCooldown: 1
+  attackType: 0
+  attackRange: 1
+  preferredDistance: 1

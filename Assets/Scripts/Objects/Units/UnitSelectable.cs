@@ -34,6 +34,7 @@ public sealed class UnitSelectable : MonoBehaviour
             placement.IsPlaced &&
             placement.ObjectType == TileObjectType.Unit &&
             unitCore != null &&
+            unitCore.IsActive &&
             unitCore.Data != null &&
             unitCore.Data.Team == UnitTeam.Ally;
     }

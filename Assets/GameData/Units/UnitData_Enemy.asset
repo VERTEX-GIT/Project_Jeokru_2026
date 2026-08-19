@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b701df0f8df8ea4ca5fb35af715ea7e, type: 3}
-  m_Name: UnitData
+  m_Name: UnitData_Enemy
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: 
   unitPrefab: {fileID: 498002034028064540, guid: db1652fdef115264384fcccbf5ec8f1b, type: 3}
-  team: 0
+  team: 1
+  isBasicUnit: 0
   maxHp: 100
-  moveSpeed: 3
+  moveSpeed: 2
   attackPower: 10
   defense: 0
   attackCooldown: 1
-  attackType: 0
-  attackRange: 1
-  preferredDistance: 1
+  attackType: 1
+  attackRange: 3
+  preferredDistance: 3

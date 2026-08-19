@@ -7,12 +7,10 @@ using UnityEngine;
 public sealed class UnitMovement : MonoBehaviour
 {
     [SerializeField]
-    private float moveSpeed = 3f;
-
-    [SerializeField]
     private TileOccupancyManager occupancyManager;
 
     private readonly List<Vector3Int> path = new();
+    private UnitCore unitCore;
     private TileObjectPlacement placement;
     private TileCoordinateManager coordinateManager;
     private GridPathfinder pathfinder;
@@ -41,6 +39,7 @@ public sealed class UnitMovement : MonoBehaviour
     private void Awake()
     {
         placement = GetComponent<TileObjectPlacement>();
+        unitCore = GetComponent<UnitCore>();
 
         if (occupancyManager == null)
         {
@@ -49,13 +48,17 @@ public sealed class UnitMovement : MonoBehaviour
 
         if (occupancyManager == null)
         {
-            occupancyManager = FindAnyObjectByType<TileOccupancyManager>();
+            occupancyManager =
+                FindAnyObjectByType<TileOccupancyManager>();
         }
 
         if (occupancyManager != null)
         {
-            coordinateManager = occupancyManager.CoordinateManager;
-            pathfinder = new GridPathfinder(occupancyManager);
+            coordinateManager =
+                occupancyManager.CoordinateManager;
+
+            pathfinder =
+                new GridPathfinder(occupancyManager);
         }
     }
 
@@ -189,6 +192,11 @@ public sealed class UnitMovement : MonoBehaviour
         Vector3 targetPosition =
             coordinateManager.CellToWorldCenter(path[waypointIndex]);
         targetPosition.z = transform.position.z;
+        float moveSpeed =
+            unitCore != null && unitCore.Data != null
+                ? unitCore.Data.MoveSpeed
+                : 0f;
+
         transform.position = Vector3.MoveTowards(
             transform.position,
             targetPosition,
@@ -224,5 +232,79 @@ public sealed class UnitMovement : MonoBehaviour
         path.Clear();
         waypointIndex = 0;
         IsMoving = false;
+    }
+
+        public void CancelMovement()
+        {
+            if (!IsMoving)
+            {
+                return;
+            }
+
+            if (hasDestinationReservation &&
+                occupancyManager != null)
+            {
+                occupancyManager.ReleaseReservation(
+                    DestinationCell,
+                    placement);
+
+                hasDestinationReservation = false;
+            }
+
+            path.Clear();
+            waypointIndex = 0;
+            IsMoving = false;
+
+            TryPlaceAtCurrentPosition();
+        }
+
+    private void TryPlaceAtCurrentPosition()
+    {
+        if (placement == null ||
+            coordinateManager == null ||
+            occupancyManager == null)
+        {
+            return;
+        }
+
+        Vector3Int currentCell =
+            coordinateManager.WorldToCell(
+                transform.position);
+
+        if (placement.TryPlace(currentCell))
+        {
+            return;
+        }
+
+        // 현재 셀이 이미 점유되어 있다면
+        // 가까운 빈 셀을 찾는다.
+        for (int radius = 1; radius <= 3; radius++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
+                {
+                    Vector3Int candidate =
+                        currentCell +
+                        new Vector3Int(x, y, 0);
+
+                    if (!coordinateManager.HasTile(candidate) ||
+                        occupancyManager.HasOccupant(candidate) ||
+                        occupancyManager.IsReserved(candidate))
+                    {
+                        continue;
+                    }
+
+                    if (placement.TryPlace(candidate))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        Debug.LogError(
+            $"{name}: 이동 취소 후 배치할 타일을 찾지 못했습니다.",
+            this);
     }
 }

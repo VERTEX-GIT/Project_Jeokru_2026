@@ -10,13 +10,18 @@ GameObject:
   m_Component:
   - component: {fileID: 726084371705134374}
   - component: {fileID: 5784421186940859319}
+  - component: {fileID: -7576542800401280973}
   - component: {fileID: 635118626172871287}
   - component: {fileID: 7224569810767069955}
   - component: {fileID: 2466824059280597571}
   - component: {fileID: 5164241042533012317}
   - component: {fileID: 3846165126221685422}
+  - component: {fileID: -7121190361800453594}
+  - component: {fileID: 8878496777682533438}
+  - component: {fileID: -1706343692188511794}
+  - component: {fileID: -7999307707097842433}
   m_Layer: 0
-  m_Name: Unit
+  m_Name: Unit_Ally
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -97,6 +102,42 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!58 &-7576542800401280973
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.5
 --- !u!114 &635118626172871287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,7 +191,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7600ee00db8a6774a99d0a21c042bde4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
-  moveSpeed: 3
   occupancyManager: {fileID: 0}
 --- !u!114 &3846165126221685422
 MonoBehaviour:
@@ -166,9 +206,62 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitCore
   <Data>k__BackingField: {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
   <IsActive>k__BackingField: 1
+  <IsAutoCombat>k__BackingField: 0
   <CurrentTarget>k__BackingField: {fileID: 0}
   <isMoving>k__BackingField: 0
   <DestinationCell>k__BackingField: {x: 0, y: 0, z: 0}
+--- !u!114 &-7121190361800453594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0964bcc49da37c642980a82a6d68707e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitTargeting
+--- !u!114 &8878496777682533438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eea9740e957bb041be620541a34dcce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitTargetFollower
+--- !u!114 &-1706343692188511794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c6caab6c2567844198e86a5140c2189, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitHealth
+  <CurrentHp>k__BackingField: 0
+--- !u!114 &-7999307707097842433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10e06e097ca3e944fb442362d5974e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCombat
+  <CooldownRemaining>k__BackingField: 0
+  projectilePrefab: {fileID: 6775409285779183715, guid: 04e2fd2751f47fd448048731121c62eb, type: 3}
+  projectileSpawnPoint: {fileID: 726084371705134374}
 --- !u!1 &8277902838959079874
 GameObject:
   m_ObjectHideFlags: 0

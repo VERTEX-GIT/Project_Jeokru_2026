@@ -80,9 +80,10 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
 
         foreach (Assignment assignment in assignments)
         {
-            if (assignment.Unit.Movement.TryMoveTo(
-                    assignment.Cell))
+            if (assignment.Unit.Movement
+                    .TryMoveTo(assignment.Cell))
             {
+                assignment.Unit.Core?.SetAutoCombat(false);
                 assignment.Unit.Core?.ClearTarget();
             }
         }
@@ -128,6 +129,7 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
                 unit.Placement.IsPlaced &&
                 workArea.Contains(unit.Placement.AnchorCell))
             {
+                unit.Core.SetAutoCombat(false);
                 unit.Core.SetTarget(factory.gameObject);
 
                 assignedUnits.Add(unit.Order);
@@ -150,6 +152,8 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
                 workArea.Contains(
                     unit.Movement.DestinationCell))
             {
+                unit.Core.SetAutoCombat(false);
+
                 assignedUnits.Add(unit.Order);
                 assignedCells.Add(
                     unit.Movement.DestinationCell);
@@ -181,10 +185,97 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
             if (assignment.Unit.Movement.TryMoveTo(
                     assignment.Cell))
             {
+                assignment.Unit.Core.SetAutoCombat(false);
                 assignment.Unit.Core.SetTarget(
                     factory.gameObject);
             }
         }
+    }
+
+    public void IssueCombatCommand(
+        IReadOnlyList<UnitSelectable> selectedUnits)
+    {
+        if (selectedUnits == null ||
+            selectedUnits.Count == 0)
+        {
+            return;
+        }
+
+        UnitCore[] allUnits =
+            FindObjectsByType<UnitCore>(
+                FindObjectsSortMode.None);
+
+        foreach (UnitSelectable selectable
+                in selectedUnits)
+        {
+            if (selectable == null ||
+                !selectable.TryGetComponent(
+                    out UnitCore ally) ||
+                !ally.IsActive ||
+                ally.Data == null ||
+                ally.Data.Team != UnitTeam.Ally)
+            {
+                continue;
+            }
+
+            // 여기 추가
+            ally.SetAutoCombat(true);
+
+            UnitCore nearestEnemy =
+                FindNearestEnemy(
+                    ally,
+                    allUnits);
+
+            if (nearestEnemy == null)
+            {
+                ally.ClearTarget();
+                continue;
+            }
+
+            ally.SetTarget(
+                nearestEnemy.gameObject);
+        }
+    }
+
+    private UnitCore FindNearestEnemy(
+        UnitCore ally,
+        UnitCore[] allUnits)
+    {
+        UnitCore nearest = null;
+        float nearestDistanceSqr =
+            float.MaxValue;
+
+        foreach (UnitCore candidate
+                in allUnits)
+        {
+            if (candidate == null ||
+                candidate == ally ||
+                !candidate.IsActive ||
+                candidate.Data == null ||
+                candidate.Data.Team !=
+                    UnitTeam.Enemy)
+            {
+                continue;
+            }
+
+            float distanceSqr =
+                (candidate.transform.position -
+                ally.transform.position)
+                .sqrMagnitude;
+
+            if (distanceSqr >=
+                nearestDistanceSqr)
+            {
+                continue;
+            }
+
+            nearestDistanceSqr =
+                distanceSqr;
+
+            nearest = candidate;
+        }
+
+        return nearest;
     }
 
     // 공장의 비어 있고 도달 가능한 작업 타일 수집
@@ -245,6 +336,7 @@ public sealed class UnitDestinationAssigner : MonoBehaviour
 
             if (selectable == null ||
                 !selectable.TryGetComponent(out UnitCore unitCore) ||
+                !unitCore.IsActive ||
                 unitCore.Data == null ||
                 unitCore.Data.Team != UnitTeam.Ally ||
                 !selectable.TryGetComponent(out UnitMovement movement) ||

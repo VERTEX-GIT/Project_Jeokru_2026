@@ -27,6 +27,9 @@ public sealed class UnitData : ScriptableObject
     [SerializeField]
     private UnitTeam team;
 
+    [SerializeField]
+    private bool isBasicUnit;
+
     [Header("능력치")]
     [SerializeField]
     [Min(1f)]
@@ -63,6 +66,7 @@ public sealed class UnitData : ScriptableObject
     public string UnitName => unitName;
     public GameObject UnitPrefab => unitPrefab;
     public UnitTeam Team => team;
+    public bool IsBasicUnit => isBasicUnit;
 
     public float MaxHp => maxHp;
     public float MoveSpeed => moveSpeed;

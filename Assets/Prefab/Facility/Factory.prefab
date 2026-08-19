@@ -10,10 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3975481819448612255}
   - component: {fileID: 6307334448573812759}
+  - component: {fileID: 9140906067357931611}
   - component: {fileID: 932181232136673035}
   - component: {fileID: 5903746932094219148}
   - component: {fileID: 6446080319276119375}
   - component: {fileID: -8106775801962366442}
+  - component: {fileID: -6285049575784256804}
   m_Layer: 0
   m_Name: Factory
   m_TagString: Untagged
@@ -95,6 +97,42 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!58 &9140906067357931611
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.5
 --- !u!114 &932181232136673035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,4 +187,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38218c11b5cdc1048ba47c8252d61019, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryCore
-  definition: {fileID: 0}
+  definition: {fileID: 11400000, guid: 9eb629aee1494d94d8ca16e94b3bb9d6, type: 2}
+--- !u!114 &-6285049575784256804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fbb80c7dec75047a83cfd7a04819d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryHealth
+  maxHp: 500
+  defense: 5
+  <CurrentHp>k__BackingField: 0

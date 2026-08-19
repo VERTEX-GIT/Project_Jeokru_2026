@@ -13,6 +13,9 @@ public sealed class UnitCore : MonoBehaviour
     public bool IsActive { get; private set; } = true;
 
     [field: SerializeField]
+    public bool IsAutoCombat { get; private set; }
+
+    [field: SerializeField]
     public GameObject CurrentTarget { get; private set; }
 
     [field: SerializeField]
@@ -58,6 +61,11 @@ public sealed class UnitCore : MonoBehaviour
     public void SetUnitActive(bool active)
     {
         IsActive = active;
+    }
+
+    public void SetAutoCombat(bool enabled)
+    {
+        IsAutoCombat = enabled;
     }
 
     public void SetTarget(GameObject target)

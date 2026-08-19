@@ -159,6 +159,19 @@ public sealed class UnitSelectionController : MonoBehaviour
                 pointerCell,
                 out TileObjectPlacement occupant))
         {
+            // 적군을 클릭했다면 전투 명령
+            if (occupant.ObjectType ==
+                    TileObjectType.Unit &&
+                occupant.TryGetComponent(
+                    out UnitCore clickedUnit) &&
+                clickedUnit.Data != null &&
+                clickedUnit.Data.Team ==
+                    UnitTeam.Enemy)
+            {
+                TryIssueCombatCommand();
+                return;
+            }
+
             // 공장이면 공장 작업 명령
             if (occupant.ObjectType ==
                     TileObjectType.Facility &&
@@ -173,6 +186,19 @@ public sealed class UnitSelectionController : MonoBehaviour
 
         // 빈 타일이면 일반 이동
         TryIssueMoveCommand(pointerCell);
+    }
+
+    private void TryIssueCombatCommand()
+    {
+        if (selectedUnits.Count == 0 ||
+            destinationAssigner == null)
+        {
+            return;
+        }
+
+        destinationAssigner
+            .IssueCombatCommand(
+                selectedUnits);
     }
 
     // 포인터가 가리키는 유닛의 선택 상태 전환
