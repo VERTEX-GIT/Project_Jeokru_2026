@@ -117,6 +117,12 @@ public sealed class UnitCombat : MonoBehaviour
             return;
         }
 
+        if (movement != null &&
+        movement.IsMoving)
+        {
+            return;
+        }
+
         GameObject target =
             unitCore.CurrentTarget;
 
@@ -303,12 +309,6 @@ public sealed class UnitCombat : MonoBehaviour
     private void TryRangedAttack()
     {
         if (CooldownRemaining > 0f)
-        {
-            return;
-        }
-
-        if (movement != null &&
-        movement.IsMoving)
         {
             return;
         }
