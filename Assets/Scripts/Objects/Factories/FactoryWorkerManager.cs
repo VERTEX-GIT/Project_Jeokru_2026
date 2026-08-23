@@ -33,36 +33,6 @@ public sealed class FactoryWorkerManager : MonoBehaviour
         }
     }
 
-    /* =< 작업 Unit 관련 메서드 >=============================================================================== */
-
-    // Unit을 빈 작업 타일에 배정
-    public bool AssignWorker(UnitCore unitCore)
-    {
-        if (unitCore == null || !unitCore.IsActive || unitCore.CurrentTarget == gameObject)
-        {
-            return false;
-        }
-
-        if (!unitCore.TryGetComponent(out UnitMovement movement))
-        {
-            return false;
-        }
-
-        foreach (Vector3Int workCell in GetAvailableWorkCells())
-        {
-            if (!movement.TryMoveTo(workCell))
-            {
-                continue;
-            }
-
-            unitCore.SetTarget(gameObject);
-
-            return true;
-        }
-
-        return false;
-    }
-
     /* =< 작업 타일 관련 메서드 >================================================================================ */
 
     // 점유되지 않은 작업 타일 좌표 반환

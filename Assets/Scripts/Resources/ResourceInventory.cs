@@ -109,9 +109,9 @@ public class ResourceInventory : MonoBehaviour
     }
 
     // 여러 자원 사용
-    public bool Spend(IReadOnlyList<ResourceCost> costs)
+    public bool Spend(IReadOnlyList<ResourceCost> costs, bool logFailure = true)
     {
-        if (!CanAfford(costs))
+        if (!CanAfford(costs, logFailure))
         {
             return false;
         }
@@ -128,7 +128,7 @@ public class ResourceInventory : MonoBehaviour
     }
 
     // Spend 할 자원이 충분한지 확인
-    public bool CanAfford(IReadOnlyList<ResourceCost> costs)
+    public bool CanAfford(IReadOnlyList<ResourceCost> costs, bool logFailure = true)
     {
         if (costs == null || costs.Count == 0)
         {
@@ -146,7 +146,10 @@ public class ResourceInventory : MonoBehaviour
         {
             if (GetResourceAmount(cost.Key) < cost.Value)
             {
-                Debug.Log("" + cost.Key + " 자원이 부족합니다. 필요량: " + cost.Value + ", 현재량: " + GetResourceAmount(cost.Key));
+                if (logFailure)
+                {
+                    Debug.Log("" + cost.Key + " 자원이 부족합니다. 필요량: " + cost.Value + ", 현재량: " + GetResourceAmount(cost.Key));
+                }
 
                 return false;
             }

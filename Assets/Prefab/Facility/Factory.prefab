@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -8106775801962366442}
   - component: {fileID: -6285049575784256804}
   - component: {fileID: 513355408488972395}
+  - component: {fileID: 1391329619259272774}
   m_Layer: 0
   m_Name: Factory
   m_TagString: Untagged
@@ -144,7 +145,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f0fdbfeb5a640be99e5077c8e12a27b, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TileObjectPlacement
   occupancyManager: {fileID: 0}
   objectType: 1
@@ -159,7 +160,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a75a399baca6446c8469891839fec956, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::FactoryWorkArea
   placement: {fileID: 932181232136673035}
   occupancyManager: {fileID: 0}
@@ -173,7 +174,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e3729fc082819042950a547c347360a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SceneTilePlacementInitializer
   placeOnStart: 1
 --- !u!114 &-8106775801962366442
@@ -199,11 +200,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49fbb80c7dec75047a83cfd7a04819d2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryHealth
-  maxHp: 500
-  defense: 5
   <CurrentHp>k__BackingField: 0
+  <IsDestroyed>k__BackingField: 0
 --- !u!114 &513355408488972395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,5 +214,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc20965b460bebd48bde64fa274ad239, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryWorkerManager
+--- !u!114 &1391329619259272774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cabec5842b3ab4086b6a2526423376, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryProduction

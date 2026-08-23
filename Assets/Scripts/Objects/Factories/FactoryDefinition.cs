@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class FactoryDefinition : ScriptableObject
 {
+    // -------------------------------------------------------
     [Header("Identity")]
     [SerializeField]
     private FactoryType factoryType;
@@ -13,6 +14,7 @@ public class FactoryDefinition : ScriptableObject
     [SerializeField]
     private string displayName;
 
+    // -------------------------------------------------------
     [Header("Production")]
 
     [SerializeField]
@@ -26,6 +28,10 @@ public class FactoryDefinition : ScriptableObject
     [Min(1)]
     private int productionAmount = 1;
 
+    [SerializeField]
+    private List<ResourceCost> productionCosts = new();
+
+    // -------------------------------------------------------
     [Header("Durability")]
     [SerializeField]
     [Min(1)]
@@ -35,16 +41,23 @@ public class FactoryDefinition : ScriptableObject
     [Min(0)]
     private int defense;
 
+    // -------------------------------------------------------
     [Header("Construction")]
     [SerializeField]
     private List<ResourceCost> installationCosts = new();
 
+    /* ---------------------------------------------------------------------- */
+
     public FactoryType FactoryType => factoryType;
     public string DisplayName => displayName;
+
     public ResourceType ProductionType => productionType;
     public float BaseProductionTime => baseProductionTime;
     public int ProductionAmount => productionAmount;
+    public IReadOnlyList<ResourceCost> ProductionCosts => productionCosts;
+
     public int MaxHealth => maxHealth;
     public int Defense => defense;
+
     public IReadOnlyList<ResourceCost> InstallationCosts => installationCosts;
 }

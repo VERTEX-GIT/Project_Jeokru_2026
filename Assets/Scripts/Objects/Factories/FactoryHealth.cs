@@ -12,9 +12,9 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
             ? factoryCore.Definition.MaxHealth
             : 0f;
 
-    [SerializeField]
-    [Min(0f)]
-    private float defense = 5f;
+    // [SerializeField]
+    // [Min(0f)]
+    // private float defense = 5f;
 
     [field: SerializeField]
     public float CurrentHp { get; private set; }
