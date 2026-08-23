@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6446080319276119375}
   - component: {fileID: -8106775801962366442}
   - component: {fileID: -6285049575784256804}
+  - component: {fileID: 513355408488972395}
   m_Layer: 0
   m_Name: Factory
   m_TagString: Untagged
@@ -198,8 +199,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49fbb80c7dec75047a83cfd7a04819d2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::FactoryHealth
   maxHp: 500
   defense: 5
   <CurrentHp>k__BackingField: 0
+--- !u!114 &513355408488972395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc20965b460bebd48bde64fa274ad239, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryWorkerManager
