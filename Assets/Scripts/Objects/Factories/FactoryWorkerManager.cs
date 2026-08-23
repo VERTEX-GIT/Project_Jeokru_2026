@@ -33,6 +33,36 @@ public sealed class FactoryWorkerManager : MonoBehaviour
         }
     }
 
+    /* =< 작업 Unit 관련 메서드 >=============================================================================== */
+
+    // Unit을 빈 작업 타일에 배정
+    public bool AssignWorker(UnitCore unitCore)
+    {
+        if (unitCore == null || !unitCore.IsActive || unitCore.CurrentTarget == gameObject)
+        {
+            return false;
+        }
+
+        if (!unitCore.TryGetComponent(out UnitMovement movement))
+        {
+            return false;
+        }
+
+        foreach (Vector3Int workCell in GetAvailableWorkCells())
+        {
+            if (!movement.TryMoveTo(workCell))
+            {
+                continue;
+            }
+
+            unitCore.SetTarget(gameObject);
+
+            return true;
+        }
+
+        return false;
+    }
+
     /* =< 작업 타일 관련 메서드 >================================================================================ */
 
     // 점유되지 않은 작업 타일 좌표 반환
@@ -92,11 +122,10 @@ public sealed class FactoryWorkerManager : MonoBehaviour
                 <if문 확인 내용>
                 - Unit이 활성화되어 있는가?
                 - Unit의 CurrentTarget이 이 FactoryWorkArea를 소유한 Factory인가?
-                - Unit이 이동 중이 아닌가?
-                - Unit의 DestinationCell이 이 FactoryWorkArea의 작업 타일 중 하나인가?
+                - 해당 공장의 실제 작업 타일을 점유하고 있는가?
                 ==============================================================================
                 */
-                if (unitCore == null || !unitCore.IsActive || unitCore.CurrentTarget != gameObject || unitCore.isMoving || unitCore.DestinationCell != workCell)
+                if (unitCore == null || !unitCore.IsActive || unitCore.CurrentTarget != gameObject)
                 {
                     continue;
                 }
