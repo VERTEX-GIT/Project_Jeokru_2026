@@ -46,6 +46,9 @@ public class FactoryDefinition : ScriptableObject
     [SerializeField]
     private List<ResourceCost> installationCosts = new();
 
+    [SerializeField]
+    private FactoryRepairCosts repairCosts = new();
+
     /* ---------------------------------------------------------------------- */
 
     public FactoryType FactoryType => factoryType;
@@ -60,4 +63,9 @@ public class FactoryDefinition : ScriptableObject
     public int Defense => defense;
 
     public IReadOnlyList<ResourceCost> InstallationCosts => installationCosts;
+    
+    public IReadOnlyList<ResourceCost> GetRepairCosts(float hpRate)
+    {
+        return repairCosts.GetRepairCosts(Mathf.Clamp01(hpRate));
+    }
 }

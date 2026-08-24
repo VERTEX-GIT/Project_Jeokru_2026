@@ -17,6 +17,7 @@ MonoBehaviour:
   productionType: 0
   baseProductionTime: 60
   productionAmount: 1
+  productionCosts: []
   maxHealth: 1000
   defense: 0
   installationCosts:
@@ -24,3 +25,23 @@ MonoBehaviour:
     amount: 3
   - resourceType: 1
     amount: 1
+  repairCosts:
+    hp0To20:
+    - resourceType: 0
+      amount: 5
+    hp20To40:
+    - resourceType: 0
+      amount: 4
+    hp40To60:
+    - resourceType: 0
+      amount: 3
+    - resourceType: 0
+      amount: 2
+    hp60To80:
+    - resourceType: 0
+      amount: 2
+    - resourceType: 1
+      amount: 2
+    hp80To100:
+    - resourceType: 0
+      amount: 1

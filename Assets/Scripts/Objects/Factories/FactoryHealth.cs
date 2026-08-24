@@ -6,11 +6,7 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
 {
     private FactoryCore factoryCore;
 
-    public float MaxHp =>
-        factoryCore != null &&
-        factoryCore.Definition != null
-            ? factoryCore.Definition.MaxHealth
-            : 0f;
+    public float MaxHp => factoryCore != null && factoryCore.Definition != null ? factoryCore.Definition.MaxHealth : 0f;
 
     // [SerializeField]
     // [Min(0f)]
@@ -28,43 +24,31 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
     {
         factoryCore = GetComponent<FactoryCore>();
 
-        if (factoryCore == null ||
-            factoryCore.Definition == null)
+        if (factoryCore == null || factoryCore.Definition == null)
         {
-            Debug.LogError(
-                $"{name}: FactoryDefinition이 없습니다.",
-                this);
+            Debug.LogError($"{name}: FactoryDefinition이 없습니다.", this);
 
             CurrentHp = 0f;
             IsDestroyed = true;
+            
             return;
         }
 
-        CurrentHp =
-            factoryCore.Definition.MaxHealth;
+        CurrentHp = factoryCore.Definition.MaxHealth;
 
         IsDestroyed = false;
     }
 
-    public void TakeDamage(
-        float attackPower,
-        GameObject attacker)
+    public void TakeDamage(float attackPower, GameObject attacker)
     {
         if (!IsAlive)
         {
             return;
         }
 
-        float damage =
-            Mathf.Max(
-                0f,
-                attackPower -
-                factoryCore.Definition.Defense);
+        float damage = Mathf.Max(0f, attackPower - factoryCore.Definition.Defense);
 
-        CurrentHp =
-            Mathf.Max(
-                0f,
-                CurrentHp - damage);
+        CurrentHp =Mathf.Max(0f, CurrentHp - damage);
 
         if (CurrentHp <= 0f)
         {
@@ -78,5 +62,20 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
 
         // 공장은 제거하지 않는다.
         // 추후 생산 정지 / 작업자 해제 / 수리 시스템과 연결.
+    }
+
+    // 공장 수리(HP 100% 회복)
+    public bool Repair()
+    {
+        // 수리 불가 조건: factoryCore 또는 factoryCore.Definition이 null, 현재 HP가 최대 HP 이상
+        if(factoryCore == null || factoryCore.Definition == null || CurrentHp >= factoryCore.Definition.MaxHealth)
+        {
+            return false;
+        }
+
+        CurrentHp = factoryCore.Definition.MaxHealth;
+        IsDestroyed = false;
+
+        return true;
     }
 }
