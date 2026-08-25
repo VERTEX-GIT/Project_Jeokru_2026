@@ -28,6 +28,9 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     // Inspector 참조 또는 동일 액션 맵에서 찾은 실제 이동 명령 액션
     private InputAction moveCommandInput;
+    // 동일 액션 맵에서 찾은 공장 수리 액션
+    private InputAction factoryRepairInput;
+    private bool isFactoryRepairMode;
 
     // 외부에서는 선택 목록을 읽기 전용으로 제공
     public IReadOnlyList<UnitSelectable> SelectedUnits => selectedUnits;
@@ -65,6 +68,9 @@ public sealed class UnitSelectionController : MonoBehaviour
         moveCommandInput = moveCommandAction != null
             ? moveCommandAction.action
             : primaryClickAction?.action.actionMap?.FindAction("MoveCommand");
+
+        factoryRepairInput =
+            primaryClickAction?.action.actionMap?.FindAction("FactoryRepair");
     }
 
     // 선택 및 이동 관련 입력 액션을 활성화하고 콜백 등록
@@ -80,6 +86,12 @@ public sealed class UnitSelectionController : MonoBehaviour
         {
             moveCommandInput.performed += OnMoveCommand;
             moveCommandInput.Enable();
+        }
+
+        if (factoryRepairInput != null)
+        {
+            factoryRepairInput.performed += OnFactoryRepair;
+            factoryRepairInput.Enable();
         }
 
         if (pointerPositionAction != null)
@@ -103,11 +115,18 @@ public sealed class UnitSelectionController : MonoBehaviour
             moveCommandInput.Disable();
         }
 
+        if (factoryRepairInput != null)
+        {
+            factoryRepairInput.performed -= OnFactoryRepair;
+            factoryRepairInput.Disable();
+        }
+
         if (pointerPositionAction != null)
         {
             pointerPositionAction.action.Disable();
         }
 
+        isFactoryRepairMode = false;
         ClearSelection();
     }
 
@@ -119,6 +138,16 @@ public sealed class UnitSelectionController : MonoBehaviour
             placementController.CurrentMode !=
                 PlacementMode.None)
         {
+            return;
+        }
+
+        if (isFactoryRepairMode)
+        {
+            if (TryRepairFactoryUnderPointer())
+            {
+                isFactoryRepairMode = false;
+            }
+
             return;
         }
 
@@ -154,7 +183,8 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnMoveCommand(
         InputAction.CallbackContext context)
     {
-        if (placementController != null &&
+        if (isFactoryRepairMode ||
+            placementController != null &&
             placementController.CurrentMode != PlacementMode.None)
         {
             return;
@@ -198,6 +228,47 @@ public sealed class UnitSelectionController : MonoBehaviour
 
         // 빈 타일이면 일반 이동
         TryIssueMoveCommand(pointerCell);
+    }
+
+    // 공장 수리 모드 시작 또는 취소
+    private void OnFactoryRepair(
+        InputAction.CallbackContext context)
+    {
+        if (placementController != null &&
+            placementController.CurrentMode != PlacementMode.None)
+        {
+            return;
+        }
+
+        isFactoryRepairMode = !isFactoryRepairMode;
+
+        Debug.Log(
+            isFactoryRepairMode
+                ? "공장 수리 모드: 수리할 공장을 클릭하세요."
+                : "공장 수리 모드를 취소했습니다.",
+            this);
+    }
+
+    // 포인터가 가리키는 공장 하나를 수리
+    private bool TryRepairFactoryUnderPointer()
+    {
+        if (!TryGetPointerCell(out Vector3Int pointerCell) ||
+            !occupancyManager.TryGetOccupant(
+                pointerCell,
+                out TileObjectPlacement occupant) ||
+            occupant.ObjectType != TileObjectType.Facility ||
+            !occupant.TryGetComponent(out FactoryRepair factoryRepair))
+        {
+            return false;
+        }
+
+        FactoryRepairResult result = factoryRepair.TryRepair();
+
+        Debug.Log(
+            $"{factoryRepair.name}: 공장 수리 결과 - {result}",
+            factoryRepair);
+
+        return true;
     }
 
     private void TryIssueCombatCommand()
