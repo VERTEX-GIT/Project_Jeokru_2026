@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 포인터 입력으로 유닛 선택을 관리하고
-// 선택된 유닛에 이동/전투/작업 명령을 전달
+// 선택된 유닛에 이동/전투/작업/전위 배치 명령을 전달
 [DisallowMultipleComponent]
 public sealed class UnitSelectionController : MonoBehaviour
 {
@@ -30,6 +30,9 @@ public sealed class UnitSelectionController : MonoBehaviour
     [SerializeField]
     private UnitDestinationAssigner destinationAssigner;
 
+    [SerializeField]
+    private UnitFrontlinePlanner frontlinePlanner;
+
     [Header("Selection Drag")]
     [SerializeField]
     private RectTransform selectionBox;
@@ -41,15 +44,26 @@ public sealed class UnitSelectionController : MonoBehaviour
     [Min(0f)]
     private float dragThreshold = 8f;
 
-    private readonly List<UnitSelectable> selectedUnits = new();
+    private readonly List<UnitSelectable>
+        selectedUnits = new();
 
     private InputAction moveCommandInput;
 
+    // 좌클릭 드래그 선택
     private Vector2 dragStartScreenPosition;
     private bool isPrimaryHeld;
 
-    public IReadOnlyList<UnitSelectable> SelectedUnits =>
-        selectedUnits;
+    // 우클릭 전위 배치
+    private Vector2 moveDragStartScreenPosition;
+    private Vector3Int moveDragStartCell;
+
+    private bool isMoveHeld;
+    private bool canStartFrontline;
+    private bool isFrontlineDrag;
+
+    public IReadOnlyList<UnitSelectable>
+        SelectedUnits =>
+            selectedUnits;
 
     private void Awake()
     {
@@ -85,6 +99,13 @@ public sealed class UnitSelectionController : MonoBehaviour
                     UnitDestinationAssigner>();
         }
 
+        if (frontlinePlanner == null)
+        {
+            frontlinePlanner =
+                FindAnyObjectByType<
+                    UnitFrontlinePlanner>();
+        }
+
         moveCommandInput =
             moveCommandAction != null
                 ? moveCommandAction.action
@@ -110,8 +131,11 @@ public sealed class UnitSelectionController : MonoBehaviour
 
         if (moveCommandInput != null)
         {
-            moveCommandInput.performed +=
-                OnMoveCommand;
+            moveCommandInput.started +=
+                OnMovePress;
+
+            moveCommandInput.canceled +=
+                OnMoveRelease;
 
             moveCommandInput.Enable();
         }
@@ -137,8 +161,11 @@ public sealed class UnitSelectionController : MonoBehaviour
 
         if (moveCommandInput != null)
         {
-            moveCommandInput.performed -=
-                OnMoveCommand;
+            moveCommandInput.started -=
+                OnMovePress;
+
+            moveCommandInput.canceled -=
+                OnMoveRelease;
 
             moveCommandInput.Disable();
         }
@@ -149,43 +176,25 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         CancelPrimaryDrag();
+        CancelMoveDrag();
+
         ClearSelection();
     }
 
     private void Update()
     {
-        if (!isPrimaryHeld ||
-            pointerPositionAction == null)
-        {
-            return;
-        }
-
-        Vector2 currentPosition =
-            pointerPositionAction.action
-                .ReadValue<Vector2>();
-
-        float dragDistance =
-            Vector2.Distance(
-                dragStartScreenPosition,
-                currentPosition);
-
-        if (dragDistance < dragThreshold)
-        {
-            HideSelectionBox();
-            return;
-        }
-
-        UpdateSelectionBox(
-            dragStartScreenPosition,
-            currentPosition);
+        UpdatePrimaryDrag();
+        UpdateMoveDrag();
     }
+
+    // =========================
+    // 좌클릭 선택
+    // =========================
 
     private void OnPrimaryPress(
         InputAction.CallbackContext context)
     {
-        if (placementController != null &&
-            placementController.CurrentMode !=
-                PlacementMode.None)
+        if (IsPlacementModeActive())
         {
             return;
         }
@@ -196,8 +205,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         dragStartScreenPosition =
-            pointerPositionAction.action
-                .ReadValue<Vector2>();
+            GetPointerScreenPosition();
 
         isPrimaryHeld = true;
     }
@@ -217,8 +225,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         Vector2 endScreenPosition =
-            pointerPositionAction.action
-                .ReadValue<Vector2>();
+            GetPointerScreenPosition();
 
         float dragDistance =
             Vector2.Distance(
@@ -246,17 +253,41 @@ public sealed class UnitSelectionController : MonoBehaviour
         HandlePrimaryClick();
     }
 
-    private void HandlePrimaryClick()
+    private void UpdatePrimaryDrag()
     {
-        if (placementController != null &&
-            placementController.CurrentMode !=
-                PlacementMode.None)
+        if (!isPrimaryHeld ||
+            pointerPositionAction == null)
         {
             return;
         }
 
-        // 실제 월드 위치에 유닛이 있다면
-        // 이동 중 여부와 관계없이 우선 선택
+        Vector2 currentPosition =
+            GetPointerScreenPosition();
+
+        float dragDistance =
+            Vector2.Distance(
+                dragStartScreenPosition,
+                currentPosition);
+
+        if (dragDistance < dragThreshold)
+        {
+            HideSelectionBox();
+            return;
+        }
+
+        UpdateSelectionBox(
+            dragStartScreenPosition,
+            currentPosition);
+    }
+
+    private void HandlePrimaryClick()
+    {
+        if (IsPlacementModeActive())
+        {
+            return;
+        }
+
+        // 이동 중인 유닛도 실제 Collider로 우선 선택
         if (TryGetUnitUnderPointer(
                 out UnitSelectable selectable))
         {
@@ -270,7 +301,6 @@ public sealed class UnitSelectionController : MonoBehaviour
             return;
         }
 
-        // 정지 중인 타일 오브젝트 판정
         if (occupancyManager.TryGetOccupant(
                 pointerCell,
                 out TileObjectPlacement occupant))
@@ -282,12 +312,133 @@ public sealed class UnitSelectionController : MonoBehaviour
         ClearSelection();
     }
 
-    private void OnMoveCommand(
+    // =========================
+    // 우클릭 명령 / 전위 배치
+    // =========================
+
+    private void OnMovePress(
         InputAction.CallbackContext context)
     {
-        if (placementController != null &&
-            placementController.CurrentMode !=
-                PlacementMode.None)
+        if (IsPlacementModeActive() ||
+            pointerPositionAction == null)
+        {
+            return;
+        }
+
+        moveDragStartScreenPosition =
+            GetPointerScreenPosition();
+
+        isMoveHeld = true;
+        isFrontlineDrag = false;
+        canStartFrontline = false;
+
+        if (selectedUnits.Count == 0 ||
+            frontlinePlanner == null)
+        {
+            return;
+        }
+
+        if (!TryGetPointerCell(
+                out moveDragStartCell))
+        {
+            return;
+        }
+
+        // 전위 배치는 빈 타일에서 시작할 때만 가능.
+        // 적/공장을 우클릭한 경우 기존 명령을 유지한다.
+        if (occupancyManager.TryGetOccupant(
+                moveDragStartCell,
+                out _))
+        {
+            return;
+        }
+
+        canStartFrontline = true;
+    }
+
+    private void UpdateMoveDrag()
+    {
+        if (!isMoveHeld ||
+            !canStartFrontline ||
+            IsPlacementModeActive() ||
+            pointerPositionAction == null ||
+            frontlinePlanner == null)
+        {
+            return;
+        }
+
+        Vector2 currentScreenPosition =
+            GetPointerScreenPosition();
+
+        float dragDistance =
+            Vector2.Distance(
+                moveDragStartScreenPosition,
+                currentScreenPosition);
+
+        if (dragDistance < dragThreshold)
+        {
+            return;
+        }
+
+        if (!isFrontlineDrag)
+        {
+            if (!frontlinePlanner.BeginFrontline(
+                    moveDragStartCell))
+            {
+                canStartFrontline = false;
+                return;
+            }
+
+            isFrontlineDrag = true;
+        }
+
+        if (TryGetPointerCell(
+                out Vector3Int currentCell))
+        {
+            frontlinePlanner.UpdateFrontline(
+                currentCell);
+        }
+    }
+
+    private void OnMoveRelease(
+        InputAction.CallbackContext context)
+    {
+        if (!isMoveHeld)
+        {
+            return;
+        }
+
+        isMoveHeld = false;
+
+        if (isFrontlineDrag)
+        {
+            // 마지막 프레임에서 포인터가 이동했을 수도 있으므로
+            // release 위치까지 한 번 더 반영
+            if (TryGetPointerCell(
+                    out Vector3Int endCell))
+            {
+                frontlinePlanner.UpdateFrontline(
+                    endCell);
+            }
+
+            frontlinePlanner.CompleteFrontline(
+                selectedUnits);
+
+            isFrontlineDrag = false;
+            canStartFrontline = false;
+
+            return;
+        }
+
+        canStartFrontline = false;
+
+        // 드래그가 아니라면 기존 우클릭 명령
+        HandleMoveCommand();
+    }
+
+    private void HandleMoveCommand()
+    {
+        if (IsPlacementModeActive())
         {
             return;
         }
@@ -302,6 +453,7 @@ public sealed class UnitSelectionController : MonoBehaviour
                 pointerCell,
                 out TileObjectPlacement occupant))
         {
+            // 적군 우클릭
             if (occupant.ObjectType ==
                     TileObjectType.Unit &&
                 occupant.TryGetComponent(
@@ -314,19 +466,29 @@ public sealed class UnitSelectionController : MonoBehaviour
                 return;
             }
 
+            // 공장 우클릭
             if (occupant.ObjectType ==
                     TileObjectType.Facility &&
                 occupant.TryGetComponent(
                     out FactoryCore factory))
             {
-                TryIssueFactoryCommand(factory);
+                TryIssueFactoryCommand(
+                    factory);
+
+                return;
             }
 
             return;
         }
 
-        TryIssueMoveCommand(pointerCell);
+        // 빈 타일 우클릭
+        TryIssueMoveCommand(
+            pointerCell);
     }
+
+    // =========================
+    // 명령 전달
+    // =========================
 
     private void TryIssueCombatCommand()
     {
@@ -339,25 +501,6 @@ public sealed class UnitSelectionController : MonoBehaviour
         destinationAssigner
             .IssueCombatCommand(
                 selectedUnits);
-    }
-
-    private void TryToggleUnit(
-        TileObjectPlacement occupant)
-    {
-        if (occupant == null ||
-            occupant.ObjectType !=
-                TileObjectType.Unit)
-        {
-            return;
-        }
-
-        if (!occupant.TryGetComponent(
-                out UnitSelectable selectable))
-        {
-            return;
-        }
-
-        ToggleSelection(selectable);
     }
 
     private void TryIssueMoveCommand(
@@ -389,6 +532,16 @@ public sealed class UnitSelectionController : MonoBehaviour
             factory);
     }
 
+    // =========================
+    // 포인터 / 타일
+    // =========================
+
+    private Vector2 GetPointerScreenPosition()
+    {
+        return pointerPositionAction.action
+            .ReadValue<Vector2>();
+    }
+
     private bool TryGetPointerCell(
         out Vector3Int cell)
     {
@@ -404,8 +557,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         Vector2 screenPosition =
-            pointerPositionAction.action
-                .ReadValue<Vector2>();
+            GetPointerScreenPosition();
 
         float cameraDistance =
             Mathf.Abs(
@@ -421,8 +573,10 @@ public sealed class UnitSelectionController : MonoBehaviour
         worldPosition.z = 0f;
 
         cell =
-            occupancyManager.CoordinateManager
-                .WorldToCell(worldPosition);
+            occupancyManager
+                .CoordinateManager
+                .WorldToCell(
+                    worldPosition);
 
         return occupancyManager
             .CoordinateManager
@@ -441,8 +595,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         Vector2 screenPosition =
-            pointerPositionAction.action
-                .ReadValue<Vector2>();
+            GetPointerScreenPosition();
 
         Vector3 worldPosition =
             worldCamera.ScreenToWorldPoint(
@@ -462,6 +615,30 @@ public sealed class UnitSelectionController : MonoBehaviour
                 UnitSelectable>();
 
         return selectable != null;
+    }
+
+    // =========================
+    // 선택 관리
+    // =========================
+
+    private void TryToggleUnit(
+        TileObjectPlacement occupant)
+    {
+        if (occupant == null ||
+            occupant.ObjectType !=
+                TileObjectType.Unit)
+        {
+            return;
+        }
+
+        if (!occupant.TryGetComponent(
+                out UnitSelectable selectable))
+        {
+            return;
+        }
+
+        ToggleSelection(
+            selectable);
     }
 
     private void ToggleSelection(
@@ -494,6 +671,7 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
 
         selectedUnits.Add(unit);
+
         unit.Select();
     }
 
@@ -546,10 +724,12 @@ public sealed class UnitSelectionController : MonoBehaviour
                 maxY);
 
         UnitSelectable[] units =
-            FindObjectsByType<UnitSelectable>(
+            FindObjectsByType<
+                UnitSelectable>(
                 FindObjectsSortMode.None);
 
-        foreach (UnitSelectable unit in units)
+        foreach (UnitSelectable unit
+                in units)
         {
             if (unit == null ||
                 !unit.CanSelect())
@@ -575,6 +755,29 @@ public sealed class UnitSelectionController : MonoBehaviour
             AddToSelection(unit);
         }
     }
+
+    public void ClearSelection()
+    {
+        for (int i =
+                selectedUnits.Count - 1;
+             i >= 0;
+             i--)
+        {
+            UnitSelectable unit =
+                selectedUnits[i];
+
+            if (unit != null)
+            {
+                unit.Deselect();
+            }
+        }
+
+        selectedUnits.Clear();
+    }
+
+    // =========================
+    // 선택 박스 UI
+    // =========================
 
     private void UpdateSelectionBox(
         Vector2 startScreen,
@@ -646,6 +849,10 @@ public sealed class UnitSelectionController : MonoBehaviour
         }
     }
 
+    // =========================
+    // 입력 취소
+    // =========================
+
     private void CancelPrimaryDrag()
     {
         isPrimaryHeld = false;
@@ -653,22 +860,23 @@ public sealed class UnitSelectionController : MonoBehaviour
         HideSelectionBox();
     }
 
-    public void ClearSelection()
+    private void CancelMoveDrag()
     {
-        for (int i =
-                selectedUnits.Count - 1;
-            i >= 0;
-            i--)
+        isMoveHeld = false;
+        canStartFrontline = false;
+        isFrontlineDrag = false;
+
+        if (frontlinePlanner != null)
         {
-            UnitSelectable unit =
-                selectedUnits[i];
-
-            if (unit != null)
-            {
-                unit.Deselect();
-            }
+            frontlinePlanner
+                .CancelFrontline();
         }
+    }
 
-        selectedUnits.Clear();
+    private bool IsPlacementModeActive()
+    {
+        return placementController != null &&
+            placementController.CurrentMode !=
+                PlacementMode.None;
     }
 }
