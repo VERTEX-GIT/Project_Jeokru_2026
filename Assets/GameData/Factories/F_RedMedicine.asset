@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c3cc6a695d2fcf43a146c379d291d31, type: 3}
+  m_Name: F_RedMedicine
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryDefinition
+  factoryType: 1
+  displayName: Red Medicine Factory
+  productionType: 1
+  baseProductionTime: 60
+  productionAmount: 1
+  productionCosts: []
+  maxHealth: 100
+  defense: 0
+  installationCosts:
+  - resourceType: 0
+    amount: 40
+  repairCosts:
+    hp0To20:
+    - resourceType: 0
+      amount: 30
+    hp20To40:
+    - resourceType: 0
+      amount: 20
+    hp40To60:
+    - resourceType: 0
+      amount: 15
+    hp60To80:
+    - resourceType: 0
+      amount: 10
+    hp80To100:
+    - resourceType: 0
+      amount: 5
