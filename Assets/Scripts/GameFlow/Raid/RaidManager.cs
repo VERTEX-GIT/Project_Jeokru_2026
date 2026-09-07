@@ -1,6 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+public enum RaidState
+{
+    Inactive,
+    Active,
+    Failed
+}
 
 [DisallowMultipleComponent]
 public sealed class RaidManager : MonoBehaviour
@@ -60,11 +68,19 @@ public sealed class RaidManager : MonoBehaviour
 
     private int activeSpawnBatchCount;
 
-    public bool IsRaidActive
+    private bool hasEnemyExisted;
+
+    public RaidState State
     {
         get;
         private set;
-    }
+    } = RaidState.Inactive;
+
+    public bool IsRaidActive =>
+        State != RaidState.Inactive;
+
+    public bool IsRaidFailed =>
+        State == RaidState.Failed;
 
     public bool IsSpawning =>
         activeSpawnBatchCount > 0;
@@ -77,6 +93,10 @@ public sealed class RaidManager : MonoBehaviour
             return spawnedEnemies.Count;
         }
     }
+
+    public event Action RaidStarted;
+    public event Action RaidSucceeded;
+    public event Action RaidFailed;
 
     private void Awake()
     {
@@ -130,14 +150,19 @@ public sealed class RaidManager : MonoBehaviour
 
     private void Update()
     {
-        CleanupEnemyList();
-
-        if (!IsRaidActive)
+        if (PauseMenu.IsPaused)
         {
             return;
         }
 
-        // 성공/실패 판정은 다음 구현에서 추가.
+        if (State == RaidState.Inactive)
+        {
+            return;
+        }
+
+        CleanupEnemyList();
+
+        EvaluateRaidState();
     }
 
     private void OnDestroy()
@@ -209,12 +234,38 @@ public sealed class RaidManager : MonoBehaviour
             return;
         }
 
-        IsRaidActive = true;
+        // 레이드가 없는 상태에서만
+        // 새로운 레이드로 시작한다.
+        //
+        // 이미 Active거나 Failed 상태라면
+        // 기존 레이드에 증원만 추가한다.
+        if (State == RaidState.Inactive)
+        {
+            StartNewRaid();
+        }
 
         StartCoroutine(
             SpawnBatchRoutine(
                 enemiesPerSecond,
                 duration));
+    }
+
+    private void StartNewRaid()
+    {
+        spawnedEnemies.Clear();
+
+        activeSpawnBatchCount = 0;
+
+        hasEnemyExisted = false;
+
+        State =
+            RaidState.Active;
+
+        RaidStarted?.Invoke();
+
+        Debug.Log(
+            "RaidManager: 레이드 시작",
+            this);
     }
 
     private IEnumerator SpawnBatchRoutine(
@@ -238,33 +289,57 @@ public sealed class RaidManager : MonoBehaviour
             while (spawnedThisSecond <
                    enemiesPerSecond)
             {
+                while (gameTimeManager != null &&
+                       !gameTimeManager.IsRunning)
+                {
+                    yield return null;
+                }
+
                 if (TrySpawnEnemy())
                 {
                     spawnedThisSecond++;
                 }
                 else
                 {
-                    // 입구가 모두 예약/점유되어 있다면
-                    // 손실시키지 않고 다음 프레임에 다시 시도.
+                    // 모든 입구가 사용 중이면
+                    // 적을 버리지 않고 다음 프레임에 재시도한다.
                     yield return null;
                 }
             }
 
-            if (second <
+            if (second >=
                 duration - 1)
             {
-                yield return
-                    new WaitForSeconds(1f);
+                continue;
+            }
+
+            float elapsedSecond = 0f;
+
+            while (elapsedSecond < 1f)
+            {
+                if (gameTimeManager == null ||
+                    gameTimeManager.IsRunning)
+                {
+                    elapsedSecond +=
+                        Time.deltaTime;
+                }
+
+                yield return null;
             }
         }
 
         activeSpawnBatchCount--;
+
+        if (activeSpawnBatchCount < 0)
+        {
+            activeSpawnBatchCount = 0;
+        }
     }
 
     private bool TrySpawnEnemy()
     {
         UnitData selectedData =
-            Random.value < 0.5f
+            UnityEngine.Random.value < 0.5f
                 ? meleeEnemyData
                 : rangedEnemyData;
 
@@ -295,7 +370,129 @@ public sealed class RaidManager : MonoBehaviour
         spawnedEnemies.Add(
             enemy);
 
+        hasEnemyExisted = true;
+
         return true;
+    }
+
+    private void EvaluateRaidState()
+    {
+        if (State == RaidState.Active)
+        {
+            if (!HasAvailableAlly())
+            {
+                FailRaid();
+                return;
+            }
+
+            if (CanSucceedRaid())
+            {
+                SucceedRaid();
+            }
+
+            return;
+        }
+
+        if (State == RaidState.Failed)
+        {
+            // 실패는 이번 레이드 동안 확정 상태.
+            // 이후 아군이 증원되더라도
+            // 여기서 성공 상태로 되돌리지 않는다.
+            return;
+        }
+    }
+
+    private bool CanSucceedRaid()
+    {
+        if (!hasEnemyExisted)
+        {
+            return false;
+        }
+
+        if (IsSpawning)
+        {
+            return false;
+        }
+
+        if (spawnedEnemies.Count > 0)
+        {
+            return false;
+        }
+
+        return State ==
+            RaidState.Active;
+    }
+
+    private bool HasAvailableAlly()
+    {
+        UnitCore[] units =
+            FindObjectsByType<UnitCore>(
+                FindObjectsSortMode.None);
+
+        foreach (UnitCore unit
+                 in units)
+        {
+            if (unit == null ||
+                unit.Data == null)
+            {
+                continue;
+            }
+
+            if (unit.Data.Team !=
+                UnitTeam.Ally)
+            {
+                continue;
+            }
+
+            if (!unit.IsGameplayAvailable)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void SucceedRaid()
+    {
+        if (State != RaidState.Active)
+        {
+            return;
+        }
+
+        State =
+            RaidState.Inactive;
+
+        spawnedEnemies.Clear();
+
+        activeSpawnBatchCount = 0;
+
+        hasEnemyExisted = false;
+
+        RaidSucceeded?.Invoke();
+
+        Debug.Log(
+            "RaidManager: 레이드 성공",
+            this);
+    }
+
+    private void FailRaid()
+    {
+        if (State != RaidState.Active)
+        {
+            return;
+        }
+
+        State =
+            RaidState.Failed;
+
+        RaidFailed?.Invoke();
+
+        Debug.Log(
+            "RaidManager: 레이드 실패",
+            this);
     }
 
     private int CalculateEnemiesPerSecond(
@@ -333,15 +530,18 @@ public sealed class RaidManager : MonoBehaviour
              i >= 0;
              i--)
         {
-            if (spawnedEnemies[i] == null)
+            if (spawnedEnemies[i] != null)
             {
-                spawnedEnemies.RemoveAt(i);
+                continue;
             }
+
+            spawnedEnemies.RemoveAt(i);
         }
     }
 
 #if UNITY_EDITOR
-    [ContextMenu("Debug/Start Raid Spawn Event")]
+    [ContextMenu(
+        "Debug/Start Raid Spawn Event")]
     private void DebugStartRaid()
     {
         int day =
@@ -349,7 +549,20 @@ public sealed class RaidManager : MonoBehaviour
                 ? gameTimeManager.CurrentDay
                 : 1;
 
-        BeginSpawnEvent(day);
+        BeginSpawnEvent(
+            day);
+    }
+
+    [ContextMenu(
+        "Debug/Print Raid State")]
+    private void DebugPrintRaidState()
+    {
+        Debug.Log(
+            $"Raid State: {State}, " +
+            $"Enemies: {ActiveEnemyCount}, " +
+            $"Spawning: {IsSpawning}, " +
+            $"Had Enemy: {hasEnemyExisted}",
+            this);
     }
 #endif
 }
