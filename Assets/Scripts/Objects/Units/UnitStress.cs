@@ -37,6 +37,9 @@ public sealed class UnitStress :
     [SerializeField]
     private float workTimer;
 
+    public UnitStressSettings Settings =>
+        settings;
+
     public float StressRatio =>
         Mathf.Clamp01(
             CurrentStress /
@@ -136,14 +139,11 @@ public sealed class UnitStress :
             Time.deltaTime;
 
         float interval =
-            settings
-                .LowHealthStressInterval;
+            settings.LowHealthStressInterval;
 
-        while (lowHealthTimer >=
-               interval)
+        while (lowHealthTimer >= interval)
         {
-            lowHealthTimer -=
-                interval;
+            lowHealthTimer -= interval;
 
             AddStress(1f);
 
@@ -169,14 +169,11 @@ public sealed class UnitStress :
             Time.deltaTime;
 
         float interval =
-            settings
-                .WorkStressInterval;
+            settings.WorkStressInterval;
 
-        while (workTimer >=
-               interval)
+        while (workTimer >= interval)
         {
-            workTimer -=
-                interval;
+            workTimer -= interval;
 
             AddStress(1f);
 
@@ -236,11 +233,8 @@ public sealed class UnitStress :
         IsWorkStressActive =
             false;
 
-        lowHealthTimer =
-            0f;
-
-        workTimer =
-            0f;
+        lowHealthTimer = 0f;
+        workTimer = 0f;
     }
 
     public void AddStress(

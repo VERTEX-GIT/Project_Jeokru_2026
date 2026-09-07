@@ -111,6 +111,7 @@ GameObject:
   - component: {fileID: 8878496777682533438}
   - component: {fileID: -1706343692188511794}
   - component: {fileID: 8475515237543357723}
+  - component: {fileID: 7473038426347916597}
   - component: {fileID: -7999307707097842433}
   - component: {fileID: 1395412719836097015}
   - component: {fileID: 9082989572240566767}
@@ -361,6 +362,23 @@ MonoBehaviour:
   <IsWorkStressActive>k__BackingField: 0
   lowHealthTimer: 0
   workTimer: 0
+--- !u!114 &7473038426347916597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e31890221cbcff84b895932891e1c9b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCounseling
+  counselingRoom: {fileID: 0}
+  <IsCounseling>k__BackingField: 0
+  <ReturnCell>k__BackingField: {x: 0, y: 0, z: 0}
+  hasReturnCell: 0
+  recoveryTimer: 0
 --- !u!114 &-7999307707097842433
 MonoBehaviour:
   m_ObjectHideFlags: 0

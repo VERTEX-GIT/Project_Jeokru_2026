@@ -20,6 +20,11 @@ public sealed class UnitStressSettings :
     [Min(0.1f)]
     private float workStressInterval = 10f;
 
+    [Header("Counseling")]
+    [SerializeField]
+    [Min(0.1f)]
+    private float counselingRecoveryInterval = 10f;
+
     public float LowHealthThreshold =>
         lowHealthThreshold;
 
@@ -28,4 +33,7 @@ public sealed class UnitStressSettings :
 
     public float WorkStressInterval =>
         workStressInterval;
+
+    public float CounselingRecoveryInterval =>
+        counselingRecoveryInterval;
 }

@@ -3,10 +3,16 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(UnitCore))]
-public sealed class UnitHealth : MonoBehaviour, IDamageable
+public sealed class UnitHealth :
+    MonoBehaviour,
+    IDamageable
 {
     [field: SerializeField]
-    public float CurrentHp { get; private set; }
+    public float CurrentHp
+    {
+        get;
+        private set;
+    }
 
     public float MaxHp =>
         unitCore != null &&
@@ -23,7 +29,6 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
     public bool IsAlive =>
         CurrentHp > 0f;
 
-    // currentHp, maxHp
     public event Action<float, float>
         HealthChanged;
 
@@ -59,6 +64,7 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
     {
         if (!IsAlive ||
             unitCore == null ||
+            !unitCore.IsActive ||
             unitCore.Data == null)
         {
             return;
@@ -78,7 +84,8 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         CurrentHp =
             Mathf.Max(
                 0f,
-                CurrentHp - damage);
+                CurrentHp -
+                damage);
 
         NotifyHealthChanged();
 
@@ -100,6 +107,33 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             attacker);
     }
 
+    public void EnsureMinimumHp(
+        float minimumHp)
+    {
+        if (unitCore == null ||
+            unitCore.Data == null)
+        {
+            return;
+        }
+
+        float clampedMinimum =
+            Mathf.Clamp(
+                minimumHp,
+                0f,
+                MaxHp);
+
+        if (CurrentHp >=
+            clampedMinimum)
+        {
+            return;
+        }
+
+        CurrentHp =
+            clampedMinimum;
+
+        NotifyHealthChanged();
+    }
+
     private void NotifyHealthChanged()
     {
         HealthChanged?.Invoke(
@@ -117,8 +151,6 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             return;
         }
 
-        // 플레이어가 직접 내린 이동 명령 수행 중에는
-        // 피격으로 전투 타겟을 설정하지 않는다.
         if (unitCore
             .IsPlayerMoveCommandActive)
         {
@@ -151,7 +183,6 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             return;
         }
 
-        // 기본 아군만 게임에서 제거하지 않고 활동 정지
         if (unitCore.Data.Team ==
                 UnitTeam.Ally &&
             unitCore.Data.IsBasicUnit)
@@ -160,7 +191,6 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             return;
         }
 
-        // 비기본 아군과 모든 적군은 제거
         Destroy(gameObject);
     }
 

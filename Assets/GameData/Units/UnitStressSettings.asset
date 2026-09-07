@@ -15,3 +15,4 @@ MonoBehaviour:
   lowHealthThreshold: 30
   lowHealthStressInterval: 10
   workStressInterval: 10
+  counselingRecoveryInterval: 10
