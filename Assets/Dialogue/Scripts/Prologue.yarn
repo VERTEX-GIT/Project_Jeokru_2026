@@ -1,4 +1,63 @@
 ﻿title: Prologue
 ---
-이름: 대사
+
+// 대사 작성 기본 형식
+이름: 대사내용
+
+
+// 배경 변경
+// 사용 형식:
+// <<background 키>>
+//
+// DialogueVisualController의
+// Backgrounds 배열에 같은 Key를 등록해야 함.
+//
+// 배경 숨기기:
+// <<background none>>
+
+
+// 캐릭터 변경
+// 사용 형식:
+// <<character 키>>
+//
+// DialogueVisualController의
+// Characters 배열에 같은 Key를 등록해야 함.
+//
+// 캐릭터 숨기기:
+// <<character none>>
+
+
+// 현재 지원하는 커스텀 명령
+//
+// <<background 키>>
+// - 등록된 배경 Sprite 표시
+//
+// <<background none>>
+// - 현재 배경 숨김
+//
+// <<character 키>>
+// - 등록된 캐릭터 Sprite 표시
+//
+// <<character none>>
+// - 현재 캐릭터 숨김
+
+
+// 주의
+//
+// 1. Key는 대소문자를 구분하지 않음.
+//    lab / Lab / LAB 모두 같은 키로 처리됨.
+//
+// 2. 등록되지 않은 Key를 사용하면
+//    Console에 경고가 출력되고 기존 이미지는 유지됨.
+//
+// 3. Sprite가 등록되지 않은 항목도
+//    Console에 경고가 출력됨.
+//
+// 4. BackgroundImage와 CharacterImage의
+//    Raycast Target은 꺼둘 것.
+//
+// 5. 대사 출력과 한 글자씩 표시,
+//    다음 대사 진행은 Yarn Spinner의
+//    Line Presenter / Line Advancer가 담당함.
+
 ===
