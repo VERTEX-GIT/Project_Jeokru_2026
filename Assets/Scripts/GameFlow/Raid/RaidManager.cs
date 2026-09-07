@@ -63,12 +63,23 @@ public sealed class RaidManager : MonoBehaviour
     private float spawnDurationIncreaseCoefficient =
         5f;
 
+    [Header("Retreat")]
+    [SerializeField]
+    [Min(0f)]
+    private float retreatDelay = 5f;
+
     private readonly List<UnitCore>
         spawnedEnemies = new();
 
     private int activeSpawnBatchCount;
 
     private bool hasEnemyExisted;
+
+    private float retreatDelayRemaining;
+
+    private bool retreatCountdownStarted;
+
+    private bool isRetreating;
 
     public RaidState State
     {
@@ -85,11 +96,15 @@ public sealed class RaidManager : MonoBehaviour
     public bool IsSpawning =>
         activeSpawnBatchCount > 0;
 
+    public bool IsRetreating =>
+        isRetreating;
+
     public int ActiveEnemyCount
     {
         get
         {
             CleanupEnemyList();
+
             return spawnedEnemies.Count;
         }
     }
@@ -104,6 +119,7 @@ public sealed class RaidManager : MonoBehaviour
             Instance != this)
         {
             Destroy(gameObject);
+
             return;
         }
 
@@ -163,6 +179,11 @@ public sealed class RaidManager : MonoBehaviour
         CleanupEnemyList();
 
         EvaluateRaidState();
+
+        if (State == RaidState.Failed)
+        {
+            UpdateFailedRaid();
+        }
     }
 
     private void OnDestroy()
@@ -179,6 +200,16 @@ public sealed class RaidManager : MonoBehaviour
     {
         if (!IsRaidTime(
                 currentTime))
+        {
+            return;
+        }
+
+        // 실패가 확정된 레이드는
+        // 이후 예정된 새로운 증원을 받지 않는다.
+        //
+        // 실패 전에 이미 시작된 SpawnBatch는
+        // 그대로 끝까지 진행한다.
+        if (State == RaidState.Failed)
         {
             return;
         }
@@ -211,6 +242,11 @@ public sealed class RaidManager : MonoBehaviour
     private void BeginSpawnEvent(
         int currentDay)
     {
+        if (State == RaidState.Failed)
+        {
+            return;
+        }
+
         if (enemySpawnZone == null)
         {
             Debug.LogError(
@@ -234,11 +270,6 @@ public sealed class RaidManager : MonoBehaviour
             return;
         }
 
-        // 레이드가 없는 상태에서만
-        // 새로운 레이드로 시작한다.
-        //
-        // 이미 Active거나 Failed 상태라면
-        // 기존 레이드에 증원만 추가한다.
         if (State == RaidState.Inactive)
         {
             StartNewRaid();
@@ -257,6 +288,12 @@ public sealed class RaidManager : MonoBehaviour
         activeSpawnBatchCount = 0;
 
         hasEnemyExisted = false;
+
+        retreatDelayRemaining = 0f;
+
+        retreatCountdownStarted = false;
+
+        isRetreating = false;
 
         State =
             RaidState.Active;
@@ -301,8 +338,6 @@ public sealed class RaidManager : MonoBehaviour
                 }
                 else
                 {
-                    // 모든 입구가 사용 중이면
-                    // 적을 버리지 않고 다음 프레임에 재시도한다.
                     yield return null;
                 }
             }
@@ -372,6 +407,17 @@ public sealed class RaidManager : MonoBehaviour
 
         hasEnemyExisted = true;
 
+        // 실패 이전에 이미 시작돼 있던
+        // SpawnBatch에서 뒤늦게 생성된 적.
+        //
+        // 이 적도 실패 레이드에 합류해서
+        // 공장만 공격한다.
+        if (State == RaidState.Failed)
+        {
+            ForceEnemyToFactory(
+                enemy);
+        }
+
         return true;
     }
 
@@ -382,6 +428,7 @@ public sealed class RaidManager : MonoBehaviour
             if (!HasAvailableAlly())
             {
                 FailRaid();
+
                 return;
             }
 
@@ -393,12 +440,12 @@ public sealed class RaidManager : MonoBehaviour
             return;
         }
 
-        if (State == RaidState.Failed)
+        if (State == RaidState.Failed &&
+            isRetreating &&
+            !IsSpawning &&
+            spawnedEnemies.Count == 0)
         {
-            // 실패는 이번 레이드 동안 확정 상태.
-            // 이후 아군이 증원되더라도
-            // 여기서 성공 상태로 되돌리지 않는다.
-            return;
+            CompleteFailedRaid();
         }
     }
 
@@ -471,6 +518,12 @@ public sealed class RaidManager : MonoBehaviour
 
         hasEnemyExisted = false;
 
+        retreatDelayRemaining = 0f;
+
+        retreatCountdownStarted = false;
+
+        isRetreating = false;
+
         RaidSucceeded?.Invoke();
 
         Debug.Log(
@@ -488,10 +541,236 @@ public sealed class RaidManager : MonoBehaviour
         State =
             RaidState.Failed;
 
+        retreatDelayRemaining =
+            retreatDelay;
+
+        retreatCountdownStarted =
+            false;
+
+        isRetreating =
+            false;
+
+        ForceAllEnemiesToFactories();
+
         RaidFailed?.Invoke();
 
         Debug.Log(
             "RaidManager: 레이드 실패",
+            this);
+    }
+
+    private void UpdateFailedRaid()
+    {
+        if (isRetreating)
+        {
+            return;
+        }
+
+        // 실패 전에 시작된 증원이
+        // 아직 남아 있다면 전부 받을 때까지 기다린다.
+        if (IsSpawning)
+        {
+            retreatCountdownStarted =
+                false;
+
+            retreatDelayRemaining =
+                retreatDelay;
+
+            return;
+        }
+
+        // 이미 진행 중이던 모든 증원이
+        // 끝난 뒤부터 퇴각 대기시간 시작.
+        if (!retreatCountdownStarted)
+        {
+            retreatCountdownStarted =
+                true;
+
+            retreatDelayRemaining =
+                retreatDelay;
+
+            Debug.Log(
+                "RaidManager: 모든 기존 증원 종료, " +
+                "퇴각 대기 시작",
+                this);
+        }
+
+        if (gameTimeManager != null &&
+            !gameTimeManager.IsRunning)
+        {
+            return;
+        }
+
+        retreatDelayRemaining -=
+            Time.deltaTime;
+
+        if (retreatDelayRemaining > 0f)
+        {
+            return;
+        }
+
+        BeginRetreat();
+    }
+
+    private void BeginRetreat()
+    {
+        if (isRetreating)
+        {
+            return;
+        }
+
+        isRetreating =
+            true;
+
+        CleanupEnemyList();
+
+        foreach (UnitCore enemy
+                 in spawnedEnemies)
+        {
+            if (enemy == null)
+            {
+                continue;
+            }
+
+            UnitRetreatMover retreatMover =
+                enemy.GetComponent<
+                    UnitRetreatMover>();
+
+            if (retreatMover == null)
+            {
+                retreatMover =
+                    enemy.gameObject
+                        .AddComponent<
+                            UnitRetreatMover>();
+            }
+
+            retreatMover.BeginRetreat(
+                enemySpawnZone);
+        }
+
+        Debug.Log(
+            "RaidManager: 적 퇴각 시작",
+            this);
+    }
+
+    private void ForceAllEnemiesToFactories()
+    {
+        CleanupEnemyList();
+
+        foreach (UnitCore enemy
+                 in spawnedEnemies)
+        {
+            ForceEnemyToFactory(
+                enemy);
+        }
+    }
+
+    private void ForceEnemyToFactory(
+        UnitCore enemy)
+    {
+        if (enemy == null ||
+            enemy.Data == null ||
+            enemy.Data.Team !=
+                UnitTeam.Enemy)
+        {
+            return;
+        }
+
+        GameObject factory =
+            FindNearestAliveFactory(
+                enemy.transform.position);
+
+        if (factory == null)
+        {
+            enemy.ClearTarget();
+
+            return;
+        }
+
+        enemy.SetTarget(
+            factory);
+
+        UnitTargeting targeting =
+            enemy.GetComponent<
+                UnitTargeting>();
+
+        if (targeting != null)
+        {
+            targeting.enabled =
+                false;
+        }
+
+        enemy.SetAutoCombat(
+            true);
+    }
+
+    private GameObject FindNearestAliveFactory(
+        Vector3 position)
+    {
+        FactoryCore[] factories =
+            FindObjectsByType<
+                FactoryCore>(
+                FindObjectsSortMode.None);
+
+        FactoryCore nearestFactory =
+            null;
+
+        float nearestDistanceSqr =
+            float.MaxValue;
+
+        foreach (FactoryCore factory
+                 in factories)
+        {
+            if (factory == null ||
+                !factory.TryGetComponent(
+                    out FactoryHealth health) ||
+                !health.IsAlive)
+            {
+                continue;
+            }
+
+            float distanceSqr =
+                (factory.transform.position -
+                 position)
+                .sqrMagnitude;
+
+            if (distanceSqr >=
+                nearestDistanceSqr)
+            {
+                continue;
+            }
+
+            nearestDistanceSqr =
+                distanceSqr;
+
+            nearestFactory =
+                factory;
+        }
+
+        return nearestFactory != null
+            ? nearestFactory.gameObject
+            : null;
+    }
+
+    private void CompleteFailedRaid()
+    {
+        State =
+            RaidState.Inactive;
+
+        spawnedEnemies.Clear();
+
+        activeSpawnBatchCount = 0;
+
+        hasEnemyExisted = false;
+
+        retreatDelayRemaining = 0f;
+
+        retreatCountdownStarted = false;
+
+        isRetreating = false;
+
+        Debug.Log(
+            "RaidManager: 실패 레이드 종료",
             this);
     }
 
@@ -544,6 +823,13 @@ public sealed class RaidManager : MonoBehaviour
         "Debug/Start Raid Spawn Event")]
     private void DebugStartRaid()
     {
+        // Failed 상태에서는
+        // 디버그 호출도 새 증원을 생성하지 않는다.
+        if (State == RaidState.Failed)
+        {
+            return;
+        }
+
         int day =
             gameTimeManager != null
                 ? gameTimeManager.CurrentDay
@@ -561,7 +847,11 @@ public sealed class RaidManager : MonoBehaviour
             $"Raid State: {State}, " +
             $"Enemies: {ActiveEnemyCount}, " +
             $"Spawning: {IsSpawning}, " +
-            $"Had Enemy: {hasEnemyExisted}",
+            $"Retreat Countdown: " +
+            $"{retreatCountdownStarted}, " +
+            $"Retreating: {isRetreating}, " +
+            $"Retreat Delay: " +
+            $"{retreatDelayRemaining:F2}",
             this);
     }
 #endif

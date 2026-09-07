@@ -5727,6 +5727,7 @@ MonoBehaviour:
   spawnCountIncreaseCoefficient: 5
   baseSpawnDuration: 3
   spawnDurationIncreaseCoefficient: 5
+  retreatDelay: 10
 --- !u!1 &182488593
 GameObject:
   m_ObjectHideFlags: 0

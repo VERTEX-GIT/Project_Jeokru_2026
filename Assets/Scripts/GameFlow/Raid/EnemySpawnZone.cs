@@ -97,11 +97,10 @@ public sealed class EnemySpawnZone : MonoBehaviour
                 spawnedObject);
 
             Destroy(spawnedObject);
+
             return false;
         }
 
-        // RaidManager가 선택한 실제 UnitData를
-        // 생성된 유닛에 적용한다.
         unitCore.SetData(
             unitData);
 
@@ -110,6 +109,7 @@ public sealed class EnemySpawnZone : MonoBehaviour
                 out Vector3Int entryCell))
         {
             Destroy(spawnedObject);
+
             return false;
         }
 
@@ -132,6 +132,159 @@ public sealed class EnemySpawnZone : MonoBehaviour
             unitCore;
 
         return true;
+    }
+
+    public bool TryMoveToEntry(
+        UnitMovement movement,
+        out Vector3Int entryCell)
+    {
+        entryCell = default;
+
+        if (movement == null ||
+            occupancyManager == null ||
+            occupancyManager.CoordinateManager ==
+                null ||
+            entryPoints == null ||
+            entryPoints.Length == 0)
+        {
+            return false;
+        }
+
+        candidateIndices.Clear();
+
+        for (int i = 0;
+             i < entryPoints.Length;
+             i++)
+        {
+            if (entryPoints[i] != null)
+            {
+                candidateIndices.Add(i);
+            }
+        }
+
+        while (candidateIndices.Count > 0)
+        {
+            int randomListIndex =
+                UnityEngine.Random.Range(
+                    0,
+                    candidateIndices.Count);
+
+            int pointIndex =
+                candidateIndices[
+                    randomListIndex];
+
+            candidateIndices.RemoveAt(
+                randomListIndex);
+
+            Vector3Int candidateCell =
+                occupancyManager
+                    .CoordinateManager
+                    .WorldToCell(
+                        entryPoints[
+                            pointIndex]
+                            .position);
+
+            if (!movement.TryMoveTo(
+                    candidateCell))
+            {
+                continue;
+            }
+
+            entryCell =
+                candidateCell;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryPlaceAtEntry(
+        TileObjectPlacement placement)
+    {
+        if (placement == null ||
+            occupancyManager == null ||
+            occupancyManager.CoordinateManager ==
+                null ||
+            entryPoints == null)
+        {
+            return false;
+        }
+
+        candidateIndices.Clear();
+
+        for (int i = 0;
+             i < entryPoints.Length;
+             i++)
+        {
+            if (entryPoints[i] != null)
+            {
+                candidateIndices.Add(i);
+            }
+        }
+
+        while (candidateIndices.Count > 0)
+        {
+            int randomListIndex =
+                UnityEngine.Random.Range(
+                    0,
+                    candidateIndices.Count);
+
+            int pointIndex =
+                candidateIndices[
+                    randomListIndex];
+
+            candidateIndices.RemoveAt(
+                randomListIndex);
+
+            Vector3Int candidateCell =
+                occupancyManager
+                    .CoordinateManager
+                    .WorldToCell(
+                        entryPoints[
+                            pointIndex]
+                            .position);
+
+            if (!placement.TryPlace(
+                    candidateCell))
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public Vector3 GetRetreatDestination(
+        Vector3 currentPosition)
+    {
+        float minY =
+            Mathf.Min(
+                spawnBottom.position.y,
+                spawnTop.position.y);
+
+        float maxY =
+            Mathf.Max(
+                spawnBottom.position.y,
+                spawnTop.position.y);
+
+        float y =
+            Mathf.Clamp(
+                currentPosition.y,
+                minY,
+                maxY);
+
+        float x =
+            (spawnBottom.position.x +
+             spawnTop.position.x) *
+            0.5f;
+
+        return new Vector3(
+            x,
+            y,
+            currentPosition.z);
     }
 
     private bool TryReserveRandomEntry(
@@ -161,7 +314,7 @@ public sealed class EnemySpawnZone : MonoBehaviour
         while (candidateIndices.Count > 0)
         {
             int randomListIndex =
-                Random.Range(
+                UnityEngine.Random.Range(
                     0,
                     candidateIndices.Count);
 
@@ -209,13 +362,14 @@ public sealed class EnemySpawnZone : MonoBehaviour
                 spawnTop.position.y);
 
         float y =
-            Random.Range(
+            UnityEngine.Random.Range(
                 minY,
                 maxY);
 
         float x =
             (spawnBottom.position.x +
-             spawnTop.position.x) * 0.5f;
+             spawnTop.position.x) *
+            0.5f;
 
         return new Vector3(
             x,
