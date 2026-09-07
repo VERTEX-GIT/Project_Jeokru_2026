@@ -183,6 +183,13 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void Update()
     {
+        if (PauseMenu.IsPaused)
+        {
+            CancelPrimaryDrag();
+            CancelMoveDrag();
+            return;
+        }
+
         UpdatePrimaryDrag();
         UpdateMoveDrag();
     }
@@ -194,6 +201,11 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnPrimaryPress(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         if (IsPlacementModeActive())
         {
             return;
@@ -213,6 +225,12 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnPrimaryRelease(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            CancelPrimaryDrag();
+            return;
+        }
+
         if (!isPrimaryHeld)
         {
             return;
@@ -282,6 +300,11 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void HandlePrimaryClick()
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         if (IsPlacementModeActive())
         {
             return;
@@ -319,6 +342,11 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnMovePress(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         if (IsPlacementModeActive() ||
             pointerPositionAction == null)
         {
@@ -403,6 +431,12 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnMoveRelease(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            CancelMoveDrag();
+            return;
+        }
+
         if (!isMoveHeld)
         {
             return;
@@ -438,6 +472,11 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void HandleMoveCommand()
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         if (IsPlacementModeActive())
         {
             return;

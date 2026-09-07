@@ -45,6 +45,12 @@ public sealed class SettingsMenuController : MonoBehaviour
 
     private float savedMasterVolume = 1f;
 
+    public bool IsOpen
+    {
+        get;
+        private set;
+    }
+
     private void Awake()
     {
         BuildResolutionOptions();
@@ -342,6 +348,8 @@ public sealed class SettingsMenuController : MonoBehaviour
     private void SetPanelVisible(
         bool visible)
     {
+        IsOpen = visible;
+
         if (panelCanvasGroup == null)
         {
             return;

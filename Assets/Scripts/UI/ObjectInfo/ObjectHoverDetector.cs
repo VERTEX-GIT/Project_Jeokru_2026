@@ -36,13 +36,18 @@ public sealed class ObjectHoverDetector
 
     private void Update()
     {
+        if (PauseMenu.IsPaused)
+        {
+            ClearHover();
+            return;
+        }
+
         UpdateHoveredObject();
     }
 
     private void UpdateHoveredObject()
     {
-        CurrentProvider = null;
-        CurrentProviderComponent = null;
+        ClearHover();
 
         if (worldCamera == null ||
             Mouse.current == null)
@@ -85,6 +90,12 @@ public sealed class ObjectHoverDetector
 
         CurrentProviderComponent =
             providerComponent;
+    }
+
+    private void ClearHover()
+    {
+        CurrentProvider = null;
+        CurrentProviderComponent = null;
     }
 
     private static bool TryFindProvider(

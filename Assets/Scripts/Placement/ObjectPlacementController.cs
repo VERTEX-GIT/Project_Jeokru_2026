@@ -8,29 +8,50 @@ public sealed class ObjectPlacementController : MonoBehaviour
     [Header("Input Actions")]
     [SerializeField]
     private InputActionReference pointerPositionAction; // 마우스 화면 좌표
+
     [SerializeField]
     private InputActionReference primaryClickAction; // 좌클릭 배치
+
     [SerializeField]
     private InputActionReference unitPlacementModeAction; // 유닛 배치 모드
+
     [SerializeField]
     private InputActionReference factoryPlacementModeAction; // 공장 배치 모드
 
     [Header("References")]
     [SerializeField]
     private Camera worldCamera; // 화면 좌표를 월드 좌표로 변환
+
     [SerializeField]
     private TileCoordinateManager coordinateManager; // 월드 좌표를 타일 셀 좌표로 변환
+
     [SerializeField]
     private PlacementPreview placementPreview; // 타일 위에 배치 미리보기 표시
+
     [SerializeField]
     private PlacementValidator placementValidator; // 해당 위치에 배치 가능한지 검사
+
     [SerializeField]
     private PlacementObjectProvider objectProvider; // 실제 유닛·공장 프리팹 생성
 
     // 현재 배치 상태와 미리보기에서 사용하는 기준 좌표
-    public PlacementMode CurrentMode { get; private set; }
-    public Vector3Int CurrentAnchorCell { get; private set; }
-    public bool CurrentPlacementValid { get; private set; }
+    public PlacementMode CurrentMode
+    {
+        get;
+        private set;
+    }
+
+    public Vector3Int CurrentAnchorCell
+    {
+        get;
+        private set;
+    }
+
+    public bool CurrentPlacementValid
+    {
+        get;
+        private set;
+    }
 
     // Inspector에서 연결되지 않은 필수 참조를 자동 탐색
     private void Awake()
@@ -136,6 +157,16 @@ public sealed class ObjectPlacementController : MonoBehaviour
     // 배치 모드 동안 포인터 위치에 맞춰 미리보기 갱신
     private void Update()
     {
+        if (PauseMenu.IsPaused)
+        {
+            if (CurrentMode != PlacementMode.None)
+            {
+                EndPlacementMode();
+            }
+
+            return;
+        }
+
         if (CurrentMode == PlacementMode.None)
         {
             return;
@@ -147,6 +178,11 @@ public sealed class ObjectPlacementController : MonoBehaviour
     private void OnUnitPlacementStarted(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         CurrentMode = PlacementMode.Unit;
         RefreshPlacementPreview();
     }
@@ -163,6 +199,11 @@ public sealed class ObjectPlacementController : MonoBehaviour
     private void OnFactoryPlacementStarted(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         CurrentMode = PlacementMode.Factory;
         RefreshPlacementPreview();
     }
@@ -179,22 +220,30 @@ public sealed class ObjectPlacementController : MonoBehaviour
     private void OnPrimaryClick(
         InputAction.CallbackContext context)
     {
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
         TryPlaceCurrentObject();
     }
 
     // 현재 포인터 위치의 배치 가능 여부와 미리보기 상태 갱신
     private void RefreshPlacementPreview()
     {
-        if (!TryGetPointerCell(out Vector3Int pointerCell))
+        if (!TryGetPointerCell(
+                out Vector3Int pointerCell))
         {
             HidePreview();
             return;
         }
 
-        Vector3Int resolvedAnchor = pointerCell;
+        Vector3Int resolvedAnchor =
+            pointerCell;
 
         // 공장 배치 모드에서는 5×5 영역 전체가 맵 안인 앵커를 찾음
-        if (CurrentMode == PlacementMode.Factory &&
+        if (CurrentMode ==
+                PlacementMode.Factory &&
             !TryGetNearestFactoryAnchor(
                 pointerCell,
                 out resolvedAnchor))
@@ -203,7 +252,8 @@ public sealed class ObjectPlacementController : MonoBehaviour
             return;
         }
 
-        CurrentAnchorCell = resolvedAnchor;
+        CurrentAnchorCell =
+            resolvedAnchor;
 
         switch (CurrentMode)
         {
@@ -216,6 +266,7 @@ public sealed class ObjectPlacementController : MonoBehaviour
                 placementPreview?.ShowUnit(
                     CurrentAnchorCell,
                     CurrentPlacementValid);
+
                 break;
 
             case PlacementMode.Factory:
@@ -227,12 +278,14 @@ public sealed class ObjectPlacementController : MonoBehaviour
                 placementPreview?.ShowFactory(
                     CurrentAnchorCell,
                     CurrentPlacementValid);
+
                 break;
         }
     }
 
     // 화면 포인터 좌표를 실제 타일 셀 좌표로 변환
-    private bool TryGetPointerCell(out Vector3Int cell)
+    private bool TryGetPointerCell(
+        out Vector3Int cell)
     {
         cell = default;
 
@@ -244,10 +297,12 @@ public sealed class ObjectPlacementController : MonoBehaviour
         }
 
         Vector2 screenPosition =
-            pointerPositionAction.action.ReadValue<Vector2>();
+            pointerPositionAction.action
+                .ReadValue<Vector2>();
 
         float cameraDistance =
-            Mathf.Abs(worldCamera.transform.position.z);
+            Mathf.Abs(
+                worldCamera.transform.position.z);
 
         Vector3 worldPosition =
             worldCamera.ScreenToWorldPoint(
@@ -258,10 +313,13 @@ public sealed class ObjectPlacementController : MonoBehaviour
 
         worldPosition.z = 0f;
 
-        cell = coordinateManager.WorldToCell(worldPosition);
+        cell =
+            coordinateManager.WorldToCell(
+                worldPosition);
 
         // 마우스가 실제 맵 밖이면 미리보기 숨김
-        return coordinateManager.HasTile(cell);
+        return coordinateManager.HasTile(
+            cell);
     }
 
     // 포인터와 가장 가까우면서 5×5 영역 전체가 맵 안인 공장 앵커 탐색
@@ -277,18 +335,27 @@ public sealed class ObjectPlacementController : MonoBehaviour
         }
 
         bool found = false;
-        int nearestDistanceSquared = int.MaxValue;
+        int nearestDistanceSquared =
+            int.MaxValue;
 
-        for (int offsetX = -2; offsetX <= 2; offsetX++)
+        for (int offsetX = -2;
+             offsetX <= 2;
+             offsetX++)
         {
-            for (int offsetY = -2; offsetY <= 2; offsetY++)
+            for (int offsetY = -2;
+                 offsetY <= 2;
+                 offsetY++)
             {
                 Vector3Int candidate =
                     pointerCell +
-                    new Vector3Int(offsetX, offsetY, 0);
+                    new Vector3Int(
+                        offsetX,
+                        offsetY,
+                        0);
 
                 if (!placementValidator
-                        .IsFactoryAreaInsideMap(candidate))
+                        .IsFactoryAreaInsideMap(
+                            candidate))
                 {
                     continue;
                 }
@@ -297,12 +364,15 @@ public sealed class ObjectPlacementController : MonoBehaviour
                     offsetX * offsetX +
                     offsetY * offsetY;
 
-                if (distanceSquared >= nearestDistanceSquared)
+                if (distanceSquared >=
+                    nearestDistanceSquared)
                 {
                     continue;
                 }
 
-                nearestDistanceSquared = distanceSquared;
+                nearestDistanceSquared =
+                    distanceSquared;
+
                 anchorCell = candidate;
                 found = true;
             }
@@ -314,7 +384,13 @@ public sealed class ObjectPlacementController : MonoBehaviour
     // 현재 모드에 맞는 프리팹을 생성해 검증된 앵커에 배치
     private void TryPlaceCurrentObject()
     {
-        if (CurrentMode == PlacementMode.None ||
+        if (PauseMenu.IsPaused)
+        {
+            return;
+        }
+
+        if (CurrentMode ==
+                PlacementMode.None ||
             !CurrentPlacementValid ||
             objectProvider == null)
         {
@@ -322,21 +398,25 @@ public sealed class ObjectPlacementController : MonoBehaviour
         }
 
         TileObjectPlacement createdPlacement =
-            objectProvider.Create(CurrentMode);
+            objectProvider.Create(
+                CurrentMode);
 
         if (createdPlacement == null)
         {
             return;
         }
 
-        if (!createdPlacement.TryPlace(CurrentAnchorCell))
+        if (!createdPlacement.TryPlace(
+                CurrentAnchorCell))
         {
             Debug.LogWarning(
                 $"{createdPlacement.name}: " +
                 $"{CurrentAnchorCell} 타일 배치 실패",
                 createdPlacement);
 
-            Destroy(createdPlacement.gameObject);
+            Destroy(
+                createdPlacement.gameObject);
+
             return;
         }
 
@@ -347,7 +427,9 @@ public sealed class ObjectPlacementController : MonoBehaviour
     // 배치 상태를 초기화하고 미리보기 숨김
     private void EndPlacementMode()
     {
-        CurrentMode = PlacementMode.None;
+        CurrentMode =
+            PlacementMode.None;
+
         HidePreview();
     }
 

@@ -7176,7 +7176,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 50
   m_TargetDisplay: 0
 --- !u!224 &1238716783
 RectTransform:
@@ -9474,6 +9474,14 @@ PrefabInstance:
     - target: {fileID: 2019901530413464523, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
       propertyPath: m_Name
       value: ObjectInfoUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 2019901530413464523, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2772393249131094623, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_SortingOrder
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3903726968240545447, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
       propertyPath: selectionController
