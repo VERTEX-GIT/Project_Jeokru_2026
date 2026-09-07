@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -7,24 +8,49 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
     [field: SerializeField]
     public float CurrentHp { get; private set; }
 
-    public bool IsAlive => CurrentHp > 0f;
+    public float MaxHp =>
+        unitCore != null &&
+        unitCore.Data != null
+            ? unitCore.Data.MaxHp
+            : 0f;
+
+    public float HealthRatio =>
+        MaxHp > 0f
+            ? Mathf.Clamp01(
+                CurrentHp / MaxHp)
+            : 0f;
+
+    public bool IsAlive =>
+        CurrentHp > 0f;
+
+    // currentHp, maxHp
+    public event Action<float, float>
+        HealthChanged;
 
     private UnitCore unitCore;
 
     private void Awake()
     {
-        unitCore = GetComponent<UnitCore>();
+        unitCore =
+            GetComponent<UnitCore>();
 
         if (unitCore.Data == null)
         {
             Debug.LogError(
-                $"{name}: UnitHealth가 사용할 UnitData가 없습니다.",
+                $"{name}: UnitHealth가 사용할 " +
+                $"UnitData가 없습니다.",
                 this);
 
             return;
         }
 
-        CurrentHp = unitCore.Data.MaxHp;
+        CurrentHp =
+            unitCore.Data.MaxHp;
+    }
+
+    private void Start()
+    {
+        NotifyHealthChanged();
     }
 
     public void TakeDamage(
@@ -41,12 +67,20 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         float damage =
             Mathf.Max(
                 0f,
-                attackPower - unitCore.Data.Defense);
+                attackPower -
+                unitCore.Data.Defense);
+
+        if (damage <= 0f)
+        {
+            return;
+        }
 
         CurrentHp =
             Mathf.Max(
                 0f,
                 CurrentHp - damage);
+
+        NotifyHealthChanged();
 
         if (CurrentHp <= 0f)
         {
@@ -55,12 +89,22 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         }
 
         if (TryGetComponent(
-                out UnitWorkRecovery workRecovery))
+                out UnitWorkRecovery
+                    workRecovery))
         {
-            workRecovery.TrySaveCurrentWork();
+            workRecovery
+                .TrySaveCurrentWork();
         }
 
-        TryRetargetToAttacker(attacker);
+        TryRetargetToAttacker(
+            attacker);
+    }
+
+    private void NotifyHealthChanged()
+    {
+        HealthChanged?.Invoke(
+            CurrentHp,
+            MaxHp);
     }
 
     private void TryRetargetToAttacker(
@@ -75,7 +119,8 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
 
         // 플레이어가 직접 내린 이동 명령 수행 중에는
         // 피격으로 전투 타겟을 설정하지 않는다.
-        if (unitCore.IsPlayerMoveCommandActive)
+        if (unitCore
+            .IsPlayerMoveCommandActive)
         {
             return;
         }
@@ -94,7 +139,8 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
             return;
         }
 
-        unitCore.SetTarget(attacker);
+        unitCore.SetTarget(
+            attacker);
     }
 
     private void HandleDeath()
@@ -106,7 +152,8 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         }
 
         // 기본 아군만 게임에서 제거하지 않고 활동 정지
-        if (unitCore.Data.Team == UnitTeam.Ally &&
+        if (unitCore.Data.Team ==
+                UnitTeam.Ally &&
             unitCore.Data.IsBasicUnit)
         {
             HandleBasicAllyDown();
@@ -119,10 +166,16 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
 
     private void HandleBasicAllyDown()
     {
-        unitCore.SetUnitActive(false);
+        unitCore.SetUnitActive(
+            false);
 
-        unitCore.SetAutoCombat(false);
-        unitCore.SetPlayerMoveCommandActive(false);
+        unitCore.SetAutoCombat(
+            false);
+
+        unitCore
+            .SetPlayerMoveCommandActive(
+                false);
+
         unitCore.ClearTarget();
 
         if (TryGetComponent(
@@ -140,7 +193,8 @@ public sealed class UnitHealth : MonoBehaviour, IDamageable
         if (TryGetComponent(
                 out UnitWorkRecovery recovery))
         {
-            recovery.ClearInterruptedWork();
+            recovery
+                .ClearInterruptedWork();
         }
     }
 }

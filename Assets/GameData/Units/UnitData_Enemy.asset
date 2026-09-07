@@ -17,10 +17,10 @@ MonoBehaviour:
   team: 1
   isBasicUnit: 0
   maxHp: 100
-  moveSpeed: 2
+  moveSpeed: 4
   attackPower: 10
   defense: 0
-  attackCooldown: 1
+  attackCooldown: 0.5
   attackType: 1
   attackRange: 4
   preferredDistance: 4
