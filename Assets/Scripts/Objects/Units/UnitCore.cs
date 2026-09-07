@@ -6,32 +6,74 @@ public sealed class UnitCore : MonoBehaviour
 {
     [field: Header("Unit Data")]
     [field: SerializeField]
-    public UnitData Data { get; private set; }
+    public UnitData Data
+    {
+        get;
+        private set;
+    }
 
     [field: Header("Runtime State")]
     [field: SerializeField]
-    public bool IsActive { get; private set; } = true;
+    public bool IsActive
+    {
+        get;
+        private set;
+    } = true;
 
     [field: SerializeField]
-    public bool IsAutoCombat { get; private set; }
+    public bool IsAutoCombat
+    {
+        get;
+        private set;
+    }
 
     [field: SerializeField]
-    public bool IsPlayerMoveCommandActive { get; private set; }
+    public bool IsPlayerMoveCommandActive
+    {
+        get;
+        private set;
+    }
 
     [field: SerializeField]
-    public GameObject CurrentTarget { get; private set; }
+    public GameObject CurrentTarget
+    {
+        get;
+        private set;
+    }
 
     [field: SerializeField]
-    public bool isMoving { get; private set; }
+    public bool isMoving
+    {
+        get;
+        private set;
+    }
 
     [field: SerializeField]
-    public Vector3Int DestinationCell { get; private set; }
+    public Vector3Int DestinationCell
+    {
+        get;
+        private set;
+    }
 
     private UnitMovement movement;
+    private UnitCounseling counseling;
+
+    public bool IsCounseling =>
+        counseling != null &&
+        counseling.IsCounseling;
+
+    public bool IsGameplayAvailable =>
+        IsActive &&
+        !IsCounseling;
 
     private void Awake()
     {
-        movement = GetComponent<UnitMovement>();
+        movement =
+            GetComponent<UnitMovement>();
+
+        counseling =
+            GetComponent<UnitCounseling>();
+
         UpdateMovementState();
 
         if (Data == null)
@@ -42,7 +84,6 @@ public sealed class UnitCore : MonoBehaviour
         }
     }
 
-    // UnitMovement의 최신 값을 Inspector에도 표시
     private void LateUpdate()
     {
         UpdateMovementState();
@@ -57,32 +98,44 @@ public sealed class UnitCore : MonoBehaviour
             return;
         }
 
-        isMoving = movement.IsMoving;
-        DestinationCell = movement.DestinationCell;
+        isMoving =
+            movement.IsMoving;
+
+        DestinationCell =
+            movement.DestinationCell;
     }
 
-    public void SetUnitActive(bool active)
+    public void SetUnitActive(
+        bool active)
     {
-        IsActive = active;
+        IsActive =
+            active;
     }
 
-    public void SetAutoCombat(bool enabled)
+    public void SetAutoCombat(
+        bool enabled)
     {
-        IsAutoCombat = enabled;
+        IsAutoCombat =
+            enabled;
     }
 
-    public void SetPlayerMoveCommandActive(bool active)
+    public void SetPlayerMoveCommandActive(
+        bool active)
     {
-        IsPlayerMoveCommandActive = active;
+        IsPlayerMoveCommandActive =
+            active;
     }
 
-    public void SetTarget(GameObject target)
+    public void SetTarget(
+        GameObject target)
     {
-        CurrentTarget = target;
+        CurrentTarget =
+            target;
     }
 
     public void ClearTarget()
     {
-        CurrentTarget = null;
+        CurrentTarget =
+            null;
     }
 }
