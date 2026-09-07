@@ -1,23 +1,25 @@
 #if UNITY_EDITOR
 
+using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
 
 public static class ObjectInfoPopupLayoutTool
 {
-    // 전체 UI 확대 배율
-    private const float UiScale = 1.6f;
+    private const string DefaultProfileFolder =
+        "Assets/GameData/UI";
 
-    // 정보창 기준 크기
-    private const float PopupWidth = 264f;
-    private const float PopupHeight = 385f;
+    private const string DefaultProfilePath =
+        DefaultProfileFolder +
+        "/ObjectInfoLayoutProfile.asset";
 
-    // 오른쪽 위 여백
-    private const float RightMargin = 24f;
-    private const float TopMargin = 105f;
+    // =====================================================
+    // Apply Layout
+    // =====================================================
 
-    [MenuItem("Tools/Jeokru/Layout Object Info Popup")]
+    [MenuItem(
+        "Tools/Jeokru/Layout Object Info Popup")]
     private static void LayoutPopup()
     {
         GameObject selected =
@@ -32,7 +34,8 @@ public static class ObjectInfoPopupLayoutTool
         }
 
         RectTransform popup =
-            selected.GetComponent<RectTransform>();
+            selected.GetComponent<
+                RectTransform>();
 
         if (popup == null)
         {
@@ -42,263 +45,389 @@ public static class ObjectInfoPopupLayoutTool
             return;
         }
 
+        ObjectInfoLayoutProfile profile =
+            FindLayoutProfile();
+
+        if (profile == null)
+        {
+            Debug.LogError(
+                "ObjectInfoLayoutProfile을 찾지 못했습니다.\n" +
+                "Tools > Jeokru > Create Default Object Info Layout Profile을 먼저 실행하세요.");
+
+            return;
+        }
+
         Undo.RegisterFullObjectHierarchyUndo(
             selected,
             "Layout Object Info Popup");
 
-        SetupPopupRoot(popup);
-        SetupBackground(popup);
-
-        // =========================
-        // Header
-        // =========================
-
-        SetupText(
+        SetupPopupRoot(
             popup,
-            "NameText",
-            "원거리 유닛",
-            x: 17f,
-            y: 17f,
-            width: 150f,
-            height: 30f,
-            fontSize: 20f,
-            alignment:
-                TextAlignmentOptions.Left);
+            profile);
 
-        SetupText(
+        SetupBackground(
+            popup);
+
+        ApplyTextLayouts(
             popup,
-            "StateText",
-            "작업 중",
-            x: 188f,
-            y: 20f,
-            width: 58f,
-            height: 22f,
-            fontSize: 12f,
-            alignment:
-                TextAlignmentOptions.Center);
+            profile);
 
-        // =========================
-        // HP
-        // =========================
-
-        SetupText(
+        ApplyRectLayouts(
             popup,
-            "HpLabelText",
-            "HP",
-            x: 22f,
-            y: 68f,
-            width: 75f,
-            height: 24f,
-            fontSize: 16f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "HpValueText",
-            "72/100",
-            x: 145f,
-            y: 68f,
-            width: 99f,
-            height: 24f,
-            fontSize: 16f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Stress
-        // =========================
-
-        SetupText(
-            popup,
-            "StressLabelText",
-            "스트레스",
-            x: 22f,
-            y: 101f,
-            width: 90f,
-            height: 24f,
-            fontSize: 16f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "StressValueText",
-            "35/100",
-            x: 145f,
-            y: 101f,
-            width: 99f,
-            height: 24f,
-            fontSize: 16f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Divider 1
-        // =========================
-
-        SetupRect(
-            popup,
-            "Divider1",
-            x: 22f,
-            y: 137f,
-            width: 222f,
-            height: 1f);
-
-        // =========================
-        // Row 1
-        // =========================
-
-        SetupText(
-            popup,
-            "AttackLabelText",
-            "공격력",
-            x: 22f,
-            y: 157f,
-            width: 95f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "AttackValueText",
-            "18.6",
-            x: 145f,
-            y: 157f,
-            width: 99f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Row 2
-        // =========================
-
-        SetupText(
-            popup,
-            "DefenseLabelText",
-            "방어력",
-            x: 22f,
-            y: 193f,
-            width: 95f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "DefenseValueText",
-            "7.2",
-            x: 145f,
-            y: 193f,
-            width: 99f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Row 3
-        // =========================
-
-        SetupText(
-            popup,
-            "AttackSpeedLabelText",
-            "공격 속도",
-            x: 22f,
-            y: 229f,
-            width: 100f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "AttackSpeedValueText",
-            "1.4s",
-            x: 145f,
-            y: 229f,
-            width: 99f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Idle Row
-        // =========================
-
-        SetupText(
-            popup,
-            "IdleLabelText",
-            "대기",
-            x: 22f,
-            y: 265f,
-            width: 100f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Left);
-
-        SetupText(
-            popup,
-            "IdleValueText",
-            "0",
-            x: 145f,
-            y: 265f,
-            width: 99f,
-            height: 24f,
-            fontSize: 15f,
-            alignment:
-                TextAlignmentOptions.Right);
-
-        // =========================
-        // Divider 2
-        // =========================
-
-        SetupRect(
-            popup,
-            "Divider2",
-            x: 22f,
-            y: 301f,
-            width: 222f,
-            height: 1f);
-
-        // =========================
-        // Description
-        // =========================
-
-        SetupText(
-            popup,
-            "DescriptionText",
-            "붉은 약 공장에서 작업 중",
-            x: 22f,
-            y: 320f,
-            width: 222f,
-            height: 46f,
-            fontSize: 13f,
-            alignment:
-                TextAlignmentOptions.TopLeft,
-            allowWrapping: true);
+            profile);
 
         EditorUtility.SetDirty(
             selected);
 
         Debug.Log(
-            $"ObjectInfoPopup 배치 완료. UiScale = {UiScale}");
+            $"ObjectInfoPopup 배치 완료. " +
+            $"Profile = {profile.name}, " +
+            $"UiScale = {profile.UiScale}");
     }
 
-    // =========================
+    // =====================================================
+    // Create Default Profile
+    // =====================================================
+
+    [MenuItem(
+        "Tools/Jeokru/Create Default Object Info Layout Profile")]
+    private static void
+        CreateDefaultLayoutProfile()
+    {
+        ObjectInfoLayoutProfile existing =
+            AssetDatabase.LoadAssetAtPath<
+                ObjectInfoLayoutProfile>(
+                    DefaultProfilePath);
+
+        if (existing != null)
+        {
+            Selection.activeObject =
+                existing;
+
+            EditorGUIUtility.PingObject(
+                existing);
+
+            Debug.LogWarning(
+                $"이미 Layout Profile이 존재합니다: " +
+                $"{DefaultProfilePath}");
+
+            return;
+        }
+
+        EnsureFolderExists(
+            DefaultProfileFolder);
+
+        ObjectInfoLayoutProfile profile =
+            ScriptableObject.CreateInstance<
+                ObjectInfoLayoutProfile>();
+
+        List<
+            ObjectInfoLayoutProfile.TextLayout>
+            textLayouts =
+                BuildDefaultTextLayouts();
+
+        List<
+            ObjectInfoLayoutProfile.RectLayout>
+            rectLayouts =
+                BuildDefaultRectLayouts();
+
+        profile.SetDefaults(
+            scale: 1.6f,
+            size:
+                new Vector2(
+                    264f,
+                    385f),
+            margin:
+                new Vector2(
+                    24f,
+                    105f),
+            texts:
+                textLayouts,
+            rects:
+                rectLayouts);
+
+        AssetDatabase.CreateAsset(
+            profile,
+            DefaultProfilePath);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Selection.activeObject =
+            profile;
+
+        EditorGUIUtility.PingObject(
+            profile);
+
+        Debug.Log(
+            $"ObjectInfoLayoutProfile 생성 완료: " +
+            $"{DefaultProfilePath}");
+    }
+
+    // =====================================================
+    // Default Data
+    // =====================================================
+
+    private static List<
+        ObjectInfoLayoutProfile.TextLayout>
+        BuildDefaultTextLayouts()
+    {
+        return new List<
+            ObjectInfoLayoutProfile.TextLayout>
+        {
+            new(
+                "NameText",
+                "원거리 유닛",
+                new Vector2(
+                    17f,
+                    17f),
+                new Vector2(
+                    150f,
+                    30f),
+                20f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "StateText",
+                "작업 중",
+                new Vector2(
+                    188f,
+                    20f),
+                new Vector2(
+                    58f,
+                    22f),
+                12f,
+                TextAlignmentOptions.Center),
+
+            new(
+                "HpLabelText",
+                "HP",
+                new Vector2(
+                    22f,
+                    68f),
+                new Vector2(
+                    75f,
+                    24f),
+                16f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "HpValueText",
+                "72/100",
+                new Vector2(
+                    145f,
+                    68f),
+                new Vector2(
+                    99f,
+                    24f),
+                16f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "StressLabelText",
+                "스트레스",
+                new Vector2(
+                    22f,
+                    101f),
+                new Vector2(
+                    90f,
+                    24f),
+                16f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "StressValueText",
+                "35/100",
+                new Vector2(
+                    145f,
+                    101f),
+                new Vector2(
+                    99f,
+                    24f),
+                16f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "AttackLabelText",
+                "공격력",
+                new Vector2(
+                    22f,
+                    157f),
+                new Vector2(
+                    95f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "AttackValueText",
+                "18.6",
+                new Vector2(
+                    145f,
+                    157f),
+                new Vector2(
+                    99f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "DefenseLabelText",
+                "방어력",
+                new Vector2(
+                    22f,
+                    193f),
+                new Vector2(
+                    95f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "DefenseValueText",
+                "7.2",
+                new Vector2(
+                    145f,
+                    193f),
+                new Vector2(
+                    99f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "AttackSpeedLabelText",
+                "공격 속도",
+                new Vector2(
+                    22f,
+                    229f),
+                new Vector2(
+                    100f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "AttackSpeedValueText",
+                "1.4s",
+                new Vector2(
+                    145f,
+                    229f),
+                new Vector2(
+                    99f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "IdleLabelText",
+                "대기",
+                new Vector2(
+                    22f,
+                    265f),
+                new Vector2(
+                    100f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Left),
+
+            new(
+                "IdleValueText",
+                "0",
+                new Vector2(
+                    145f,
+                    265f),
+                new Vector2(
+                    99f,
+                    24f),
+                15f,
+                TextAlignmentOptions.Right),
+
+            new(
+                "DescriptionText",
+                "붉은 약 공장에서 작업 중",
+                new Vector2(
+                    22f,
+                    320f),
+                new Vector2(
+                    222f,
+                    46f),
+                13f,
+                TextAlignmentOptions.TopLeft,
+                allowWrapping: true)
+        };
+    }
+
+    private static List<
+        ObjectInfoLayoutProfile.RectLayout>
+        BuildDefaultRectLayouts()
+    {
+        return new List<
+            ObjectInfoLayoutProfile.RectLayout>
+        {
+            new(
+                "Divider1",
+                new Vector2(
+                    22f,
+                    137f),
+                new Vector2(
+                    222f,
+                    1f)),
+
+            new(
+                "Divider2",
+                new Vector2(
+                    22f,
+                    301f),
+                new Vector2(
+                    222f,
+                    1f))
+        };
+    }
+
+    // =====================================================
+    // Apply Profile
+    // =====================================================
+
+    private static void ApplyTextLayouts(
+        RectTransform popup,
+        ObjectInfoLayoutProfile profile)
+    {
+        foreach (
+            ObjectInfoLayoutProfile.TextLayout
+                layout
+            in profile.TextLayouts)
+        {
+            SetupText(
+                popup,
+                profile,
+                layout);
+        }
+    }
+
+    private static void ApplyRectLayouts(
+        RectTransform popup,
+        ObjectInfoLayoutProfile profile)
+    {
+        foreach (
+            ObjectInfoLayoutProfile.RectLayout
+                layout
+            in profile.RectLayouts)
+        {
+            SetupRect(
+                popup,
+                profile,
+                layout);
+        }
+    }
+
+    // =====================================================
     // Popup Root
-    // =========================
+    // =====================================================
 
     private static void SetupPopupRoot(
-        RectTransform popup)
+        RectTransform popup,
+        ObjectInfoLayoutProfile profile)
     {
         popup.anchorMin =
             new Vector2(
@@ -316,16 +445,13 @@ public static class ObjectInfoPopupLayoutTool
                 1f);
 
         popup.sizeDelta =
-            new Vector2(
-                PopupWidth *
-                UiScale,
-                PopupHeight *
-                UiScale);
+            profile.PopupSize *
+            profile.UiScale;
 
         popup.anchoredPosition =
             new Vector2(
-                -RightMargin,
-                -TopMargin);
+                -profile.PopupMargin.x,
+                -profile.PopupMargin.y);
 
         popup.localScale =
             Vector3.one;
@@ -334,9 +460,9 @@ public static class ObjectInfoPopupLayoutTool
             popup);
     }
 
-    // =========================
+    // =====================================================
     // Background
-    // =========================
+    // =====================================================
 
     private static void SetupBackground(
         RectTransform popup)
@@ -380,42 +506,41 @@ public static class ObjectInfoPopupLayoutTool
             background);
     }
 
-    // =========================
+    // =====================================================
     // Text
-    // =========================
+    // =====================================================
 
     private static void SetupText(
         RectTransform parent,
-        string objectName,
-        string content,
-        float x,
-        float y,
-        float width,
-        float height,
-        float fontSize,
-        TextAlignmentOptions alignment,
-        bool bold = false,
-        bool allowWrapping = false)
+        ObjectInfoLayoutProfile profile,
+        ObjectInfoLayoutProfile.TextLayout
+            layout)
     {
+        if (string.IsNullOrWhiteSpace(
+                layout.ObjectName))
+        {
+            return;
+        }
+
         RectTransform rect =
             FindRect(
                 parent,
-                objectName);
+                layout.ObjectName);
 
         if (rect == null)
         {
             Debug.LogWarning(
-                $"{objectName}을 찾지 못했습니다.");
+                $"{layout.ObjectName}을 찾지 못했습니다.");
 
             return;
         }
 
         SetTopLeftRect(
             rect,
-            x * UiScale,
-            y * UiScale,
-            width * UiScale,
-            height * UiScale);
+            layout.Position *
+                profile.UiScale,
+            layout.Size *
+                profile.UiScale);
 
         TMP_Text text =
             rect.GetComponent<TMP_Text>();
@@ -423,36 +548,37 @@ public static class ObjectInfoPopupLayoutTool
         if (text == null)
         {
             Debug.LogWarning(
-                $"{objectName}에 TMP_Text가 없습니다.");
+                $"{layout.ObjectName}에 TMP_Text가 없습니다.");
 
             return;
         }
 
         text.text =
-            content;
+            layout.PreviewText;
 
         text.fontSize =
-            fontSize *
-            UiScale;
+            layout.FontSize *
+            profile.UiScale;
 
         text.enableAutoSizing =
             false;
 
         text.alignment =
-            alignment;
+            layout.Alignment;
 
         text.enableWordWrapping =
-            allowWrapping;
+            layout.AllowWrapping;
 
         text.overflowMode =
-            allowWrapping
+            layout.AllowWrapping
                 ? TextOverflowModes.Overflow
                 : TextOverflowModes.Truncate;
 
-        text.fontStyle =
-            bold
-                ? FontStyles.Bold
-                : FontStyles.Normal;
+        if (layout.OverrideFontStyle)
+        {
+            text.fontStyle =
+                layout.FontStyle;
+        }
 
         text.characterSpacing =
             0f;
@@ -473,52 +599,51 @@ public static class ObjectInfoPopupLayoutTool
             text);
     }
 
-    // =========================
-    // Divider / Rect
-    // =========================
+    // =====================================================
+    // Rect
+    // =====================================================
 
     private static void SetupRect(
         RectTransform parent,
-        string objectName,
-        float x,
-        float y,
-        float width,
-        float height)
+        ObjectInfoLayoutProfile profile,
+        ObjectInfoLayoutProfile.RectLayout
+            layout)
     {
+        if (string.IsNullOrWhiteSpace(
+                layout.ObjectName))
+        {
+            return;
+        }
+
         RectTransform rect =
             FindRect(
                 parent,
-                objectName);
+                layout.ObjectName);
 
         if (rect == null)
         {
             Debug.LogWarning(
-                $"{objectName}을 찾지 못했습니다.");
+                $"{layout.ObjectName}을 찾지 못했습니다.");
 
             return;
         }
 
         SetTopLeftRect(
             rect,
-            x * UiScale,
-            y * UiScale,
-            width * UiScale,
-            height * UiScale);
-
-        EditorUtility.SetDirty(
-            rect);
+            layout.Position *
+                profile.UiScale,
+            layout.Size *
+                profile.UiScale);
     }
 
-    // =========================
+    // =====================================================
     // RectTransform Helper
-    // =========================
+    // =====================================================
 
     private static void SetTopLeftRect(
         RectTransform rect,
-        float x,
-        float y,
-        float width,
-        float height)
+        Vector2 position,
+        Vector2 size)
     {
         rect.anchorMin =
             new Vector2(
@@ -537,13 +662,11 @@ public static class ObjectInfoPopupLayoutTool
 
         rect.anchoredPosition =
             new Vector2(
-                x,
-                -y);
+                position.x,
+                -position.y);
 
         rect.sizeDelta =
-            new Vector2(
-                width,
-                height);
+            size;
 
         rect.localScale =
             Vector3.one;
@@ -552,9 +675,46 @@ public static class ObjectInfoPopupLayoutTool
             rect);
     }
 
-    // =========================
+    // =====================================================
+    // Profile Search
+    // =====================================================
+
+    private static ObjectInfoLayoutProfile
+        FindLayoutProfile()
+    {
+        string[] guids =
+            AssetDatabase.FindAssets(
+                "t:ObjectInfoLayoutProfile");
+
+        if (guids == null ||
+            guids.Length == 0)
+        {
+            return null;
+        }
+
+        if (guids.Length > 1)
+        {
+            Debug.LogError(
+                "ObjectInfoLayoutProfile이 여러 개 존재합니다. " +
+                "현재는 하나의 공통 프로필만 사용하도록 설계되어 있습니다.");
+
+            return null;
+        }
+
+        string path =
+            AssetDatabase
+                .GUIDToAssetPath(
+                    guids[0]);
+
+        return AssetDatabase
+            .LoadAssetAtPath<
+                ObjectInfoLayoutProfile>(
+                    path);
+    }
+
+    // =====================================================
     // Search Helper
-    // =========================
+    // =====================================================
 
     private static RectTransform FindRect(
         RectTransform parent,
@@ -576,6 +736,46 @@ public static class ObjectInfoPopupLayoutTool
         }
 
         return null;
+    }
+
+    // =====================================================
+    // Folder Helper
+    // =====================================================
+
+    private static void EnsureFolderExists(
+        string folderPath)
+    {
+        string[] parts =
+            folderPath.Split('/');
+
+        if (parts.Length <= 1)
+        {
+            return;
+        }
+
+        string currentPath =
+            parts[0];
+
+        for (int i = 1;
+             i < parts.Length;
+             i++)
+        {
+            string nextPath =
+                currentPath +
+                "/" +
+                parts[i];
+
+            if (!AssetDatabase.IsValidFolder(
+                    nextPath))
+            {
+                AssetDatabase.CreateFolder(
+                    currentPath,
+                    parts[i]);
+            }
+
+            currentPath =
+                nextPath;
+        }
     }
 }
 

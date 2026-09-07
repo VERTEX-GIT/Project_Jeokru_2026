@@ -59,6 +59,25 @@ public sealed class ObjectInfoPresenter :
 
         CollectValidSelectedUnits();
 
+        // -------------------------------------------------
+        // Factory Hover
+        //
+        // 유닛이 선택되어 있어도 공장 위에 마우스가
+        // 올라가 있는 동안에는 공장 정보를 임시 표시한다.
+        //
+        // Hover가 끝나면 선택 상태는 그대로 남아 있으므로
+        // 다음 프레임부터 기존 선택 정보가 다시 표시된다.
+        // -------------------------------------------------
+
+        if (TryShowFactoryHover())
+        {
+            return;
+        }
+
+        // -------------------------------------------------
+        // Multi Selection
+        // -------------------------------------------------
+
         if (validSelectedUnits.Count >= 2)
         {
             MultiSelectionInfoData info =
@@ -69,6 +88,10 @@ public sealed class ObjectInfoPresenter :
 
             return;
         }
+
+        // -------------------------------------------------
+        // Single Selection
+        // -------------------------------------------------
 
         if (validSelectedUnits.Count == 1)
         {
@@ -87,9 +110,12 @@ public sealed class ObjectInfoPresenter :
             }
         }
 
+        // -------------------------------------------------
+        // Normal Hover
+        // -------------------------------------------------
+
         if (hoverDetector != null &&
-            hoverDetector.CurrentProvider !=
-                null)
+            hoverDetector.CurrentProvider != null)
         {
             popupController.ShowSingle(
                 hoverDetector
@@ -100,6 +126,28 @@ public sealed class ObjectInfoPresenter :
         }
 
         popupController.Hide();
+    }
+
+    private bool TryShowFactoryHover()
+    {
+        if (hoverDetector == null ||
+            hoverDetector.CurrentProvider == null)
+        {
+            return false;
+        }
+
+        if (hoverDetector.CurrentProvider
+            is not FactoryHoverInfoProvider)
+        {
+            return false;
+        }
+
+        popupController.ShowSingle(
+            hoverDetector
+                .CurrentProvider
+                .GetHoverInfo());
+
+        return true;
     }
 
     private void CollectValidSelectedUnits()
@@ -119,7 +167,7 @@ public sealed class ObjectInfoPresenter :
                     .SelectedUnits;
 
         foreach (UnitSelectable selectable
-                in selectedUnits)
+                 in selectedUnits)
         {
             if (selectable == null)
             {
@@ -163,7 +211,7 @@ public sealed class ObjectInfoPresenter :
             true;
 
         foreach (UnitSelectable selectable
-                in units)
+                 in units)
         {
             if (selectable == null ||
                 !selectable.TryGetComponent(
@@ -336,7 +384,7 @@ public sealed class ObjectInfoPresenter :
                 MonoBehaviour>();
 
         foreach (MonoBehaviour behaviour
-                in behaviours)
+                 in behaviours)
         {
             if (behaviour is
                 IHoverInfoProvider
@@ -354,7 +402,7 @@ public sealed class ObjectInfoPresenter :
                 MonoBehaviour>(true);
 
         foreach (MonoBehaviour behaviour
-                in behaviours)
+                 in behaviours)
         {
             if (behaviour is
                 IHoverInfoProvider

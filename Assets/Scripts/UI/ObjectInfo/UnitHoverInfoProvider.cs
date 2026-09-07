@@ -27,10 +27,15 @@ public sealed class UnitHoverInfoProvider :
             return new HoverInfoData(
                 name,
                 "-",
+                "HP",
                 "-",
+                "스트레스",
                 "-",
+                "공격력",
                 "-",
+                "방어력",
                 "-",
+                "공격 속도",
                 "-",
                 string.Empty);
         }
@@ -42,11 +47,22 @@ public sealed class UnitHoverInfoProvider :
             BuildUnitName(data),
             UnitInfoStateUtility
                 .GetStateText(unitCore),
+
+            "HP",
             BuildHpText(),
+
+            "스트레스",
             "-",
+
+            "공격력",
             data.AttackPower.ToString("0.#"),
+
+            "방어력",
             data.Defense.ToString("0.#"),
+
+            "공격 속도",
             $"{data.AttackCooldown:0.#}s",
+
             BuildDescription());
     }
 

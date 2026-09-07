@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CanvasGroup))]
-public sealed class ObjectInfoPopupController : MonoBehaviour
+public sealed class ObjectInfoPopupController :
+    MonoBehaviour
 {
     [Header("Root")]
     [SerializeField]
@@ -135,7 +136,7 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
 
         SetText(
             hpLabelText,
-            "HP");
+            data.HpLabel);
 
         SetText(
             hpValueText,
@@ -143,7 +144,7 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
 
         SetText(
             stressLabelText,
-            "스트레스");
+            data.StressLabel);
 
         SetText(
             stressValueText,
@@ -151,7 +152,7 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
 
         SetText(
             attackPowerLabelText,
-            "공격력");
+            data.AttackPowerLabel);
 
         SetText(
             attackPowerValueText,
@@ -159,7 +160,7 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
 
         SetText(
             defenseLabelText,
-            "방어력");
+            data.DefenseLabel);
 
         SetText(
             defenseValueText,
@@ -167,7 +168,7 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
 
         SetText(
             attackSpeedLabelText,
-            "공격 속도");
+            data.AttackSpeedLabel);
 
         SetText(
             attackSpeedValueText,
@@ -304,8 +305,9 @@ public sealed class ObjectInfoPopupController : MonoBehaviour
             true);
     }
 
-    private static string BuildCompositionText(
-        MultiSelectionInfoData data)
+    private static string
+        BuildCompositionText(
+            MultiSelectionInfoData data)
     {
         if (data.RangedCount > 0 &&
             data.MeleeCount > 0)
