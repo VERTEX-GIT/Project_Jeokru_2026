@@ -9,6 +9,7 @@ public sealed class UnitHoverInfoProvider :
 {
     private UnitCore unitCore;
     private UnitHealth unitHealth;
+    private UnitStress unitStress;
 
     private void Awake()
     {
@@ -17,6 +18,9 @@ public sealed class UnitHoverInfoProvider :
 
         unitHealth =
             GetComponent<UnitHealth>();
+
+        unitStress =
+            GetComponent<UnitStress>();
     }
 
     public HoverInfoData GetHoverInfo()
@@ -52,7 +56,7 @@ public sealed class UnitHoverInfoProvider :
             BuildHpText(),
 
             "스트레스",
-            "-",
+            BuildStressText(),
 
             "공격력",
             data.AttackPower.ToString("0.#"),
@@ -91,6 +95,18 @@ public sealed class UnitHoverInfoProvider :
         return
             $"{unitHealth.CurrentHp:0}/" +
             $"{unitCore.Data.MaxHp:0}";
+    }
+
+    private string BuildStressText()
+    {
+        if (unitStress == null)
+        {
+            return "-";
+        }
+
+        return
+            $"{unitStress.CurrentStress:0}/" +
+            $"{UnitStress.MaxStress:0}";
     }
 
     private string BuildDescription()

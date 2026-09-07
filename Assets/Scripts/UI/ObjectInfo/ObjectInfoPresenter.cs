@@ -59,24 +59,12 @@ public sealed class ObjectInfoPresenter :
 
         CollectValidSelectedUnits();
 
-        // -------------------------------------------------
-        // Factory Hover
-        //
-        // 유닛이 선택되어 있어도 공장 위에 마우스가
-        // 올라가 있는 동안에는 공장 정보를 임시 표시한다.
-        //
-        // Hover가 끝나면 선택 상태는 그대로 남아 있으므로
-        // 다음 프레임부터 기존 선택 정보가 다시 표시된다.
-        // -------------------------------------------------
-
+        // 공장 Hover는 선택된 유닛 정보보다
+        // 일시적으로 우선한다.
         if (TryShowFactoryHover())
         {
             return;
         }
-
-        // -------------------------------------------------
-        // Multi Selection
-        // -------------------------------------------------
 
         if (validSelectedUnits.Count >= 2)
         {
@@ -88,10 +76,6 @@ public sealed class ObjectInfoPresenter :
 
             return;
         }
-
-        // -------------------------------------------------
-        // Single Selection
-        // -------------------------------------------------
 
         if (validSelectedUnits.Count == 1)
         {
@@ -110,12 +94,9 @@ public sealed class ObjectInfoPresenter :
             }
         }
 
-        // -------------------------------------------------
-        // Normal Hover
-        // -------------------------------------------------
-
         if (hoverDetector != null &&
-            hoverDetector.CurrentProvider != null)
+            hoverDetector.CurrentProvider !=
+                null)
         {
             popupController.ShowSingle(
                 hoverDetector
@@ -197,6 +178,9 @@ public sealed class ObjectInfoPresenter :
         float hpRatioSum = 0f;
         int hpUnitCount = 0;
 
+        float stressSum = 0f;
+        int stressUnitCount = 0;
+
         int movingCount = 0;
         int combatCount = 0;
         int workingCount = 0;
@@ -250,6 +234,15 @@ public sealed class ObjectInfoPresenter :
                 hpUnitCount++;
             }
 
+            if (selectable.TryGetComponent(
+                    out UnitStress stress))
+            {
+                stressSum +=
+                    stress.CurrentStress;
+
+                stressUnitCount++;
+            }
+
             switch (data.AttackType)
             {
                 case UnitAttackType.Ranged:
@@ -301,7 +294,9 @@ public sealed class ObjectInfoPresenter :
                 hpUnitCount);
 
         string averageStress =
-            "-";
+            BuildAverageStress(
+                stressSum,
+                stressUnitCount);
 
         return new MultiSelectionInfoData(
             title,
@@ -365,6 +360,24 @@ public sealed class ObjectInfoPresenter :
         return
             averageHpPercent +
             "%";
+    }
+
+    private static string BuildAverageStress(
+        float stressSum,
+        int stressUnitCount)
+    {
+        if (stressUnitCount <= 0)
+        {
+            return "-";
+        }
+
+        float averageStress =
+            stressSum /
+            stressUnitCount;
+
+        return
+            $"{averageStress:0.#}/" +
+            $"{UnitStress.MaxStress:0}";
     }
 
     private static bool
