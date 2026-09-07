@@ -78,8 +78,9 @@ public sealed class UnitCore : MonoBehaviour
 
         if (Data == null)
         {
-            Debug.LogError(
-                $"{name}: UnitCore에 UnitData가 지정되지 않았습니다.",
+            Debug.LogWarning(
+                $"{name}: UnitCore에 UnitData가 아직 지정되지 않았습니다. " +
+                "동적 생성 유닛이라면 생성 직후 설정될 수 있습니다.",
                 this);
         }
     }
@@ -103,6 +104,21 @@ public sealed class UnitCore : MonoBehaviour
 
         DestinationCell =
             movement.DestinationCell;
+    }
+
+    public void SetData(
+        UnitData data)
+    {
+        if (data == null)
+        {
+            Debug.LogError(
+                $"{name}: null UnitData를 설정할 수 없습니다.",
+                this);
+
+            return;
+        }
+
+        Data = data;
     }
 
     public void SetUnitActive(
