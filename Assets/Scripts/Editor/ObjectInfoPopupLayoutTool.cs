@@ -9,9 +9,9 @@ public static class ObjectInfoPopupLayoutTool
     // 전체 UI 확대 배율
     private const float UiScale = 1.6f;
 
-    // Figma 정보창 기준 크기
+    // 정보창 기준 크기
     private const float PopupWidth = 264f;
-    private const float PopupHeight = 353f;
+    private const float PopupHeight = 385f;
 
     // 오른쪽 위 여백
     private const float RightMargin = 24f;
@@ -146,7 +146,7 @@ public static class ObjectInfoPopupLayoutTool
             height: 1f);
 
         // =========================
-        // Attack
+        // Row 1
         // =========================
 
         SetupText(
@@ -174,7 +174,7 @@ public static class ObjectInfoPopupLayoutTool
                 TextAlignmentOptions.Right);
 
         // =========================
-        // Defense
+        // Row 2
         // =========================
 
         SetupText(
@@ -202,7 +202,7 @@ public static class ObjectInfoPopupLayoutTool
                 TextAlignmentOptions.Right);
 
         // =========================
-        // Attack Speed
+        // Row 3
         // =========================
 
         SetupText(
@@ -230,6 +230,34 @@ public static class ObjectInfoPopupLayoutTool
                 TextAlignmentOptions.Right);
 
         // =========================
+        // Idle Row
+        // =========================
+
+        SetupText(
+            popup,
+            "IdleLabelText",
+            "대기",
+            x: 22f,
+            y: 265f,
+            width: 100f,
+            height: 24f,
+            fontSize: 15f,
+            alignment:
+                TextAlignmentOptions.Left);
+
+        SetupText(
+            popup,
+            "IdleValueText",
+            "0",
+            x: 145f,
+            y: 265f,
+            width: 99f,
+            height: 24f,
+            fontSize: 15f,
+            alignment:
+                TextAlignmentOptions.Right);
+
+        // =========================
         // Divider 2
         // =========================
 
@@ -237,7 +265,7 @@ public static class ObjectInfoPopupLayoutTool
             popup,
             "Divider2",
             x: 22f,
-            y: 269f,
+            y: 301f,
             width: 222f,
             height: 1f);
 
@@ -250,7 +278,7 @@ public static class ObjectInfoPopupLayoutTool
             "DescriptionText",
             "붉은 약 공장에서 작업 중",
             x: 22f,
-            y: 288f,
+            y: 320f,
             width: 222f,
             height: 46f,
             fontSize: 13f,

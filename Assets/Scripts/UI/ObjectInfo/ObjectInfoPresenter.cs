@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class ObjectInfoPresenter
-    : MonoBehaviour
+public sealed class ObjectInfoPresenter :
+    MonoBehaviour
 {
     [Header("References")]
     [SerializeField]
@@ -59,25 +59,16 @@ public sealed class ObjectInfoPresenter
 
         CollectValidSelectedUnits();
 
-        // =========================
-        // 다중 선택
-        // =========================
-
         if (validSelectedUnits.Count >= 2)
         {
             MultiSelectionInfoData info =
                 BuildMultiSelectionInfo(
                     validSelectedUnits);
 
-            popupController.ShowMulti(
-                info);
+            popupController.ShowMulti(info);
 
             return;
         }
-
-        // =========================
-        // 단일 선택
-        // =========================
 
         if (validSelectedUnits.Count == 1)
         {
@@ -86,7 +77,8 @@ public sealed class ObjectInfoPresenter
 
             if (TryGetHoverProvider(
                     selected.gameObject,
-                    out IHoverInfoProvider provider))
+                    out IHoverInfoProvider
+                        provider))
             {
                 popupController.ShowSingle(
                     provider.GetHoverInfo());
@@ -95,12 +87,9 @@ public sealed class ObjectInfoPresenter
             }
         }
 
-        // =========================
-        // Hover
-        // =========================
-
         if (hoverDetector != null &&
-            hoverDetector.CurrentProvider != null)
+            hoverDetector.CurrentProvider !=
+                null)
         {
             popupController.ShowSingle(
                 hoverDetector
@@ -112,10 +101,6 @@ public sealed class ObjectInfoPresenter
 
         popupController.Hide();
     }
-
-    // =========================
-    // Selection
-    // =========================
 
     private void CollectValidSelectedUnits()
     {
@@ -134,7 +119,7 @@ public sealed class ObjectInfoPresenter
                     .SelectedUnits;
 
         foreach (UnitSelectable selectable
-                 in selectedUnits)
+                in selectedUnits)
         {
             if (selectable == null)
             {
@@ -154,10 +139,6 @@ public sealed class ObjectInfoPresenter
         }
     }
 
-    // =========================
-    // Multi Selection
-    // =========================
-
     private static MultiSelectionInfoData
         BuildMultiSelectionInfo(
             List<UnitSelectable> units)
@@ -165,38 +146,24 @@ public sealed class ObjectInfoPresenter
         int totalCount =
             units.Count;
 
-        float hpRatioSum =
-            0f;
+        float hpRatioSum = 0f;
+        int hpUnitCount = 0;
 
-        int hpUnitCount =
-            0;
+        int movingCount = 0;
+        int combatCount = 0;
+        int workingCount = 0;
+        int idleCount = 0;
 
-        int movingCount =
-            0;
+        int rangedCount = 0;
+        int meleeCount = 0;
 
-        int combatCount =
-            0;
-
-        int workingCount =
-            0;
-
-        int idleCount =
-            0;
-
-        int rangedCount =
-            0;
-
-        int meleeCount =
-            0;
-
-        UnitData firstData =
-            null;
+        UnitData firstData = null;
 
         bool allSameUnitData =
             true;
 
         foreach (UnitSelectable selectable
-                 in units)
+                in units)
         {
             if (selectable == null ||
                 !selectable.TryGetComponent(
@@ -209,10 +176,6 @@ public sealed class ObjectInfoPresenter
             UnitData data =
                 core.Data;
 
-            // =========================
-            // 같은 종류인지 검사
-            // =========================
-
             if (firstData == null)
             {
                 firstData =
@@ -223,10 +186,6 @@ public sealed class ObjectInfoPresenter
                 allSameUnitData =
                     false;
             }
-
-            // =========================
-            // HP 평균
-            // =========================
 
             if (selectable.TryGetComponent(
                     out UnitHealth health) &&
@@ -243,10 +202,6 @@ public sealed class ObjectInfoPresenter
                 hpUnitCount++;
             }
 
-            // =========================
-            // 유닛 구성
-            // =========================
-
             switch (data.AttackType)
             {
                 case UnitAttackType.Ranged:
@@ -258,21 +213,25 @@ public sealed class ObjectInfoPresenter
                     break;
             }
 
-            // =========================
-            // 현재 상태
-            // =========================
-
-            if (IsWorkingAtFactory(core))
+            if (!core.IsActive)
+            {
+                idleCount++;
+            }
+            else if (
+                UnitInfoStateUtility
+                    .IsWorkingAtFactory(core))
             {
                 workingCount++;
             }
-            else if (core.IsAutoCombat)
+            else if (
+                UnitInfoStateUtility
+                    .IsInCombat(core))
             {
                 combatCount++;
             }
             else if (
-                core.IsPlayerMoveCommandActive ||
-                core.isMoving)
+                UnitInfoStateUtility
+                    .IsMoving(core))
             {
                 movingCount++;
             }
@@ -282,60 +241,17 @@ public sealed class ObjectInfoPresenter
             }
         }
 
-        // =========================
-        // 제목
-        // =========================
+        string title =
+            BuildTitle(
+                firstData,
+                allSameUnitData,
+                totalCount);
 
-        string title;
+        string averageHp =
+            BuildAverageHp(
+                hpRatioSum,
+                hpUnitCount);
 
-        if (allSameUnitData &&
-            firstData != null)
-        {
-            title =
-                firstData.UnitName +
-                " ×" +
-                totalCount;
-        }
-        else
-        {
-            title =
-                totalCount +
-                "개 유닛 선택";
-        }
-
-        // =========================
-        // 평균 HP
-        // =========================
-
-        string averageHp;
-
-        if (hpUnitCount > 0)
-        {
-            float averageHpRatio =
-                hpRatioSum /
-                hpUnitCount;
-
-            int averageHpPercent =
-                Mathf.RoundToInt(
-                    averageHpRatio *
-                    100f);
-
-            averageHp =
-                averageHpPercent +
-                "%";
-        }
-        else
-        {
-            averageHp =
-                "-";
-        }
-
-        // =========================
-        // 평균 스트레스
-        // =========================
-
-        // 스트레스 시스템 구현 후
-        // 실제 평균값으로 교체
         string averageStress =
             "-";
 
@@ -351,28 +267,62 @@ public sealed class ObjectInfoPresenter
             meleeCount);
     }
 
-    private static bool IsWorkingAtFactory(
-        UnitCore core)
+    private static string BuildTitle(
+        UnitData firstData,
+        bool allSameUnitData,
+        int totalCount)
     {
-        if (core == null ||
-            core.CurrentTarget == null)
+        if (!allSameUnitData ||
+            firstData == null)
         {
-            return false;
+            return
+                totalCount +
+                "개 유닛 선택";
         }
 
-        return core.CurrentTarget
-            .TryGetComponent<
-                FactoryCore>(
-                out _);
+        string unitName =
+            firstData.UnitName;
+
+        if (string.IsNullOrWhiteSpace(
+                unitName))
+        {
+            unitName =
+                "유닛";
+        }
+
+        return
+            unitName +
+            " ×" +
+            totalCount;
     }
 
-    // =========================
-    // Provider
-    // =========================
+    private static string BuildAverageHp(
+        float hpRatioSum,
+        int hpUnitCount)
+    {
+        if (hpUnitCount <= 0)
+        {
+            return "-";
+        }
 
-    private static bool TryGetHoverProvider(
-        GameObject target,
-        out IHoverInfoProvider provider)
+        float averageHpRatio =
+            hpRatioSum /
+            hpUnitCount;
+
+        int averageHpPercent =
+            Mathf.RoundToInt(
+                averageHpRatio *
+                100f);
+
+        return
+            averageHpPercent +
+            "%";
+    }
+
+    private static bool
+        TryGetHoverProvider(
+            GameObject target,
+            out IHoverInfoProvider provider)
     {
         provider = null;
 
@@ -386,11 +336,11 @@ public sealed class ObjectInfoPresenter
                 MonoBehaviour>();
 
         foreach (MonoBehaviour behaviour
-                 in behaviours)
+                in behaviours)
         {
             if (behaviour is
                 IHoverInfoProvider
-                hoverProvider)
+                    hoverProvider)
             {
                 provider =
                     hoverProvider;
@@ -401,15 +351,14 @@ public sealed class ObjectInfoPresenter
 
         behaviours =
             target.GetComponentsInChildren<
-                MonoBehaviour>(
-                true);
+                MonoBehaviour>(true);
 
         foreach (MonoBehaviour behaviour
-                 in behaviours)
+                in behaviours)
         {
             if (behaviour is
                 IHoverInfoProvider
-                hoverProvider)
+                    hoverProvider)
             {
                 provider =
                     hoverProvider;

@@ -4,8 +4,7 @@ using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CanvasGroup))]
-public sealed class ObjectInfoPopupController
-    : MonoBehaviour
+public sealed class ObjectInfoPopupController : MonoBehaviour
 {
     [Header("Root")]
     [SerializeField]
@@ -56,6 +55,13 @@ public sealed class ObjectInfoPopupController
     [SerializeField]
     private TMP_Text attackSpeedValueText;
 
+    [Header("Idle Row")]
+    [SerializeField]
+    private TMP_Text idleLabelText;
+
+    [SerializeField]
+    private TMP_Text idleValueText;
+
     [Header("Description")]
     [SerializeField]
     private TMP_Text descriptionText;
@@ -74,7 +80,7 @@ public sealed class ObjectInfoPopupController
     private float fadePadding = 50f;
 
     [SerializeField]
-    [Min(0f)]
+    [Min(0.01f)]
     private float fadeSpeed = 8f;
 
     private Canvas parentCanvas;
@@ -98,14 +104,10 @@ public sealed class ObjectInfoPopupController
         parentCanvas =
             GetComponentInParent<Canvas>();
 
-        // 이 UI는 절대로 게임 입력을 막지 않는다.
-        canvasGroup.blocksRaycasts =
-            false;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.interactable = false;
 
-        canvasGroup.interactable =
-            false;
-
-        Hide();
+        HideImmediate();
     }
 
     private void Update()
@@ -113,14 +115,15 @@ public sealed class ObjectInfoPopupController
         UpdateTransparency();
     }
 
-    // =========================
-    // 단일 유닛
-    // =========================
-
     public void ShowSingle(
         HoverInfoData data)
     {
+        bool wasHidden =
+            !isVisible;
+
         isVisible = true;
+
+        ApplySingleLayout();
 
         SetText(
             nameText,
@@ -174,25 +177,27 @@ public sealed class ObjectInfoPopupController
             descriptionText,
             data.Description);
 
-        ApplyCurrentAlpha();
+        if (wasHidden &&
+            canvasGroup != null)
+        {
+            canvasGroup.alpha =
+                GetTargetAlpha();
+        }
     }
-
-    // =========================
-    // 다중 선택
-    // =========================
 
     public void ShowMulti(
         MultiSelectionInfoData data)
     {
+        bool wasHidden =
+            !isVisible;
+
         isVisible = true;
+
+        ApplyMultiLayout();
 
         SetText(
             nameText,
             data.Title);
-
-        SetText(
-            stateText,
-            "다중 선택");
 
         SetText(
             hpLabelText,
@@ -210,8 +215,6 @@ public sealed class ObjectInfoPopupController
             stressValueText,
             data.AverageStress);
 
-        // 기존 공격력/방어력/공속 3개 행을
-        // 다중 선택에서는 상태 분포로 재사용
         SetText(
             attackPowerLabelText,
             "이동");
@@ -236,18 +239,32 @@ public sealed class ObjectInfoPopupController
             attackSpeedValueText,
             data.WorkingCount.ToString());
 
-        string composition =
-            BuildCompositionText(
-                data);
+        SetText(
+            idleLabelText,
+            "대기");
+
+        SetText(
+            idleValueText,
+            data.IdleCount.ToString());
 
         SetText(
             descriptionText,
-            composition);
+            BuildCompositionText(data));
 
-        ApplyCurrentAlpha();
+        if (wasHidden &&
+            canvasGroup != null)
+        {
+            canvasGroup.alpha =
+                GetTargetAlpha();
+        }
     }
 
     public void Hide()
+    {
+        isVisible = false;
+    }
+
+    private void HideImmediate()
     {
         isVisible = false;
 
@@ -257,50 +274,61 @@ public sealed class ObjectInfoPopupController
         }
     }
 
-    // =========================
-    // Multi Description
-    // =========================
+    private void ApplySingleLayout()
+    {
+        SetActive(
+            stateText,
+            true);
+
+        SetActive(
+            idleLabelText,
+            false);
+
+        SetActive(
+            idleValueText,
+            false);
+    }
+
+    private void ApplyMultiLayout()
+    {
+        SetActive(
+            stateText,
+            false);
+
+        SetActive(
+            idleLabelText,
+            true);
+
+        SetActive(
+            idleValueText,
+            true);
+    }
 
     private static string BuildCompositionText(
         MultiSelectionInfoData data)
     {
-        string composition;
-
         if (data.RangedCount > 0 &&
             data.MeleeCount > 0)
         {
-            composition =
+            return
                 $"원거리 {data.RangedCount} / " +
                 $"근거리 {data.MeleeCount}";
         }
-        else if (data.RangedCount > 0)
+
+        if (data.RangedCount > 0)
         {
-            composition =
+            return
                 $"원거리 {data.RangedCount}";
         }
-        else if (data.MeleeCount > 0)
+
+        if (data.MeleeCount > 0)
         {
-            composition =
+            return
                 $"근거리 {data.MeleeCount}";
         }
-        else
-        {
-            composition =
-                "구성 정보 없음";
-        }
 
-        if (data.IdleCount > 0)
-        {
-            composition +=
-                $"\n대기 {data.IdleCount}";
-        }
-
-        return composition;
+        return "구성 정보 없음";
     }
-
-    // =========================
-    // Transparency
-    // =========================
 
     private void UpdateTransparency()
     {
@@ -309,38 +337,35 @@ public sealed class ObjectInfoPopupController
             return;
         }
 
-        if (!isVisible)
-        {
-            canvasGroup.alpha =
-                0f;
-
-            return;
-        }
-
         float targetAlpha =
-            IsPointerNearPopup()
-                ? nearPointerAlpha
-                : normalAlpha;
+            isVisible
+                ? GetTargetAlpha()
+                : 0f;
+
+        float lerpFactor =
+            1f -
+            Mathf.Exp(
+                -fadeSpeed *
+                Time.unscaledDeltaTime);
 
         canvasGroup.alpha =
-            Mathf.MoveTowards(
+            Mathf.Lerp(
                 canvasGroup.alpha,
                 targetAlpha,
-                fadeSpeed *
-                Time.unscaledDeltaTime);
+                lerpFactor);
+
+        if (!isVisible &&
+            canvasGroup.alpha < 0.001f)
+        {
+            canvasGroup.alpha = 0f;
+        }
     }
 
-    private void ApplyCurrentAlpha()
+    private float GetTargetAlpha()
     {
-        if (canvasGroup == null)
-        {
-            return;
-        }
-
-        canvasGroup.alpha =
-            IsPointerNearPopup()
-                ? nearPointerAlpha
-                : normalAlpha;
+        return IsPointerNearPopup()
+            ? nearPointerAlpha
+            : normalAlpha;
     }
 
     private bool IsPointerNearPopup()
@@ -352,11 +377,9 @@ public sealed class ObjectInfoPopupController
         }
 
         Vector2 screenPosition =
-            Mouse.current.position
-                .ReadValue();
+            Mouse.current.position.ReadValue();
 
-        Camera uiCamera =
-            null;
+        Camera uiCamera = null;
 
         if (parentCanvas != null &&
             parentCanvas.renderMode !=
@@ -405,12 +428,23 @@ public sealed class ObjectInfoPopupController
         }
 
         target.text =
-            value ??
-            string.Empty;
+            value ?? string.Empty;
+    }
+
+    private static void SetActive(
+        TMP_Text target,
+        bool active)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        target.gameObject.SetActive(
+            active);
     }
 
 #if UNITY_EDITOR
-
     private void OnValidate()
     {
         if (canvasGroup == null)
@@ -427,13 +461,9 @@ public sealed class ObjectInfoPopupController
 
         if (canvasGroup != null)
         {
-            canvasGroup.blocksRaycasts =
-                false;
-
-            canvasGroup.interactable =
-                false;
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
         }
     }
-
 #endif
 }
