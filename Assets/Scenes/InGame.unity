@@ -11736,6 +11736,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 772828671229911335, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2019901530413464523, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
       propertyPath: m_Name
       value: ObjectInfoUI
@@ -11743,6 +11747,18 @@ PrefabInstance:
     - target: {fileID: 2019901530413464523, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2411996468770914130, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2411996468770914130, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 1920
+      objectReference: {fileID: 0}
+    - target: {fileID: 2411996468770914130, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 2772393249131094623, guid: f7c9e026922974d4aac5e5af04c681e4, type: 3}
       propertyPath: m_SortingOrder
