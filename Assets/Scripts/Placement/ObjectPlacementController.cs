@@ -246,6 +246,11 @@ public sealed class ObjectPlacementController : MonoBehaviour
         Vector2 screenPosition =
             pointerPositionAction.action.ReadValue<Vector2>();
 
+        if (!worldCamera.pixelRect.Contains(screenPosition))
+        {
+            return false;
+        }
+
         float cameraDistance =
             Mathf.Abs(worldCamera.transform.position.z);
 

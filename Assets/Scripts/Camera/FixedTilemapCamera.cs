@@ -9,10 +9,13 @@ public sealed class FixedTilemapCamera : MonoBehaviour
     private Tilemap targetTilemap;
 
     [SerializeField]
-    private Vector2Int visibleTileCount = new Vector2Int(32, 18);
+    private Vector2Int targetAspectRatio = new Vector2Int(16, 9);
+
+    [SerializeField, Range(0f, 0.5f)]
+    private float topBarHeightRatio = 1f / 9f;
 
     [SerializeField]
-    private Vector2Int targetAspectRatio = new Vector2Int(16, 9);
+    private RectTransform topBar;
 
     private Camera targetCamera;
     private Vector3 fixedPosition;
@@ -57,16 +60,20 @@ public sealed class FixedTilemapCamera : MonoBehaviour
         targetCamera.clearFlags = CameraClearFlags.SolidColor;
         targetCamera.backgroundColor = Color.black;
 
-        float tileWorldHeight =
-            targetTilemap.layoutGrid.cellSize.y *
-            Mathf.Abs(targetTilemap.transform.lossyScale.y);
+        targetTilemap.CompressBounds();
+        Bounds mapBounds = targetTilemap.localBounds;
+        Vector3 mapScale = targetTilemap.transform.lossyScale;
+        float mapWorldWidth = mapBounds.size.x * Mathf.Abs(mapScale.x);
+        float mapWorldHeight = mapBounds.size.y * Mathf.Abs(mapScale.y);
+        float targetAspect = GetGameAspect();
 
-        targetCamera.orthographicSize =
-            visibleTileCount.y * tileWorldHeight * 0.5f;
+        targetCamera.orthographicSize = Mathf.Max(0.01f, Mathf.Max(
+            mapWorldHeight * 0.5f,
+            mapWorldWidth / (targetAspect * 2f)));
 
         Vector3 mapWorldCenter =
             targetTilemap.transform.TransformPoint(
-                targetTilemap.localBounds.center
+                mapBounds.center
             );
 
         fixedPosition = new Vector3(
@@ -91,18 +98,18 @@ public sealed class FixedTilemapCamera : MonoBehaviour
             return;
         }
 
-        float targetAspect =
-            (float)targetAspectRatio.x / targetAspectRatio.y;
+        float targetAspect = GetFrameAspect();
 
         float currentAspect =
             (float)renderWidth / renderHeight;
 
+        Rect frame;
         if (currentAspect > targetAspect)
         {
             float viewportWidth = targetAspect / currentAspect;
             float viewportX = (1f - viewportWidth) * 0.5f;
 
-            targetCamera.rect = new Rect(
+            frame = new Rect(
                 viewportX,
                 0f,
                 viewportWidth,
@@ -114,7 +121,7 @@ public sealed class FixedTilemapCamera : MonoBehaviour
             float viewportHeight = currentAspect / targetAspect;
             float viewportY = (1f - viewportHeight) * 0.5f;
 
-            targetCamera.rect = new Rect(
+            frame = new Rect(
                 0f,
                 viewportY,
                 1f,
@@ -122,13 +129,41 @@ public sealed class FixedTilemapCamera : MonoBehaviour
             );
         }
 
-        targetCamera.aspect = targetAspect;
+        float gameHeight = frame.height * (1f - Mathf.Clamp(topBarHeightRatio, 0f, 0.5f));
+        targetCamera.rect = new Rect(frame.x, frame.y, frame.width, gameHeight);
+        targetCamera.aspect = GetGameAspect();
+
+        // TopBar is a direct child of the full-screen overlay canvas.
+        if (topBar != null)
+        {
+            topBar.anchorMin = new Vector2(frame.xMin, frame.yMin + gameHeight);
+            topBar.anchorMax = new Vector2(frame.xMax, frame.yMax);
+            topBar.offsetMin = Vector2.zero;
+            topBar.offsetMax = Vector2.zero;
+        }
+    }
+
+    private float GetFrameAspect()
+    {
+        return (float)Mathf.Max(1, targetAspectRatio.x) / Mathf.Max(1, targetAspectRatio.y);
+    }
+
+    private float GetGameAspect()
+    {
+        return GetFrameAspect() / (1f - Mathf.Clamp(topBarHeightRatio, 0f, 0.5f));
     }
 
     private void GetFullRenderSize(
         out int renderWidth,
         out int renderHeight)
     {
+        if (targetCamera.targetTexture != null)
+        {
+            renderWidth = targetCamera.targetTexture.width;
+            renderHeight = targetCamera.targetTexture.height;
+            return;
+        }
+
         Rect viewport = targetCamera.rect;
 
         renderWidth = Mathf.RoundToInt(
