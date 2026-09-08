@@ -44,6 +44,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Counseling
+    uniqueID: 1313838245
+    locked: 0
   - name: Factory
     uniqueID: 1264709361
     locked: 0

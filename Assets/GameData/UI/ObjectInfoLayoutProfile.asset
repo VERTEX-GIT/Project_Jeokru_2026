@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7400e51a73ec764982e5cf9b875abb4, type: 3}
+  m_Name: ObjectInfoLayoutProfile
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectInfoLayoutProfile
+  uiScale: 1.6
+  popupSize: {x: 264, y: 385}
+  popupMargin: {x: 24, y: 105}
+  textLayouts:
+  - objectName: NameText
+    previewText: "\uC6D0\uAC70\uB9AC \uC720\uB2DB"
+    position: {x: 17, y: 17}
+    size: {x: 150, y: 30}
+    fontSize: 20
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: StateText
+    previewText: "\uC791\uC5C5 \uC911"
+    position: {x: 188, y: 20}
+    size: {x: 58, y: 22}
+    fontSize: 12
+    alignment: 514
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: HpLabelText
+    previewText: HP
+    position: {x: 22, y: 68}
+    size: {x: 75, y: 24}
+    fontSize: 16
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: HpValueText
+    previewText: 72/100
+    position: {x: 145, y: 68}
+    size: {x: 99, y: 24}
+    fontSize: 16
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: StressLabelText
+    previewText: "\uC2A4\uD2B8\uB808\uC2A4"
+    position: {x: 22, y: 101}
+    size: {x: 90, y: 24}
+    fontSize: 16
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: StressValueText
+    previewText: 35/100
+    position: {x: 145, y: 101}
+    size: {x: 99, y: 24}
+    fontSize: 16
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: AttackLabelText
+    previewText: "\uACF5\uACA9\uB825"
+    position: {x: 22, y: 157}
+    size: {x: 95, y: 24}
+    fontSize: 15
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: AttackValueText
+    previewText: 18.6
+    position: {x: 145, y: 157}
+    size: {x: 99, y: 24}
+    fontSize: 15
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: DefenseLabelText
+    previewText: "\uBC29\uC5B4\uB825"
+    position: {x: 22, y: 193}
+    size: {x: 95, y: 24}
+    fontSize: 15
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: DefenseValueText
+    previewText: 7.2
+    position: {x: 145, y: 193}
+    size: {x: 99, y: 24}
+    fontSize: 15
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: AttackSpeedLabelText
+    previewText: "\uACF5\uACA9 \uC18D\uB3C4"
+    position: {x: 22, y: 229}
+    size: {x: 100, y: 24}
+    fontSize: 15
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: AttackSpeedValueText
+    previewText: 1.4s
+    position: {x: 145, y: 229}
+    size: {x: 99, y: 24}
+    fontSize: 15
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: IdleLabelText
+    previewText: "\uB300\uAE30"
+    position: {x: 22, y: 265}
+    size: {x: 100, y: 24}
+    fontSize: 15
+    alignment: 513
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: IdleValueText
+    previewText: 0
+    position: {x: 145, y: 265}
+    size: {x: 99, y: 24}
+    fontSize: 15
+    alignment: 516
+    allowWrapping: 0
+    overrideFontStyle: 0
+    fontStyle: 0
+  - objectName: DescriptionText
+    previewText: "\uBD89\uC740 \uC57D \uACF5\uC7A5\uC5D0\uC11C \uC791\uC5C5 \uC911"
+    position: {x: 22, y: 320}
+    size: {x: 222, y: 46}
+    fontSize: 13
+    alignment: 257
+    allowWrapping: 1
+    overrideFontStyle: 0
+    fontStyle: 0
+  rectLayouts:
+  - objectName: Divider1
+    position: {x: 22, y: 137}
+    size: {x: 222, y: 1}
+  - objectName: Divider2
+    position: {x: 22, y: 301}
+    size: {x: 222, y: 1}

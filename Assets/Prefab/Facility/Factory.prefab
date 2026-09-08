@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 513355408488972395}
   - component: {fileID: 1391329619259272774}
   - component: {fileID: 2296065425400022254}
+  - component: {fileID: 2688018928763052202}
   m_Layer: 0
   m_Name: Factory
   m_TagString: Untagged
@@ -146,7 +147,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f0fdbfeb5a640be99e5077c8e12a27b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileObjectPlacement
   occupancyManager: {fileID: 0}
   objectType: 1
@@ -161,7 +162,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a75a399baca6446c8469891839fec956, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryWorkArea
   placement: {fileID: 932181232136673035}
   occupancyManager: {fileID: 0}
@@ -175,7 +176,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e3729fc082819042950a547c347360a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTilePlacementInitializer
   placeOnStart: 1
 --- !u!114 &-8106775801962366442
@@ -239,5 +240,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf9f77b85a359984e9f2422f866d0466, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FactoryRepair
+--- !u!114 &2688018928763052202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7889241511686395874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed5baa0a143e9384094d070605923af9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryHoverInfoProvider
