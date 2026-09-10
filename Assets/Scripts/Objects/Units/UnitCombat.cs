@@ -160,7 +160,7 @@ public sealed class UnitCombat : MonoBehaviour
             }
 
             damageable.TakeDamage(
-                unitCore.Data.AttackPower,
+                unitCore.AttackPower,
                 gameObject);
 
             hitAnyTarget = true;
@@ -175,7 +175,7 @@ public sealed class UnitCombat : MonoBehaviour
             IsTargetInAttackRange(target))
         {
             factoryHealth.TakeDamage(
-                unitCore.Data.AttackPower,
+                unitCore.AttackPower,
                 gameObject);
 
             hitAnyTarget = true;
@@ -187,7 +187,7 @@ public sealed class UnitCombat : MonoBehaviour
         }
 
         CooldownRemaining =
-            unitCore.Data.AttackCooldown;
+            unitCore.AttackCooldown;
     }
 
     private bool IsUnitInAttackRange(
@@ -355,12 +355,12 @@ public sealed class UnitCombat : MonoBehaviour
 
         projectile.Initialize(
             direction,
-            unitCore.Data.AttackPower,
+            unitCore.AttackPower,
             unitCore.Data.Team,
             gameObject);
 
         CooldownRemaining =
-            unitCore.Data.AttackCooldown;
+            unitCore.AttackCooldown;
     }
 
     private Vector3 GetProjectileTargetPosition(

@@ -6406,19 +6406,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 417070989}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1705001023}
-        m_TargetAssemblyTypeName: MedicineUseController, Assembly-CSharp
-        m_MethodName: SelectBlueMedicine
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &430755121
 GameObject:
   m_ObjectHideFlags: 0
@@ -6730,19 +6718,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 552097574}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1705001023}
-        m_TargetAssemblyTypeName: MedicineUseController, Assembly-CSharp
-        m_MethodName: SelectRedMedicine
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -9691,19 +9667,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1641157483}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1705001023}
-        m_TargetAssemblyTypeName: MedicineUseController, Assembly-CSharp
-        m_MethodName: SelectPurpleMedicine
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &1661388717
 GameObject:
   m_ObjectHideFlags: 0
@@ -9950,7 +9914,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1705001022}
-  - component: {fileID: 1705001023}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -9976,25 +9939,6 @@ Transform:
   - {fileID: 175584442}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1705001023
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1705001021}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72a6384848bead249b3ab10c9eb2674b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MedicineUseController
-  attackIncreasePercent: 10
-  defenseIncreasePercent: 10
-  cooldownDecreasePercent: 5
-  healAmount: 10
-  maxAttackPower: 300
-  maxDefense: 300
-  minAttackCooldown: 0.5
 --- !u!1 &1722269678
 GameObject:
   m_ObjectHideFlags: 0
@@ -10218,19 +10162,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1746194947}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1705001023}
-        m_TargetAssemblyTypeName: MedicineUseController, Assembly-CSharp
-        m_MethodName: SelectGreenMedicine
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &1819899440
 GameObject:
   m_ObjectHideFlags: 0

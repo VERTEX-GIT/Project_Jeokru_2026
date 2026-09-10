@@ -183,7 +183,7 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void Update()
     {
-        if (PauseMenu.IsPaused)
+        if (PauseMenu.IsPaused || IsPlacementModeActive())
         {
             CancelPrimaryDrag();
             CancelMoveDrag();
@@ -225,7 +225,7 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnPrimaryRelease(
         InputAction.CallbackContext context)
     {
-        if (PauseMenu.IsPaused)
+        if (PauseMenu.IsPaused || IsPlacementModeActive())
         {
             CancelPrimaryDrag();
             return;
@@ -431,7 +431,7 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnMoveRelease(
         InputAction.CallbackContext context)
     {
-        if (PauseMenu.IsPaused)
+        if (PauseMenu.IsPaused || IsPlacementModeActive())
         {
             CancelMoveDrag();
             return;
@@ -924,8 +924,12 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private bool IsPlacementModeActive()
     {
+        if (MedicineUseController.Instance != null && MedicineUseController.Instance.BlocksWorldInput)
+        {
+            return true;
+        }
+
         return placementController != null &&
-            placementController.CurrentMode !=
-                PlacementMode.None;
+            (placementController.BlocksWorldInput || placementController.IsPointerOverUI());
     }
 }

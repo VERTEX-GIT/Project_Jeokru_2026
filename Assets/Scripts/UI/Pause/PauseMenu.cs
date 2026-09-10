@@ -17,6 +17,8 @@ public sealed class PauseMenu : MonoBehaviour
     private string mainMenuSceneName =
         "MainTitle";
 
+    private ObjectPlacementController placementController;
+
     public static bool IsPaused
     {
         get;
@@ -76,6 +78,21 @@ public sealed class PauseMenu : MonoBehaviour
 
     private void HandleEscapePressed()
     {
+        var medicine = MedicineUseController.Instance;
+        if (!IsPaused && medicine != null &&
+            (medicine.CancelMedicineSelection() || medicine.InputConsumedThisFrame))
+        {
+            return;
+        }
+
+        if (placementController == null)
+            placementController = FindAnyObjectByType<ObjectPlacementController>();
+
+        // 실행 순서와 관계없이 첫 Esc는 배치 취소에만 사용한다.
+        if (!IsPaused && placementController != null &&
+            (placementController.CancelPlacement() || placementController.InputConsumedThisFrame))
+            return;
+
         if (IsMainMenuScene())
         {
             return;

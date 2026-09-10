@@ -74,7 +74,7 @@ public sealed class UnitHealth :
             Mathf.Max(
                 0f,
                 attackPower -
-                unitCore.Data.Defense);
+                unitCore.Defense);
 
         if (damage <= 0f)
         {

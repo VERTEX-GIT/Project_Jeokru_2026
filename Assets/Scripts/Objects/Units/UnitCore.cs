@@ -12,6 +12,16 @@ public sealed class UnitCore : MonoBehaviour
         private set;
     }
 
+    [field: Header("Runtime Combat Stats")]
+    [field: SerializeField, Min(0f)]
+    public float AttackPower { get; private set; }
+
+    [field: SerializeField, Min(0f)]
+    public float Defense { get; private set; }
+
+    [field: SerializeField, Min(0f)]
+    public float AttackCooldown { get; private set; }
+
     [field: Header("Runtime State")]
     [field: SerializeField]
     public bool IsActive
@@ -76,6 +86,9 @@ public sealed class UnitCore : MonoBehaviour
 
         UpdateMovementState();
 
+        if (Data != null)
+            SetData(Data);
+
         if (Data == null)
         {
             Debug.LogWarning(
@@ -119,6 +132,15 @@ public sealed class UnitCore : MonoBehaviour
         }
 
         Data = data;
+        SetCombatStats(data.AttackPower, data.Defense, data.AttackCooldown);
+    }
+
+    // SO 기본값은 바꾸지 않고 이 유닛의 현재 능력치만 변경합니다.
+    public void SetCombatStats(float attackPower, float defense, float attackCooldown)
+    {
+        AttackPower = Mathf.Max(0f, attackPower);
+        Defense = Mathf.Max(0f, defense);
+        AttackCooldown = Mathf.Max(0f, attackCooldown);
     }
 
     public void SetUnitActive(

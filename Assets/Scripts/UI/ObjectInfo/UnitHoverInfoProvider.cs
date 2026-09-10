@@ -59,13 +59,13 @@ public sealed class UnitHoverInfoProvider :
             BuildStressText(),
 
             "공격력",
-            data.AttackPower.ToString("0.#"),
+            unitCore.AttackPower.ToString("0.#"),
 
             "방어력",
-            data.Defense.ToString("0.#"),
+            unitCore.Defense.ToString("0.#"),
 
             "공격 속도",
-            $"{data.AttackCooldown:0.#}s",
+            $"{unitCore.AttackCooldown:0.#}s",
 
             BuildDescription());
     }
