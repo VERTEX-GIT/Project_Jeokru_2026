@@ -8957,6 +8957,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1327067457}
   - component: {fileID: 1327067458}
+  - component: {fileID: 1327067459}
   m_Layer: 0
   m_Name: InventoryManager
   m_TagString: Untagged
@@ -8991,6 +8992,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a68ff7049840e20478f4f4637a77504b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourceInventory
+--- !u!114 &1327067459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327067456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50cfe9704ac3a244ea644605b7cfc0de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceAmountView
+  RedMedAmountText: {fileID: 1696855512}
+  BlueMedAmountText: {fileID: 1976482787}
+  PurpleMedAmountText: {fileID: 942901070}
+  GreenMedAmountText: {fileID: 1287202111}
+  IronAmountText: {fileID: 276215556}
 --- !u!1 &1331440343
 GameObject:
   m_ObjectHideFlags: 0

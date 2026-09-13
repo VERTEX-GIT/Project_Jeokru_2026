@@ -19,7 +19,7 @@ MonoBehaviour:
   maxHp: 100
   moveSpeed: 3
   attackPower: 10
-  defense: 0
+  defense: 1
   attackCooldown: 1
   attackType: 0
   attackRange: 1

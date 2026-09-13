@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public sealed class KonamiIronCheat : MonoBehaviour
+public sealed class KonamiCheat : MonoBehaviour
 {
     private const string Command = "UUDDLRLRBA";
     private string input = "";
@@ -10,9 +10,9 @@ public sealed class KonamiIronCheat : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
     {
-        if (FindAnyObjectByType<KonamiIronCheat>() != null) return;
-        var cheat = new GameObject(nameof(KonamiIronCheat));
-        cheat.AddComponent<KonamiIronCheat>();
+        if (FindAnyObjectByType<KonamiCheat>() != null) return;
+        var cheat = new GameObject(nameof(KonamiCheat));
+        cheat.AddComponent<KonamiCheat>();
         DontDestroyOnLoad(cheat);
     }
 
@@ -33,7 +33,17 @@ public sealed class KonamiIronCheat : MonoBehaviour
                 Key.LeftArrow => 'L', Key.RightArrow => 'R',
                 Key.B => 'B', Key.A => 'A', _ => '?'
             };
-            if (Accept(code)) ResourceInventory.Inventory.Add(ResourceType.Iron, 999);
+            if (Accept(code))
+            {
+                var inventory = ResourceInventory.Inventory;
+                inventory.Add(ResourceType.Iron, 999);
+                inventory.Add(ResourceType.RedMedicine, 999);
+                inventory.Add(ResourceType.BlueMedicine, 999);
+                inventory.Add(ResourceType.PurpleMedicine, 999);
+                inventory.Add(ResourceType.GreenMedicine, 999);
+
+                Debug.Log("Konami code accepted! Added 999 Iron and Medicines.", this);
+            }
         }
     }
 

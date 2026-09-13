@@ -23,11 +23,11 @@ public sealed class MedicineUseController : MonoBehaviour
     [SerializeField, Range(0f, 100f)]
     private float cooldownDecreasePercent;
 
+    //================================================
+
     // 회복량
     [SerializeField, Min(0f)]
     private float healAmount;
-
-    //===============================================
 
     // 최대 공격력
     [SerializeField, Min(0f)]
@@ -41,17 +41,35 @@ public sealed class MedicineUseController : MonoBehaviour
     [SerializeField, Min(0f)]
     private float minAttackCooldown;
 
+    //================================================
+
     public string FailureReason { get; private set; } = "";
     private bool isApplying;
 
+    //================================================
+
+    // 싱글톤
     public static MedicineUseController Instance { get; private set; }
+
+    // 현재 선택된 약 종류
     public ResourceType? SelectedMedicine { get; private set; }
+    
+    /* ----------------------------
+    약 사용에 사용된 마우스 처리를 다른 작업에도 사용하지 못하도록 하는 변수
+
+    InputConsumedThisFrame: 이번 프레임에 약 사용을 위해 마우스 입력이 소비되었는지 여부
+    BlocksWorldInput: 약 사용 직전이거나 약 사용 시 다른 커멘드 막기
+    ---------------------------- */
     public bool InputConsumedThisFrame => consumedInputFrame == Time.frameCount;
     public bool BlocksWorldInput => SelectedMedicine.HasValue || InputConsumedThisFrame;
 
+    // 약 사용 시 마우스 입력이 소비된 프레임
     private int consumedInputFrame = -1;
+
     private Camera worldCamera;
     private ObjectPlacementController placementController;
+
+    // UI Raycast 검사 결과를 재사용하기 위한 리스트
     private readonly List<RaycastResult> uiHits = new();
 
     private void Awake()
@@ -80,6 +98,11 @@ public sealed class MedicineUseController : MonoBehaviour
     public void SelectPurpleMedicine() => SelectMedicine(ResourceType.PurpleMedicine);
     public void SelectGreenMedicine() => SelectMedicine(ResourceType.GreenMedicine);
 
+    //================================================
+    // 알약 선택 메서드
+    //================================================
+
+    // 약 선택
     private void SelectMedicine(ResourceType medicine)
     {
         if (!isActiveAndEnabled || PauseMenu.IsPaused)
@@ -93,6 +116,7 @@ public sealed class MedicineUseController : MonoBehaviour
         FailureReason = "";
     }
 
+    // 약 선택 취소
     public bool CancelMedicineSelection()
     {
         if (!SelectedMedicine.HasValue)
@@ -129,6 +153,7 @@ public sealed class MedicineUseController : MonoBehaviour
         TryUseAtScreenPosition(Mouse.current.position.ReadValue());
     }
 
+    // 약 사용 시도
     private void TryUseAtScreenPosition(Vector2 screenPosition)
     {
         if (!SelectedMedicine.HasValue || worldCamera == null ||
@@ -151,6 +176,7 @@ public sealed class MedicineUseController : MonoBehaviour
         }
     }
 
+    // UI 위에 마우스가 있는지 검사
     private bool IsPointerOverUI(Vector2 screenPosition)
     {
         if (EventSystem.current == null)
@@ -211,6 +237,7 @@ public sealed class MedicineUseController : MonoBehaviour
         }
         finally
         {
+            Debug.Log("Current Inventory List: " + ResourceInventory.Inventory, this);
             isApplying = false;
         }
     }
@@ -241,51 +268,70 @@ public sealed class MedicineUseController : MonoBehaviour
         return true;
     }
 
-    // 약별 효과: 새 값 계산 → 변화 확인 및 차감 → 적용
+    //================================================
+    // 알약별 효과 적용 메서드
+    //================================================
+
+    // 붉은 약 사용 - 공격력 증가
     private bool UseRedMedicine(UnitCore target)
     {
         float next = Increase(target.AttackPower, attackIncreasePercent, maxAttackPower);
+
         if (!TrySpendMedicine(ResourceType.RedMedicine, target.AttackPower, next))
         {
             return false;
         }
 
+        Debug.Log($"[MedicineUseController] {target.name} 공격력 {target.AttackPower} -> {next}", this);
+
         target.SetCombatStats(next, target.Defense, target.AttackCooldown);
         return true;
     }
 
+    // 푸른 약 사용 - 방어력 증가
     private bool UseBlueMedicine(UnitCore target)
     {
         float next = Increase(target.Defense, defenseIncreasePercent, maxDefense);
+
         if (!TrySpendMedicine(ResourceType.BlueMedicine, target.Defense, next))
         {
             return false;
         }
 
+        Debug.Log($"[MedicineUseController] {target.name} 방어력 {target.Defense} -> {next}", this);
+
         target.SetCombatStats(target.AttackPower, next, target.AttackCooldown);
         return true;
     }
 
+    // 보라 약 사용 - 공격 쿨타임 감소
     private bool UsePurpleMedicine(UnitCore target)
     {
         float next = Decrease(target.AttackCooldown, cooldownDecreasePercent, minAttackCooldown);
+
         if (!TrySpendMedicine(ResourceType.PurpleMedicine, target.AttackCooldown, next))
         {
             return false;
         }
 
+        Debug.Log($"[MedicineUseController] {target.name} 공격 쿨타임 {target.AttackCooldown} -> {next}", this);
+
         target.SetCombatStats(target.AttackPower, target.Defense, next);
         return true;
     }
 
+    // 초록 약 사용 - 체력 회복
     private bool UseGreenMedicine(UnitCore target, UnitHealth health)
     {
         float next = Mathf.Max(health.CurrentHp,
             Mathf.Min(health.MaxHp, health.CurrentHp + Mathf.Max(0f, healAmount)));
+
         if (!TrySpendMedicine(ResourceType.GreenMedicine, health.CurrentHp, next))
         {
             return false;
         }
+
+        Debug.Log($"[MedicineUseController] {target.name} 체력 {health.CurrentHp} -> {next}", this);
 
         health.EnsureMinimumHp(next);
         if (!target.IsActive && health.IsAlive && target.Data.IsBasicUnit)
@@ -296,7 +342,7 @@ public sealed class MedicineUseController : MonoBehaviour
         return true;
     }
 
-    // 변화가 없거나 재고가 부족하면 소비하지 않습니다.
+    // 변화가 없거나 재고가 부족하면 소비하지 않음
     private bool TrySpendMedicine(ResourceType medicine, float current, float next)
     {
         if (!IsFinite(next))
@@ -323,26 +369,31 @@ public sealed class MedicineUseController : MonoBehaviour
         return true;
     }
 
-    // 이미 제한을 넘은 유닛에게 약을 사용해도 능력치가 역으로 나빠지지 않습니다.
+    // 스탯 증가 계산
     private static float Increase(float current, float percent, float maximum)
     {
         float increased = current * (1f + Mathf.Max(0f, percent) / 100f);
         return Mathf.Max(current, Mathf.Min(maximum, increased));
     }
 
+    // 스탯 감소 계산
     private static float Decrease(float current, float percent, float minimum)
     {
         float decreased = current * (1f - Mathf.Clamp01(percent / 100f));
         return Mathf.Min(current, Mathf.Max(Mathf.Max(0f, minimum), decreased));
     }
 
+    // 유한 수인지 검사
     private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
+    // 약 사용 실패 시 실패 이유를 설정하고 false 반환
     private bool Fail(string reason)
     {
         FailureReason = reason;
         return false;
     }
+
+// -----------------------------------------------------------------------------------------------------
 
 #if UNITY_EDITOR
     [ContextMenu("Check Medicine Selection (Play Mode)")]
