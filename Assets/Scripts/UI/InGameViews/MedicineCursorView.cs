@@ -51,7 +51,8 @@ public sealed class MedicineCursorView : MonoBehaviour
                     var cursor = new GameObject("MedicineCursorIcon", typeof(RectTransform), typeof(Image));
                     cursor.layer = parentCanvas.gameObject.layer;
                     cursor.transform.SetParent(parentCanvas.rootCanvas.transform, false);
-                    view = cursor.AddComponent<MedicineCursorView>();
+                    // 관리 스크립트는 켜 두어야 비활성 아이콘을 다시 켤 수 있습니다.
+                    view = parentCanvas.rootCanvas.gameObject.AddComponent<MedicineCursorView>();
                     view.controller = controller;
                     view.canvas = parentCanvas.rootCanvas;
                     view.canvasRect = (RectTransform)view.canvas.transform;
@@ -61,7 +62,7 @@ public sealed class MedicineCursorView : MonoBehaviour
                     view.icon.rectTransform.anchorMin = view.canvasRect.pivot;
                     view.icon.rectTransform.anchorMax = view.canvasRect.pivot;
                     view.icon.rectTransform.sizeDelta = new Vector2(32f, 32f);
-                    view.icon.enabled = false;
+                    cursor.SetActive(false);
                 }
 
                 view.sprites[medicine.Value] = button.image.overrideSprite;
@@ -71,11 +72,14 @@ public sealed class MedicineCursorView : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (icon == null) return;
+
         ResourceType? selected = controller != null ? controller.SelectedMedicine : null;
-        icon.enabled = selected.HasValue && Mouse.current != null && Application.isFocused &&
+        bool visible = selected.HasValue && Mouse.current != null && Application.isFocused &&
             !PauseMenu.IsPaused && sprites.TryGetValue(selected.Value, out var sprite) && sprite != null;
-        if (!icon.enabled)
+        if (!visible)
         {
+            icon.gameObject.SetActive(false);
             return;
         }
 
@@ -84,18 +88,19 @@ public sealed class MedicineCursorView : MonoBehaviour
         if (!new Rect(0f, 0f, Screen.width, Screen.height).Contains(screenPosition) ||
             !RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPosition, camera, out var local))
         {
-            icon.enabled = false;
+            icon.gameObject.SetActive(false);
             return;
         }
 
         icon.sprite = sprites[selected.Value];
         icon.rectTransform.anchoredPosition = GetIconPosition(local, canvasRect.rect);
-        transform.SetAsLastSibling();
+        icon.transform.SetAsLastSibling();
+        icon.gameObject.SetActive(true);
     }
 
     private void OnDisable()
     {
-        if (icon != null) icon.enabled = false;
+        if (icon != null) icon.gameObject.SetActive(false);
     }
 
     private static ResourceType? GetMedicine(string method) => method switch
