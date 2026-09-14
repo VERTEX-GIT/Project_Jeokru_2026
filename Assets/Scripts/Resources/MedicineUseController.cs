@@ -41,6 +41,12 @@ public sealed class MedicineUseController : MonoBehaviour
     [SerializeField, Min(0f)]
     private float minAttackCooldown;
 
+    // 좌클릭을 누르고 있을 때 약을 반복 적용하는 간격(초)
+    [SerializeField, Min(0.05f)]
+    private float repeatInterval = 0.3f;
+
+    private float nextUseTime;
+
     //================================================
 
     public string FailureReason { get; private set; } = "";
@@ -112,6 +118,7 @@ public sealed class MedicineUseController : MonoBehaviour
 
         placementController?.CancelPlacement();
         SelectedMedicine = medicine;
+        nextUseTime = 0f;
         consumedInputFrame = Time.frameCount;
         FailureReason = "";
     }
@@ -125,6 +132,7 @@ public sealed class MedicineUseController : MonoBehaviour
         }
 
         SelectedMedicine = null;
+        nextUseTime = 0f;
         consumedInputFrame = Time.frameCount;
         return true;
     }
@@ -144,13 +152,36 @@ public sealed class MedicineUseController : MonoBehaviour
             return;
         }
 
-        if (InputConsumedThisFrame || Mouse.current == null ||
-            !Mouse.current.leftButton.wasPressedThisFrame)
+        if (InputConsumedThisFrame || Mouse.current == null)
+        {
+            return;
+        }
+
+        var leftButton = Mouse.current.leftButton;
+        if (!ShouldApplyMedicine(leftButton.wasPressedThisFrame, leftButton.isPressed, Time.unscaledTime))
         {
             return;
         }
 
         TryUseAtScreenPosition(Mouse.current.position.ReadValue());
+    }
+
+    // 첫 클릭은 즉시, 누르고 있으면 간격마다 한 번만 시도합니다.
+    private bool ShouldApplyMedicine(bool pressedThisFrame, bool isHeld, float now)
+    {
+        if (!pressedThisFrame && !isHeld)
+        {
+            nextUseTime = 0f;
+            return false;
+        }
+
+        if (!pressedThisFrame && now < nextUseTime)
+        {
+            return false;
+        }
+
+        nextUseTime = now + Mathf.Max(0.05f, repeatInterval);
+        return true;
     }
 
     // 약 사용 시도
@@ -166,11 +197,7 @@ public sealed class MedicineUseController : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(worldPosition);
         UnitCore target = hit != null ? hit.GetComponentInParent<UnitCore>() : null;
 
-        if (TryUseMedicine(SelectedMedicine.Value, target))
-        {
-            CancelMedicineSelection();
-        }
-        else
+        if (!TryUseMedicine(SelectedMedicine.Value, target))
         {
             Debug.Log(FailureReason, this);
         }
@@ -396,6 +423,36 @@ public sealed class MedicineUseController : MonoBehaviour
 // -----------------------------------------------------------------------------------------------------
 
 #if UNITY_EDITOR
+    [ContextMenu("Check Medicine Repeat Timing")]
+    private void CheckRepeatTiming()
+    {
+        float savedTime = nextUseTime;
+        float savedInterval = repeatInterval;
+        try
+        {
+            repeatInterval = 0.5f;
+            bool passed = ShouldApplyMedicine(true, true, 10f) &&
+                !ShouldApplyMedicine(false, true, 10.49f) &&
+                ShouldApplyMedicine(false, true, 10.5f) &&
+                !ShouldApplyMedicine(false, true, 10.5f) &&
+                !ShouldApplyMedicine(false, false, 10.6f) &&
+                ShouldApplyMedicine(true, true, 10.61f);
+            repeatInterval = 0f;
+            passed &= ShouldApplyMedicine(true, true, 20f) &&
+                !ShouldApplyMedicine(false, true, 20f);
+            if (!passed)
+            {
+                throw new System.Exception("Medicine repeat timing check failed");
+            }
+            Debug.Log("MEDICINE_REPEAT_CHECK PASS: immediate click, interval, release, re-click and minimum interval");
+        }
+        finally
+        {
+            nextUseTime = savedTime;
+            repeatInterval = savedInterval;
+        }
+    }
+
     [ContextMenu("Check Medicine Selection (Play Mode)")]
     private void CheckSelection()
     {
