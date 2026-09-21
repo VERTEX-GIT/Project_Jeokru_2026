@@ -1,11 +1,15 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class GameTimeDisplay : MonoBehaviour
 {
     [SerializeField]
-    private TMP_Text timeText;
+    private TMP_Text dayText;
+
+    [SerializeField]
+    private Slider timeSlider;
 
     [SerializeField]
     private GameTimeManager gameTimeManager;
@@ -70,14 +74,21 @@ public sealed class GameTimeDisplay : MonoBehaviour
 
     private void Refresh()
     {
-        if (timeText == null ||
-            gameTimeManager == null)
+        if (gameTimeManager == null)
         {
             return;
         }
 
-        timeText.text =
-            $"{gameTimeManager.CurrentDay}일차  " +
-            $"{gameTimeManager.CurrentTime:00}";
+        if (dayText != null)
+        {
+            dayText.text =
+                $"{gameTimeManager.CurrentDay}일차";
+        }
+
+        if (timeSlider != null)
+        {
+            timeSlider.normalizedValue =
+                (gameTimeManager.CurrentTime - 1f) / 59f;
+        }
     }
 }

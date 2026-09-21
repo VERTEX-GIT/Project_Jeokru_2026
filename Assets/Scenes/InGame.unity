@@ -6572,7 +6572,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 79367520}
   m_FillRect: {fileID: 461681275}
   m_HandleRect: {fileID: 79367519}
@@ -6672,7 +6672,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.95, g: 0.62, b: 0.12, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7117,7 +7117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.22, g: 0.22, b: 0.22, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -9933,7 +9933,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 37.537, y: -20}
+  m_AnchoredPosition: {x: 755, y: -24}
   m_SizeDelta: {x: 49.90674, y: 28.776052}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1611276468
@@ -11182,7 +11182,7 @@ GameObject:
   - component: {fileID: 2043839662}
   - component: {fileID: 2043839661}
   m_Layer: 5
-  m_Name: GameTimeUI
+  m_Name: DayText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11204,8 +11204,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -300, y: 0}
+  m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2043839661
 MonoBehaviour:
@@ -11219,7 +11219,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8eac2e6ac042c040885926ff274df52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameTimeDisplay
-  timeText: {fileID: 2043839662}
+  dayText: {fileID: 2043839662}
+  timeSlider: {fileID: 424227564}
   gameTimeManager: {fileID: 175584441}
 --- !u!114 &2043839662
 MonoBehaviour:
@@ -11241,7 +11242,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "1\uC77C\uCC28 01"
+  m_text: "1\uC77C\uCC28"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
   m_sharedMaterial: {fileID: 2464405986921477177, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
@@ -11275,8 +11276,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
