@@ -39,23 +39,66 @@ public sealed class UnitHealth :
         unitCore =
             GetComponent<UnitCore>();
 
-        if (unitCore.Data == null)
+        if (unitCore == null)
+        {
+            return;
+        }
+
+        unitCore.DataChanged +=
+            HandleUnitDataChanged;
+
+        if (unitCore.Data != null)
+        {
+            InitializeHealth(
+                unitCore.Data);
+        }
+    }
+
+    private void Start()
+    {
+        if (unitCore == null ||
+            unitCore.Data == null)
         {
             Debug.LogError(
                 $"{name}: UnitHealth가 사용할 " +
-                $"UnitData가 없습니다.",
+                "UnitData가 없습니다.",
                 this);
 
             return;
         }
 
-        CurrentHp =
-            unitCore.Data.MaxHp;
+        NotifyHealthChanged();
     }
 
-    private void Start()
+    private void OnDestroy()
     {
+        if (unitCore != null)
+        {
+            unitCore.DataChanged -=
+                HandleUnitDataChanged;
+        }
+    }
+
+    private void HandleUnitDataChanged(
+        UnitData data)
+    {
+        InitializeHealth(
+            data);
+
         NotifyHealthChanged();
+    }
+
+    private void InitializeHealth(
+        UnitData data)
+    {
+        if (data == null)
+        {
+            CurrentHp = 0f;
+            return;
+        }
+
+        CurrentHp =
+            data.MaxHp;
     }
 
     public void TakeDamage(

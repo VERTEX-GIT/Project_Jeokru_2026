@@ -6,26 +6,33 @@ public class ResourceInventory : MonoBehaviour
 {
     /* =< 변수 >============================================================================================== */
 
-    // 싱글톤
-    public static ResourceInventory Inventory { get; private set; }
+    // 현재 인게임 씬의 인벤토리
+    public static ResourceInventory Inventory
+    {
+        get;
+        private set;
+    }
 
     // 자원 보유량
-    private readonly Dictionary<ResourceType, int> resourceAmounts = new();
+    private readonly Dictionary<ResourceType, int>
+        resourceAmounts = new();
+
     // 이벤트: 자원 보유량 변경 시 호출
-    public event Action<ResourceType, int> ResourceAmountChanged;
+    public event Action<ResourceType, int>
+        ResourceAmountChanged;
 
     /* =< 기본 메서드 >======================================================================================== */
 
     private void Awake()
     {
-        if (Inventory != null && Inventory != this)
+        if (Inventory != null &&
+            Inventory != this)
         {
             Destroy(gameObject);
             return;
         }
 
         Inventory = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     private void OnDestroy()
@@ -41,118 +48,189 @@ public class ResourceInventory : MonoBehaviour
     // 자원 보유량 리셋
     public void ResetResourceAmounts()
     {
-        foreach (ResourceType resourceType in Enum.GetValues(typeof(ResourceType)))
+        foreach (ResourceType resourceType
+                 in Enum.GetValues(
+                     typeof(ResourceType)))
         {
-            resourceAmounts[resourceType] = 0;
+            resourceAmounts[
+                resourceType] = 0;
+
+            ResourceAmountChanged?.Invoke(
+                resourceType,
+                0);
         }
     }
 
     // 특정 자원 보유량 반환
-    public int GetResourceAmount(ResourceType resourceType)
+    public int GetResourceAmount(
+        ResourceType resourceType)
     {
-        return resourceAmounts.TryGetValue(resourceType, out int amount) ? amount : 0;
+        return resourceAmounts
+            .TryGetValue(
+                resourceType,
+                out int amount)
+            ? amount
+            : 0;
     }
 
     // 특정 단일 자원 추가
-    public bool Add(ResourceType resourceType, int amount)
+    public bool Add(
+        ResourceType resourceType,
+        int amount)
     {
         if (amount <= 0)
         {
             return false;
         }
 
-        resourceAmounts[resourceType] = GetResourceAmount(resourceType) + amount;
+        resourceAmounts[
+            resourceType] =
+            GetResourceAmount(
+                resourceType) +
+            amount;
 
-        ResourceAmountChanged?.Invoke(resourceType, GetResourceAmount(resourceType));
-
+        ResourceAmountChanged?.Invoke(
+            resourceType,
+            GetResourceAmount(
+                resourceType));
 
         return true;
     }
 
     // 여러 자원 추가
-    public bool Add(IReadOnlyList<ResourceCost> resources)
+    public bool Add(
+        IReadOnlyList<ResourceCost>
+            resources)
     {
-        if (resources == null || resources.Count == 0)
+        if (resources == null ||
+            resources.Count == 0)
         {
             return false;
         }
 
-        Dictionary<ResourceType, int> totals = CalculateTotals(resources);
+        Dictionary<ResourceType, int>
+            totals =
+                CalculateTotals(
+                    resources);
 
         if (totals.Count == 0)
         {
             return false;
         }
 
-        // 여러 자원 수 만큼 단일 자원 추가 메서드 호출
-        foreach (KeyValuePair<ResourceType, int> resource in totals)
+        foreach (KeyValuePair<
+                     ResourceType,
+                     int> resource
+                 in totals)
         {
-            Add(resource.Key, resource.Value);
+            Add(
+                resource.Key,
+                resource.Value);
         }
 
         return true;
     }
 
     // 특정 단일 자원 사용
-    public bool Spend(ResourceType resourceType, int amount)
+    public bool Spend(
+        ResourceType resourceType,
+        int amount)
     {
-        if (amount <= 0 || GetResourceAmount(resourceType) < amount)
+        if (amount <= 0 ||
+            GetResourceAmount(
+                resourceType) < amount)
         {
             return false;
         }
 
-        resourceAmounts[resourceType] = GetResourceAmount(resourceType) - amount;
+        resourceAmounts[
+            resourceType] =
+            GetResourceAmount(
+                resourceType) -
+            amount;
 
-        ResourceAmountChanged?.Invoke(resourceType, GetResourceAmount(resourceType));
+        ResourceAmountChanged?.Invoke(
+            resourceType,
+            GetResourceAmount(
+                resourceType));
 
         return true;
     }
 
     // 여러 자원 사용
-    public bool Spend(IReadOnlyList<ResourceCost> costs, bool logFailure = true)
+    public bool Spend(
+        IReadOnlyList<ResourceCost> costs,
+        bool logFailure = true)
     {
-        if (!CanAfford(costs, logFailure))
+        if (!CanAfford(
+                costs,
+                logFailure))
         {
             return false;
         }
 
-        Dictionary<ResourceType, int> totals = CalculateTotals(costs);
+        Dictionary<ResourceType, int>
+            totals =
+                CalculateTotals(
+                    costs);
 
-        // 여러 자원 수 만큼 단일 자원 사용 메서드 호출
-        foreach (KeyValuePair<ResourceType, int> cost in totals)
+        foreach (KeyValuePair<
+                     ResourceType,
+                     int> cost
+                 in totals)
         {
-            Spend(cost.Key, cost.Value);
+            Spend(
+                cost.Key,
+                cost.Value);
         }
 
         return true;
     }
 
     // Spend 할 자원이 충분한지 확인
-    public bool CanAfford(IReadOnlyList<ResourceCost> costs, bool logFailure = true)
+    public bool CanAfford(
+        IReadOnlyList<ResourceCost> costs,
+        bool logFailure = true)
     {
-        if (costs == null || costs.Count == 0)
+        if (costs == null ||
+            costs.Count == 0)
         {
             return false;
         }
 
-        Dictionary<ResourceType, int> totals = CalculateTotals(costs);
+        Dictionary<ResourceType, int>
+            totals =
+                CalculateTotals(
+                    costs);
 
         if (totals.Count == 0)
         {
             return false;
         }
 
-        foreach (KeyValuePair<ResourceType, int> cost in totals)
+        foreach (KeyValuePair<
+                     ResourceType,
+                     int> cost
+                 in totals)
         {
-            if (GetResourceAmount(cost.Key) < cost.Value)
+            if (GetResourceAmount(
+                    cost.Key) >=
+                cost.Value)
             {
-                if (logFailure)
-                {
-                    Debug.Log("" + cost.Key + " 자원이 부족합니다. 필요량: " + cost.Value + ", 현재량: " + GetResourceAmount(cost.Key));
-                }
-
-                return false;
+                continue;
             }
+
+            if (logFailure)
+            {
+                Debug.Log(
+                    $"{cost.Key} 자원이 부족합니다. " +
+                    $"필요량: {cost.Value}, " +
+                    $"현재량: " +
+                    $"{GetResourceAmount(cost.Key)}",
+                    this);
+            }
+
+            return false;
         }
 
         return true;
@@ -171,24 +249,36 @@ public class ResourceInventory : MonoBehaviour
     | Wood: 5 | 로 반환.
     ------------------------------------------------------------------------
     */
-    private static Dictionary<ResourceType, int> CalculateTotals(IReadOnlyList<ResourceCost> resources)
+    private static Dictionary<
+        ResourceType,
+        int> CalculateTotals(
+        IReadOnlyList<ResourceCost>
+            resources)
     {
-        Dictionary<ResourceType, int> totals = new();
+        Dictionary<ResourceType, int>
+            totals = new();
 
-        foreach (ResourceCost resource in resources)
+        foreach (ResourceCost resource
+                 in resources)
         {
-            if (resource == null || resource.Amount <= 0)
+            if (resource == null ||
+                resource.Amount <= 0)
             {
                 continue;
             }
 
-            if (totals.ContainsKey(resource.ResourceType))
+            if (totals.ContainsKey(
+                    resource.ResourceType))
             {
-                totals[resource.ResourceType] += resource.Amount;
+                totals[
+                    resource.ResourceType] +=
+                    resource.Amount;
             }
             else
             {
-                totals.Add(resource.ResourceType, resource.Amount);
+                totals.Add(
+                    resource.ResourceType,
+                    resource.Amount);
             }
         }
 

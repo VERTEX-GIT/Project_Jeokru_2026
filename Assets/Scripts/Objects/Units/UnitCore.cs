@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -65,6 +66,9 @@ public sealed class UnitCore : MonoBehaviour
         private set;
     }
 
+    public event Action<UnitData>
+        DataChanged;
+
     private UnitMovement movement;
     private UnitCounseling counseling;
 
@@ -87,7 +91,9 @@ public sealed class UnitCore : MonoBehaviour
         UpdateMovementState();
 
         if (Data != null)
+        {
             SetData(Data);
+        }
 
         if (Data == null)
         {
@@ -131,16 +137,38 @@ public sealed class UnitCore : MonoBehaviour
             return;
         }
 
-        Data = data;
-        SetCombatStats(data.AttackPower, data.Defense, data.AttackCooldown);
+        Data =
+            data;
+
+        SetCombatStats(
+            data.AttackPower,
+            data.Defense,
+            data.AttackCooldown);
+
+        DataChanged?.Invoke(
+            data);
     }
 
     // SO 기본값은 바꾸지 않고 이 유닛의 현재 능력치만 변경합니다.
-    public void SetCombatStats(float attackPower, float defense, float attackCooldown)
+    public void SetCombatStats(
+        float attackPower,
+        float defense,
+        float attackCooldown)
     {
-        AttackPower = Mathf.Max(0f, attackPower);
-        Defense = Mathf.Max(0f, defense);
-        AttackCooldown = Mathf.Max(0f, attackCooldown);
+        AttackPower =
+            Mathf.Max(
+                0f,
+                attackPower);
+
+        Defense =
+            Mathf.Max(
+                0f,
+                defense);
+
+        AttackCooldown =
+            Mathf.Max(
+                0f,
+                attackCooldown);
     }
 
     public void SetUnitActive(
