@@ -15,7 +15,7 @@ MonoBehaviour:
   factoryType: 0
   displayName: Mine
   productionType: 0
-  baseProductionTime: 60
+  baseProductionTime: 10
   productionAmount: 1
   productionCosts: []
   maxHealth: 100

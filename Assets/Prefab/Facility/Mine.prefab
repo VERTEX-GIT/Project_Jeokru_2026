@@ -12,6 +12,18 @@ PrefabInstance:
       propertyPath: definition
       value: 
       objectReference: {fileID: 11400000, guid: 2076fbb97edaa6b4aa0884778c3e4a06, type: 2}
+    - target: {fileID: 294645892733528303, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 320623f05411edf449f2804e7ff4dd64, type: 3}
+    - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -52,9 +64,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6307334448573812759, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 320623f05411edf449f2804e7ff4dd64, type: 3}
     - target: {fileID: 7889241511686395874, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
       propertyPath: m_Name
       value: Mine
+      objectReference: {fileID: 0}
+    - target: {fileID: 9140906067357931611, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_Radius
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9140906067357931611, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

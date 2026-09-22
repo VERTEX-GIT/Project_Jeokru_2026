@@ -12,6 +12,18 @@ PrefabInstance:
       propertyPath: definition
       value: 
       objectReference: {fileID: 11400000, guid: 9bf0876fa1d507e4e8bec946302258df, type: 2}
+    - target: {fileID: 294645892733528303, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b63f38c5a78cb2544a705c31bd16675d, type: 3}
+    - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3975481819448612255, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -52,6 +64,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6307334448573812759, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b63f38c5a78cb2544a705c31bd16675d, type: 3}
     - target: {fileID: 7889241511686395874, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
       propertyPath: m_Name
       value: GrnMedFac
