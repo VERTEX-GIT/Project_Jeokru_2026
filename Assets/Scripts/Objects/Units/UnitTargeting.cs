@@ -1,6 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum UnitTargetingMode
+{
+    Normal,
+    FactoryOnly
+}
+
 [DisallowMultipleComponent]
 [RequireComponent(typeof(UnitCore))]
 public sealed class UnitTargeting : MonoBehaviour
@@ -9,6 +15,14 @@ public sealed class UnitTargeting : MonoBehaviour
 
     private UnitCore unitCore;
     private float nextSearchTime;
+
+    [Header("Runtime")]
+    [SerializeField]
+    private UnitTargetingMode targetingMode =
+        UnitTargetingMode.Normal;
+
+    public UnitTargetingMode TargetingMode =>
+        targetingMode;
 
     private void Awake()
     {
@@ -30,24 +44,26 @@ public sealed class UnitTargeting : MonoBehaviour
             return;
         }
 
-        // 현재 타겟이 아직 유효하면 유지
+        // 현재 모드에서 타겟이 아직 유효하면 유지
         if (IsCurrentTargetValid())
         {
             return;
         }
 
-        // 타겟이 없을 때 매 프레임 전체 유닛을 검색하지 않도록 제한
+        // 타겟이 없을 때 매 프레임 전체 대상을 검색하지 않도록 제한
         if (Time.time < nextSearchTime)
         {
             return;
         }
 
-        bool acquired = TryAcquireTarget();
+        bool acquired =
+            TryAcquireTarget();
 
         if (!acquired)
         {
             nextSearchTime =
-                Time.time + EmptySearchInterval;
+                Time.time +
+                EmptySearchInterval;
         }
     }
 
@@ -61,13 +77,15 @@ public sealed class UnitTargeting : MonoBehaviour
         }
 
         // 적군은 항상 자동전투
-        if (unitCore.Data.Team == UnitTeam.Enemy)
+        if (unitCore.Data.Team ==
+            UnitTeam.Enemy)
         {
             return true;
         }
 
         // 아군은 자동전투 상태일 때만
-        return unitCore.Data.Team == UnitTeam.Ally &&
+        return unitCore.Data.Team ==
+                   UnitTeam.Ally &&
                unitCore.IsAutoCombat;
     }
 
@@ -81,6 +99,14 @@ public sealed class UnitTargeting : MonoBehaviour
             return false;
         }
 
+        // FactoryOnly에서는 공장 이외의 타겟을 유지하지 않는다.
+        if (targetingMode ==
+            UnitTargetingMode.FactoryOnly)
+        {
+            return IsAliveFactoryTarget(
+                target);
+        }
+
         // 유닛
         if (target.TryGetComponent(
                 out UnitCore targetUnit))
@@ -92,14 +118,41 @@ public sealed class UnitTargeting : MonoBehaviour
         }
 
         // 공장은 적군만 타겟 가능
-        if (unitCore.Data.Team == UnitTeam.Enemy &&
+        if (unitCore.Data.Team ==
+                UnitTeam.Enemy &&
             target.TryGetComponent(
-                out FactoryHealth factoryHealth))
+                out FactoryHealth
+                    factoryHealth))
         {
             return factoryHealth.IsAlive;
         }
 
         return false;
+    }
+
+    public void SetTargetingMode(
+        UnitTargetingMode mode)
+    {
+        targetingMode =
+            mode;
+
+        nextSearchTime = 0f;
+
+        if (unitCore == null)
+        {
+            unitCore =
+                GetComponent<UnitCore>();
+        }
+
+        if (unitCore == null)
+        {
+            return;
+        }
+
+        if (!IsCurrentTargetValid())
+        {
+            unitCore.ClearTarget();
+        }
     }
 
     public bool TryAcquireTarget()
@@ -115,17 +168,27 @@ public sealed class UnitTargeting : MonoBehaviour
         float nearestDistanceSqr =
             float.MaxValue;
 
-        FindNearestEnemyUnits(
-            nearestTargets,
-            ref nearestDistanceSqr);
-
-        // 공장은 적군만 공격 가능
-        if (unitCore.Data.Team ==
-            UnitTeam.Enemy)
+        if (targetingMode ==
+            UnitTargetingMode.FactoryOnly)
         {
             FindNearestFactories(
                 nearestTargets,
                 ref nearestDistanceSqr);
+        }
+        else
+        {
+            FindNearestEnemyUnits(
+                nearestTargets,
+                ref nearestDistanceSqr);
+
+            // 공장은 적군만 공격 가능
+            if (unitCore.Data.Team ==
+                UnitTeam.Enemy)
+            {
+                FindNearestFactories(
+                    nearestTargets,
+                    ref nearestDistanceSqr);
+            }
         }
 
         if (nearestTargets.Count == 0)
@@ -140,7 +203,8 @@ public sealed class UnitTargeting : MonoBehaviour
                     0,
                     nearestTargets.Count)];
 
-        unitCore.SetTarget(selectedTarget);
+        unitCore.SetTarget(
+            selectedTarget);
 
         nextSearchTime = 0f;
 
@@ -155,7 +219,8 @@ public sealed class UnitTargeting : MonoBehaviour
             FindObjectsByType<UnitCore>(
                 FindObjectsSortMode.None);
 
-        foreach (UnitCore candidate in units)
+        foreach (UnitCore candidate
+                 in units)
         {
             if (candidate == null ||
                 candidate == unitCore ||
@@ -182,7 +247,8 @@ public sealed class UnitTargeting : MonoBehaviour
             FindObjectsByType<FactoryCore>(
                 FindObjectsSortMode.None);
 
-        foreach (FactoryCore factory in factories)
+        foreach (FactoryCore factory
+                 in factories)
         {
             if (factory == null ||
                 !factory.TryGetComponent(
@@ -197,6 +263,23 @@ public sealed class UnitTargeting : MonoBehaviour
                 nearestTargets,
                 ref nearestDistanceSqr);
         }
+    }
+
+    private bool IsAliveFactoryTarget(
+        GameObject target)
+    {
+        if (unitCore == null ||
+            unitCore.Data == null ||
+            unitCore.Data.Team !=
+                UnitTeam.Enemy ||
+            target == null)
+        {
+            return false;
+        }
+
+        return target.TryGetComponent(
+                   out FactoryHealth health) &&
+               health.IsAlive;
     }
 
     private void ConsiderTarget(
@@ -216,7 +299,8 @@ public sealed class UnitTargeting : MonoBehaviour
                 distanceSqr;
 
             nearestTargets.Clear();
-            nearestTargets.Add(candidate);
+            nearestTargets.Add(
+                candidate);
 
             return;
         }
@@ -225,7 +309,8 @@ public sealed class UnitTargeting : MonoBehaviour
                 distanceSqr,
                 nearestDistanceSqr))
         {
-            nearestTargets.Add(candidate);
+            nearestTargets.Add(
+                candidate);
         }
     }
 }

@@ -677,19 +677,8 @@ public sealed class RaidManager : MonoBehaviour
             return;
         }
 
-        GameObject factory =
-            FindNearestAliveFactory(
-                enemy.transform.position);
-
-        if (factory == null)
-        {
-            enemy.ClearTarget();
-
-            return;
-        }
-
-        enemy.SetTarget(
-            factory);
+        enemy.SetAutoCombat(
+            true);
 
         UnitTargeting targeting =
             enemy.GetComponent<
@@ -698,11 +687,30 @@ public sealed class RaidManager : MonoBehaviour
         if (targeting != null)
         {
             targeting.enabled =
-                false;
+                true;
+
+            targeting.SetTargetingMode(
+                UnitTargetingMode.FactoryOnly);
+
+            targeting.TryAcquireTarget();
+
+            return;
         }
 
-        enemy.SetAutoCombat(
-            true);
+        // UnitTargeting이 없는 예외적인 적은
+        // 기존 방식으로 가장 가까운 공장을 한 번 지정한다.
+        GameObject factory =
+            FindNearestAliveFactory(
+                enemy.transform.position);
+
+        if (factory == null)
+        {
+            enemy.ClearTarget();
+            return;
+        }
+
+        enemy.SetTarget(
+            factory);
     }
 
     private GameObject FindNearestAliveFactory(
