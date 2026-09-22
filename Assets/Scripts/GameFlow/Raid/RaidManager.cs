@@ -524,6 +524,7 @@ public sealed class RaidManager : MonoBehaviour
 
         isRetreating = false;
 
+        gameTimeManager?.NotifyRaidSucceeded();
         RaidSucceeded?.Invoke();
 
         Debug.Log(

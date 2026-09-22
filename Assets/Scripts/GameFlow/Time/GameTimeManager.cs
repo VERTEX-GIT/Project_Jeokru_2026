@@ -57,6 +57,38 @@ public sealed class GameTimeManager : MonoBehaviour
 
     private float elapsedIntervalTime;
 
+    public bool IsVictory { get; private set; }
+
+    public bool IsWaitingForRaid => CurrentTime == 60 &&
+        RaidManager.Instance != null && RaidManager.Instance.IsRaidActive;
+
+    public void CheckFactoryDefeat()
+    {
+        if (IsGameOver) return;
+        var factories = FindObjectsByType<FactoryHealth>(FindObjectsSortMode.None);
+        if (factories.Length == 0) return;
+        foreach (var factory in factories)
+        {
+            if (factory.IsAlive) return;
+        }
+        FinishGame(false);
+    }
+
+    public void NotifyRaidSucceeded()
+    {
+        if (CurrentDay != 30 || CurrentTime != 60 || IsGameOver) return;
+        CheckFactoryDefeat();
+        if (!IsGameOver) FinishGame(true);
+    }
+
+    private void FinishGame(bool victory)
+    {
+        if (IsGameOver) return;
+        IsVictory = victory;
+        IsGameOver = true;
+        Time.timeScale = 0f;
+    }
+
     private void Awake()
     {
         if (Instance != null &&
@@ -78,6 +110,12 @@ public sealed class GameTimeManager : MonoBehaviour
             return;
         }
 
+        if (IsWaitingForRaid)
+        {
+            elapsedIntervalTime = 0f;
+            return;
+        }
+
         elapsedIntervalTime +=
             Time.deltaTime;
 
@@ -88,6 +126,11 @@ public sealed class GameTimeManager : MonoBehaviour
                 timeIncreaseInterval;
 
             AdvanceTime();
+            if (!IsRunning || IsWaitingForRaid)
+            {
+                elapsedIntervalTime = 0f;
+                break;
+            }
         }
     }
 
@@ -95,6 +138,7 @@ public sealed class GameTimeManager : MonoBehaviour
     {
         if (Instance == this)
         {
+            if (IsGameOver) Time.timeScale = 1f;
             Instance = null;
         }
     }
@@ -114,10 +158,12 @@ public sealed class GameTimeManager : MonoBehaviour
 
         elapsedIntervalTime = 0f;
         IsGameOver = false;
+        IsVictory = false;
     }
 
     private void AdvanceTime()
     {
+        if (!IsRunning || IsWaitingForRaid) return;
         CurrentTime++;
 
         if (CurrentTime > 60)
@@ -145,6 +191,7 @@ public sealed class GameTimeManager : MonoBehaviour
 
     public void ResetTime()
     {
+        if (IsGameOver) Time.timeScale = 1f;
         InitializeTime();
 
         DayChanged?.Invoke(

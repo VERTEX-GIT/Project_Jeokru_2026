@@ -19,10 +19,12 @@ public sealed class PauseMenu : MonoBehaviour
 
     private ObjectPlacementController placementController;
 
+    private static bool paused;
+
     public static bool IsPaused
     {
-        get;
-        private set;
+        get => paused || (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver);
+        private set => paused = value;
     }
 
     private void Start()
@@ -41,6 +43,7 @@ public sealed class PauseMenu : MonoBehaviour
 
     private void Update()
     {
+        if (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver) return;
         if (IsMainMenuScene())
         {
             return;
@@ -140,6 +143,7 @@ public sealed class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
+        if (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver) return;
         if (settingsMenu != null &&
             settingsMenu.IsOpen)
         {

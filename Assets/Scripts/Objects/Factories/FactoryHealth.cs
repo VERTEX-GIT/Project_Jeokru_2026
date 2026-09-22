@@ -59,6 +59,7 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
     private void HandleDestroyed()
     {
         IsDestroyed = true;
+        GameTimeManager.Instance?.CheckFactoryDefeat();
 
         // 공장은 제거하지 않는다.
         // 추후 생산 정지 / 작업자 해제 / 수리 시스템과 연결.
