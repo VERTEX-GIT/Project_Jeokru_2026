@@ -12452,7 +12452,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 830849258038282339, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
       propertyPath: anchorCell.y
-      value: 7
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4280184795454498564, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
       propertyPath: m_LocalPosition.x
