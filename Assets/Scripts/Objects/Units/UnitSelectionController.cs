@@ -201,12 +201,9 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnPrimaryPress(
         InputAction.CallbackContext context)
     {
-        if (PauseMenu.IsPaused)
-        {
-            return;
-        }
-
-        if (IsPlacementModeActive())
+        if (PauseMenu.IsPaused ||
+            IsPlacementModeActive() ||
+            IsPointerOverUI())
         {
             return;
         }
@@ -300,12 +297,9 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void HandlePrimaryClick()
     {
-        if (PauseMenu.IsPaused)
-        {
-            return;
-        }
-
-        if (IsPlacementModeActive())
+        if (PauseMenu.IsPaused ||
+            IsPlacementModeActive() ||
+            IsPointerOverUI())
         {
             return;
         }
@@ -342,12 +336,9 @@ public sealed class UnitSelectionController : MonoBehaviour
     private void OnMovePress(
         InputAction.CallbackContext context)
     {
-        if (PauseMenu.IsPaused)
-        {
-            return;
-        }
-
-        if (IsPlacementModeActive() ||
+        if (PauseMenu.IsPaused ||
+            IsPlacementModeActive() ||
+            IsPointerOverUI() ||
             pointerPositionAction == null)
         {
             return;
@@ -391,6 +382,13 @@ public sealed class UnitSelectionController : MonoBehaviour
             IsPlacementModeActive() ||
             pointerPositionAction == null ||
             frontlinePlanner == null)
+        {
+            return;
+        }
+
+        // 진행 중인 드래그는 UI를 스쳤다고 취소하지 않는다.
+        // 다만 UI 아래 월드 좌표로 전위가 갱신되는 것은 막는다.
+        if (IsPointerOverUI())
         {
             return;
         }
@@ -447,8 +445,9 @@ public sealed class UnitSelectionController : MonoBehaviour
         if (isFrontlineDrag)
         {
             // 마지막 프레임에서 포인터가 이동했을 수도 있으므로
-            // release 위치까지 한 번 더 반영
-            if (TryGetPointerCell(
+            // UI 위가 아닐 때만 release 위치까지 한 번 더 반영
+            if (!IsPointerOverUI() &&
+                TryGetPointerCell(
                     out Vector3Int endCell))
             {
                 frontlinePlanner.UpdateFrontline(
@@ -472,12 +471,9 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private void HandleMoveCommand()
     {
-        if (PauseMenu.IsPaused)
-        {
-            return;
-        }
-
-        if (IsPlacementModeActive())
+        if (PauseMenu.IsPaused ||
+            IsPlacementModeActive() ||
+            IsPointerOverUI())
         {
             return;
         }
@@ -924,12 +920,19 @@ public sealed class UnitSelectionController : MonoBehaviour
 
     private bool IsPlacementModeActive()
     {
-        if (MedicineUseController.Instance != null && MedicineUseController.Instance.BlocksWorldInput)
+        if (MedicineUseController.Instance != null &&
+            MedicineUseController.Instance.BlocksWorldInput)
         {
             return true;
         }
 
         return placementController != null &&
-            (placementController.BlocksWorldInput || placementController.IsPointerOverUI());
+            placementController.BlocksWorldInput;
+    }
+
+    private bool IsPointerOverUI()
+    {
+        return placementController != null &&
+            placementController.IsPointerOverUI();
     }
 }

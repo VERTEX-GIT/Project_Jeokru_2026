@@ -2,6 +2,5 @@
 public enum PlacementMode
 {
     None,       // 배치하지 않는 기본 상태
-    Unit,       // 1×1 유닛 배치
-    Factory     // 3×3 공장 배치
+    Factory     // 공장 배치
 }
