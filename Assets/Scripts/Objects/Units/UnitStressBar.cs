@@ -1,11 +1,11 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class UnitHealthBar : MonoBehaviour
+public sealed class UnitStressBar : MonoBehaviour
 {
     [Header("References")]
     [SerializeField]
-    private UnitHealth unitHealth;
+    private UnitStress unitStress;
 
     [SerializeField]
     private Transform fillTransform;
@@ -23,7 +23,7 @@ public sealed class UnitHealthBar : MonoBehaviour
 
     [SerializeField]
     [Min(0.001f)]
-    private float height = 0.1f;
+    private float height = 0.08f;
 
     private Vector3 fillBaseLocalPosition;
 
@@ -46,10 +46,10 @@ public sealed class UnitHealthBar : MonoBehaviour
     {
         ResolveReferences();
 
-        if (unitHealth != null)
+        if (unitStress != null)
         {
-            unitHealth.HealthChanged +=
-                OnHealthChanged;
+            unitStress.StressChanged +=
+                OnStressChanged;
         }
 
         Refresh();
@@ -57,10 +57,10 @@ public sealed class UnitHealthBar : MonoBehaviour
 
     private void OnDisable()
     {
-        if (unitHealth != null)
+        if (unitStress != null)
         {
-            unitHealth.HealthChanged -=
-                OnHealthChanged;
+            unitStress.StressChanged -=
+                OnStressChanged;
         }
     }
 
@@ -110,11 +110,11 @@ public sealed class UnitHealthBar : MonoBehaviour
 
     private void ResolveReferences()
     {
-        if (unitHealth == null)
+        if (unitStress == null)
         {
-            unitHealth =
+            unitStress =
                 GetComponentInParent<
-                    UnitHealth>();
+                    UnitStress>();
         }
 
         if (fillTransform == null &&
@@ -125,15 +125,15 @@ public sealed class UnitHealthBar : MonoBehaviour
         }
     }
 
-    private void OnHealthChanged(
-        float currentHp,
-        float maxHp)
+    private void OnStressChanged(
+        float currentStress,
+        float maxStress)
     {
         float ratio =
-            maxHp > 0f
+            maxStress > 0f
                 ? Mathf.Clamp01(
-                    currentHp /
-                    maxHp)
+                    currentStress /
+                    maxStress)
                 : 0f;
 
         RefreshVisualOnly(
@@ -143,17 +143,17 @@ public sealed class UnitHealthBar : MonoBehaviour
     private void Refresh()
     {
         if (!initialized ||
-            unitHealth == null)
+            unitStress == null)
         {
             return;
         }
 
         RefreshVisualOnly(
-            unitHealth.HealthRatio);
+            unitStress.StressRatio);
     }
 
     // Fill의 왼쪽 끝을 고정한 채
-    // 오른쪽만 줄어들도록 크기와 위치를 함께 조절
+    // 오른쪽으로 스트레스가 차오르도록 조절
     private void RefreshVisualOnly(
         float ratio)
     {
