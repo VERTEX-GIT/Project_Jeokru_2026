@@ -13,6 +13,10 @@ public class ResourceInventory : MonoBehaviour
         private set;
     }
 
+    [Header("Starting Resources")]
+    [SerializeField]
+    private List<ResourceCost> startingResources = new();
+
     // 자원 보유량
     private readonly Dictionary<ResourceType, int>
         resourceAmounts = new();
@@ -33,6 +37,8 @@ public class ResourceInventory : MonoBehaviour
         }
 
         Inventory = this;
+
+        InitializeStartingResources();
     }
 
     private void OnDestroy()
@@ -44,6 +50,35 @@ public class ResourceInventory : MonoBehaviour
     }
 
     /* =< 자원 메서드 >========================================================================================= */
+
+    // 시작 자원으로 초기화
+    private void InitializeStartingResources()
+    {
+        resourceAmounts.Clear();
+
+        foreach (ResourceType resourceType
+                 in Enum.GetValues(
+                     typeof(ResourceType)))
+        {
+            resourceAmounts[
+                resourceType] = 0;
+        }
+
+        Dictionary<ResourceType, int>
+            totals =
+                CalculateTotals(
+                    startingResources);
+
+        foreach (KeyValuePair<
+                     ResourceType,
+                     int> resource
+                 in totals)
+        {
+            resourceAmounts[
+                resource.Key] =
+                resource.Value;
+        }
+    }
 
     // 자원 보유량 리셋
     public void ResetResourceAmounts()
@@ -257,6 +292,11 @@ public class ResourceInventory : MonoBehaviour
     {
         Dictionary<ResourceType, int>
             totals = new();
+
+        if (resources == null)
+        {
+            return totals;
+        }
 
         foreach (ResourceCost resource
                  in resources)

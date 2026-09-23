@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: Mine
   productionType: 0
   baseProductionTime: 10
-  productionAmount: 1
+  productionAmount: 2
   productionCosts: []
   maxHealth: 100
   defense: 0
   installationCosts:
   - resourceType: 0
-    amount: 40
+    amount: 30
   repairCosts:
     hp0To20:
     - resourceType: 0

@@ -15,27 +15,27 @@ MonoBehaviour:
   factoryType: 1
   displayName: Red Medicine Factory
   productionType: 1
-  baseProductionTime: 60
+  baseProductionTime: 20
   productionAmount: 1
   productionCosts: []
   maxHealth: 100
   defense: 0
   installationCosts:
   - resourceType: 0
-    amount: 40
+    amount: 25
   repairCosts:
     hp0To20:
     - resourceType: 0
-      amount: 30
+      amount: 15
     hp20To40:
     - resourceType: 0
-      amount: 20
+      amount: 12
     hp40To60:
     - resourceType: 0
-      amount: 15
+      amount: 9
     hp60To80:
     - resourceType: 0
-      amount: 10
+      amount: 6
     hp80To100:
     - resourceType: 0
-      amount: 5
+      amount: 3

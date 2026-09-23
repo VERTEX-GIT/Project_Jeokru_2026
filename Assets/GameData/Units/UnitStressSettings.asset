@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitStressSettings
   lowHealthThreshold: 30
   lowHealthStressInterval: 10
-  workStressInterval: 0.5
+  workStressInterval: 1
   counselingRecoveryInterval: 10
