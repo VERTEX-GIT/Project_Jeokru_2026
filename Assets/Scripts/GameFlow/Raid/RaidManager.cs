@@ -10,14 +10,16 @@ public enum RaidState
     Failed
 }
 
+public enum RaidEventType
+{
+    Small,
+    Medium
+}
+
 [DisallowMultipleComponent]
 public sealed class RaidManager : MonoBehaviour
 {
-    public static RaidManager Instance
-    {
-        get;
-        private set;
-    }
+    public static RaidManager Instance { get; private set; }
 
     [Header("References")]
     [SerializeField]
@@ -28,13 +30,12 @@ public sealed class RaidManager : MonoBehaviour
 
     [Header("Raid Times")]
     [SerializeField]
-    private int[] raidTimes =
-    {
-        15,
-        30,
-        45,
-        60
-    };
+    [Range(1, 59)]
+    private int smallRaidTime = 30;
+
+    [SerializeField]
+    [Range(2, 60)]
+    private int mediumRaidTime = 60;
 
     [Header("Enemy Types")]
     [SerializeField]
@@ -43,68 +44,55 @@ public sealed class RaidManager : MonoBehaviour
     [SerializeField]
     private UnitData rangedEnemyData;
 
-    [Header("Spawn Count")]
-    [SerializeField]
-    [Min(0)]
-    private int baseEnemiesPerSecond = 1;
-
-    [SerializeField]
-    [Min(0.01f)]
-    private float spawnCountIncreaseCoefficient =
-        5f;
-
-    [Header("Spawn Duration")]
+    [Header("Enemy Count")]
     [SerializeField]
     [Min(1)]
-    private int baseSpawnDuration = 3;
+    private int baseSmallRaidEnemyCount = 2;
 
     [SerializeField]
-    [Min(0.01f)]
-    private float spawnDurationIncreaseCoefficient =
-        5f;
+    [Min(1)]
+    private int baseMediumRaidEnemyCount = 3;
+
+    [SerializeField]
+    [Min(1)]
+    private int smallRaidIncreaseIntervalDays = 5;
+
+    [SerializeField]
+    [Min(1)]
+    private int mediumRaidIncreaseIntervalDays = 3;
+
+    [SerializeField]
+    [Min(1)]
+    private int enemyCountIncreaseAmount = 1;
+
+    [Header("Spawn")]
+    [SerializeField]
+    [Min(0.05f)]
+    private float spawnInterval = 0.75f;
 
     [Header("Retreat")]
     [SerializeField]
     [Min(0f)]
     private float retreatDelay = 5f;
 
-    private readonly List<UnitCore>
-        spawnedEnemies = new();
-
+    private readonly List<UnitCore> spawnedEnemies = new();
     private int activeSpawnBatchCount;
-
     private bool hasEnemyExisted;
-
     private float retreatDelayRemaining;
-
     private bool retreatCountdownStarted;
-
     private bool isRetreating;
 
-    public RaidState State
-    {
-        get;
-        private set;
-    } = RaidState.Inactive;
-
-    public bool IsRaidActive =>
-        State != RaidState.Inactive;
-
-    public bool IsRaidFailed =>
-        State == RaidState.Failed;
-
-    public bool IsSpawning =>
-        activeSpawnBatchCount > 0;
-
-    public bool IsRetreating =>
-        isRetreating;
+    public RaidState State { get; private set; } = RaidState.Inactive;
+    public bool IsRaidActive => State != RaidState.Inactive;
+    public bool IsRaidFailed => State == RaidState.Failed;
+    public bool IsSpawning => activeSpawnBatchCount > 0;
+    public bool IsRetreating => isRetreating;
 
     public int ActiveEnemyCount
     {
         get
         {
             CleanupEnemyList();
-
             return spawnedEnemies.Count;
         }
     }
@@ -115,260 +103,141 @@ public sealed class RaidManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null &&
-            Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
-
             return;
         }
 
         Instance = this;
 
         if (gameTimeManager == null)
-        {
-            gameTimeManager =
-                GameTimeManager.Instance;
-        }
+            gameTimeManager = GameTimeManager.Instance;
 
         if (gameTimeManager == null)
-        {
-            gameTimeManager =
-                FindAnyObjectByType<
-                    GameTimeManager>();
-        }
+            gameTimeManager = FindAnyObjectByType<GameTimeManager>();
 
         if (enemySpawnZone == null)
-        {
-            enemySpawnZone =
-                FindAnyObjectByType<
-                    EnemySpawnZone>();
-        }
+            enemySpawnZone = FindAnyObjectByType<EnemySpawnZone>();
     }
 
     private void OnEnable()
     {
         if (gameTimeManager != null)
-        {
-            gameTimeManager.TimeTicked +=
-                HandleTimeTicked;
-        }
+            gameTimeManager.TimeTicked += HandleTimeTicked;
     }
 
     private void OnDisable()
     {
         if (gameTimeManager != null)
-        {
-            gameTimeManager.TimeTicked -=
-                HandleTimeTicked;
-        }
+            gameTimeManager.TimeTicked -= HandleTimeTicked;
     }
 
     private void Update()
     {
-        if (PauseMenu.IsPaused)
-        {
+        if (PauseMenu.IsPaused || State == RaidState.Inactive)
             return;
-        }
-
-        if (State == RaidState.Inactive)
-        {
-            return;
-        }
 
         CleanupEnemyList();
-
         EvaluateRaidState();
 
         if (State == RaidState.Failed)
-        {
             UpdateFailedRaid();
-        }
     }
 
     private void OnDestroy()
     {
         if (Instance == this)
-        {
             Instance = null;
-        }
     }
 
-    private void HandleTimeTicked(
-        int currentDay,
-        int currentTime)
-    {
-        if (!IsRaidTime(
-                currentTime))
-        {
-            return;
-        }
-
-        // 실패가 확정된 레이드는
-        // 이후 예정된 새로운 증원을 받지 않는다.
-        //
-        // 실패 전에 이미 시작된 SpawnBatch는
-        // 그대로 끝까지 진행한다.
-        if (State == RaidState.Failed)
-        {
-            return;
-        }
-
-        BeginSpawnEvent(
-            currentDay);
-    }
-
-    private bool IsRaidTime(
-        int currentTime)
-    {
-        if (raidTimes == null)
-        {
-            return false;
-        }
-
-        foreach (int raidTime
-                 in raidTimes)
-        {
-            if (raidTime ==
-                currentTime)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void BeginSpawnEvent(
-        int currentDay)
+    private void HandleTimeTicked(int currentDay, int currentTime)
     {
         if (State == RaidState.Failed)
+            return;
+
+        if (currentTime == smallRaidTime)
         {
+            BeginSpawnEvent(currentDay, RaidEventType.Small);
             return;
         }
+
+        if (currentTime == mediumRaidTime)
+            BeginSpawnEvent(currentDay, RaidEventType.Medium);
+    }
+
+    private void BeginSpawnEvent(int currentDay, RaidEventType raidEventType)
+    {
+        if (State == RaidState.Failed)
+            return;
 
         if (enemySpawnZone == null)
         {
-            Debug.LogError(
-                "RaidManager: EnemySpawnZone이 없습니다.",
-                this);
-
+            Debug.LogError("RaidManager: EnemySpawnZone이 없습니다.", this);
             return;
         }
 
-        int enemiesPerSecond =
-            CalculateEnemiesPerSecond(
-                currentDay);
-
-        int duration =
-            CalculateSpawnDuration(
-                currentDay);
-
-        if (enemiesPerSecond <= 0 ||
-            duration <= 0)
-        {
+        int enemyCount = CalculateEnemyCount(currentDay, raidEventType);
+        if (enemyCount <= 0)
             return;
-        }
 
         if (State == RaidState.Inactive)
-        {
             StartNewRaid();
-        }
 
-        StartCoroutine(
-            SpawnBatchRoutine(
-                enemiesPerSecond,
-                duration));
+        StartCoroutine(SpawnBatchRoutine(enemyCount));
+
+        Debug.Log(
+            $"RaidManager: {raidEventType} 레이드 증원 시작, 적 {enemyCount}명",
+            this);
     }
 
     private void StartNewRaid()
     {
         spawnedEnemies.Clear();
-
         activeSpawnBatchCount = 0;
-
         hasEnemyExisted = false;
-
         retreatDelayRemaining = 0f;
-
         retreatCountdownStarted = false;
-
         isRetreating = false;
 
-        State =
-            RaidState.Active;
-
+        State = RaidState.Active;
         RaidStarted?.Invoke();
 
-        Debug.Log(
-            "RaidManager: 레이드 시작",
-            this);
+        Debug.Log("RaidManager: 레이드 시작", this);
     }
 
-    private IEnumerator SpawnBatchRoutine(
-        int enemiesPerSecond,
-        int duration)
+    private IEnumerator SpawnBatchRoutine(int enemyCount)
     {
         activeSpawnBatchCount++;
 
-        for (int second = 0;
-             second < duration;
-             second++)
+        for (int spawnedCount = 0; spawnedCount < enemyCount;)
         {
-            while (gameTimeManager != null &&
-                   !gameTimeManager.IsRunning)
+            while (gameTimeManager != null && !gameTimeManager.IsRunning)
+                yield return null;
+
+            if (!TrySpawnEnemy())
             {
                 yield return null;
-            }
-
-            int spawnedThisSecond = 0;
-
-            while (spawnedThisSecond <
-                   enemiesPerSecond)
-            {
-                while (gameTimeManager != null &&
-                       !gameTimeManager.IsRunning)
-                {
-                    yield return null;
-                }
-
-                if (TrySpawnEnemy())
-                {
-                    spawnedThisSecond++;
-                }
-                else
-                {
-                    yield return null;
-                }
-            }
-
-            if (second >=
-                duration - 1)
-            {
                 continue;
             }
 
-            float elapsedSecond = 0f;
+            spawnedCount++;
 
-            while (elapsedSecond < 1f)
+            if (spawnedCount >= enemyCount)
+                continue;
+
+            float elapsedInterval = 0f;
+
+            while (elapsedInterval < spawnInterval)
             {
-                if (gameTimeManager == null ||
-                    gameTimeManager.IsRunning)
-                {
-                    elapsedSecond +=
-                        Time.deltaTime;
-                }
+                if (gameTimeManager == null || gameTimeManager.IsRunning)
+                    elapsedInterval += Time.deltaTime;
 
                 yield return null;
             }
         }
 
-        activeSpawnBatchCount--;
-
-        if (activeSpawnBatchCount < 0)
-        {
-            activeSpawnBatchCount = 0;
-        }
+        activeSpawnBatchCount = Mathf.Max(0, activeSpawnBatchCount - 1);
     }
 
     private bool TrySpawnEnemy()
@@ -379,44 +248,22 @@ public sealed class RaidManager : MonoBehaviour
                 : rangedEnemyData;
 
         if (selectedData == null)
-        {
-            selectedData =
-                meleeEnemyData != null
-                    ? meleeEnemyData
-                    : rangedEnemyData;
-        }
+            selectedData = meleeEnemyData != null ? meleeEnemyData : rangedEnemyData;
 
         if (selectedData == null)
         {
-            Debug.LogError(
-                "RaidManager: 적 UnitData가 연결되지 않았습니다.",
-                this);
-
+            Debug.LogError("RaidManager: 적 UnitData가 연결되지 않았습니다.", this);
             return false;
         }
 
-        if (!enemySpawnZone.TrySpawn(
-                selectedData,
-                out UnitCore enemy))
-        {
+        if (!enemySpawnZone.TrySpawn(selectedData, out UnitCore enemy))
             return false;
-        }
 
-        spawnedEnemies.Add(
-            enemy);
-
+        spawnedEnemies.Add(enemy);
         hasEnemyExisted = true;
 
-        // 실패 이전에 이미 시작돼 있던
-        // SpawnBatch에서 뒤늦게 생성된 적.
-        //
-        // 이 적도 실패 레이드에 합류해서
-        // 공장만 공격한다.
         if (State == RaidState.Failed)
-        {
-            ForceEnemyToFactory(
-                enemy);
-        }
+            ForceEnemyToFactory(enemy);
 
         return true;
     }
@@ -428,14 +275,11 @@ public sealed class RaidManager : MonoBehaviour
             if (!HasAvailableAlly())
             {
                 FailRaid();
-
                 return;
             }
 
             if (CanSucceedRaid())
-            {
                 SucceedRaid();
-            }
 
             return;
         }
@@ -451,47 +295,23 @@ public sealed class RaidManager : MonoBehaviour
 
     private bool CanSucceedRaid()
     {
-        if (!hasEnemyExisted)
-        {
-            return false;
-        }
-
-        if (IsSpawning)
-        {
-            return false;
-        }
-
-        if (spawnedEnemies.Count > 0)
-        {
-            return false;
-        }
-
-        return State ==
-            RaidState.Active;
+        return hasEnemyExisted &&
+               !IsSpawning &&
+               spawnedEnemies.Count == 0 &&
+               State == RaidState.Active;
     }
 
     private bool HasAvailableAlly()
     {
         UnitCore[] units =
-            FindObjectsByType<UnitCore>(
-                FindObjectsSortMode.None);
+            FindObjectsByType<UnitCore>(FindObjectsSortMode.None);
 
-        foreach (UnitCore unit
-                 in units)
+        foreach (UnitCore unit in units)
         {
             if (unit == null ||
-                unit.Data == null)
-            {
-                continue;
-            }
-
-            if (unit.Data.Team !=
-                UnitTeam.Ally)
-            {
-                continue;
-            }
-
-            if (!unit.IsGameplayAvailable)
+                unit.Data == null ||
+                unit.Data.Team != UnitTeam.Ally ||
+                !unit.IsGameplayAvailable)
             {
                 continue;
             }
@@ -505,203 +325,128 @@ public sealed class RaidManager : MonoBehaviour
     private void SucceedRaid()
     {
         if (State != RaidState.Active)
-        {
             return;
-        }
 
-        State =
-            RaidState.Inactive;
-
-        spawnedEnemies.Clear();
-
-        activeSpawnBatchCount = 0;
-
-        hasEnemyExisted = false;
-
-        retreatDelayRemaining = 0f;
-
-        retreatCountdownStarted = false;
-
-        isRetreating = false;
+        ResetRaidState();
 
         gameTimeManager?.NotifyRaidSucceeded();
+
+        if (gameTimeManager != null &&
+            !gameTimeManager.IsGameOver)
+        {
+            gameTimeManager.NotifyRaidResolved();
+        }
+
         RaidSucceeded?.Invoke();
 
-        Debug.Log(
-            "RaidManager: 레이드 성공",
-            this);
+        Debug.Log("RaidManager: 레이드 성공", this);
     }
 
     private void FailRaid()
     {
         if (State != RaidState.Active)
-        {
             return;
-        }
 
-        State =
-            RaidState.Failed;
-
-        retreatDelayRemaining =
-            retreatDelay;
-
-        retreatCountdownStarted =
-            false;
-
-        isRetreating =
-            false;
+        State = RaidState.Failed;
+        retreatDelayRemaining = retreatDelay;
+        retreatCountdownStarted = false;
+        isRetreating = false;
 
         ForceAllEnemiesToFactories();
 
         RaidFailed?.Invoke();
 
-        Debug.Log(
-            "RaidManager: 레이드 실패",
-            this);
+        Debug.Log("RaidManager: 레이드 실패", this);
     }
 
     private void UpdateFailedRaid()
     {
         if (isRetreating)
-        {
             return;
-        }
 
-        // 실패 전에 시작된 증원이
-        // 아직 남아 있다면 전부 받을 때까지 기다린다.
         if (IsSpawning)
         {
-            retreatCountdownStarted =
-                false;
-
-            retreatDelayRemaining =
-                retreatDelay;
-
+            retreatCountdownStarted = false;
+            retreatDelayRemaining = retreatDelay;
             return;
         }
 
-        // 이미 진행 중이던 모든 증원이
-        // 끝난 뒤부터 퇴각 대기시간 시작.
         if (!retreatCountdownStarted)
         {
-            retreatCountdownStarted =
-                true;
-
-            retreatDelayRemaining =
-                retreatDelay;
+            retreatCountdownStarted = true;
+            retreatDelayRemaining = retreatDelay;
 
             Debug.Log(
-                "RaidManager: 모든 기존 증원 종료, " +
-                "퇴각 대기 시작",
+                "RaidManager: 모든 기존 증원 종료, 퇴각 대기 시작",
                 this);
         }
 
-        if (gameTimeManager != null &&
-            !gameTimeManager.IsRunning)
-        {
+        if (gameTimeManager != null && !gameTimeManager.IsRunning)
             return;
-        }
 
-        retreatDelayRemaining -=
-            Time.deltaTime;
+        retreatDelayRemaining -= Time.deltaTime;
 
-        if (retreatDelayRemaining > 0f)
-        {
-            return;
-        }
-
-        BeginRetreat();
+        if (retreatDelayRemaining <= 0f)
+            BeginRetreat();
     }
 
     private void BeginRetreat()
     {
         if (isRetreating)
-        {
             return;
-        }
 
-        isRetreating =
-            true;
-
+        isRetreating = true;
         CleanupEnemyList();
 
-        foreach (UnitCore enemy
-                 in spawnedEnemies)
+        foreach (UnitCore enemy in spawnedEnemies)
         {
             if (enemy == null)
-            {
                 continue;
-            }
 
             UnitRetreatMover retreatMover =
-                enemy.GetComponent<
-                    UnitRetreatMover>();
+                enemy.GetComponent<UnitRetreatMover>();
 
             if (retreatMover == null)
-            {
-                retreatMover =
-                    enemy.gameObject
-                        .AddComponent<
-                            UnitRetreatMover>();
-            }
+                retreatMover = enemy.gameObject.AddComponent<UnitRetreatMover>();
 
-            retreatMover.BeginRetreat(
-                enemySpawnZone);
+            retreatMover.BeginRetreat(enemySpawnZone);
         }
 
-        Debug.Log(
-            "RaidManager: 적 퇴각 시작",
-            this);
+        Debug.Log("RaidManager: 적 퇴각 시작", this);
     }
 
     private void ForceAllEnemiesToFactories()
     {
         CleanupEnemyList();
 
-        foreach (UnitCore enemy
-                 in spawnedEnemies)
-        {
-            ForceEnemyToFactory(
-                enemy);
-        }
+        foreach (UnitCore enemy in spawnedEnemies)
+            ForceEnemyToFactory(enemy);
     }
 
-    private void ForceEnemyToFactory(
-        UnitCore enemy)
+    private void ForceEnemyToFactory(UnitCore enemy)
     {
         if (enemy == null ||
             enemy.Data == null ||
-            enemy.Data.Team !=
-                UnitTeam.Enemy)
+            enemy.Data.Team != UnitTeam.Enemy)
         {
             return;
         }
 
-        enemy.SetAutoCombat(
-            true);
+        enemy.SetAutoCombat(true);
 
         UnitTargeting targeting =
-            enemy.GetComponent<
-                UnitTargeting>();
+            enemy.GetComponent<UnitTargeting>();
 
         if (targeting != null)
         {
-            targeting.enabled =
-                true;
-
-            targeting.SetTargetingMode(
-                UnitTargetingMode.FactoryOnly);
-
+            targeting.enabled = true;
+            targeting.SetTargetingMode(UnitTargetingMode.FactoryOnly);
             targeting.TryAcquireTarget();
-
             return;
         }
 
-        // UnitTargeting이 없는 예외적인 적은
-        // 기존 방식으로 가장 가까운 공장을 한 번 지정한다.
         GameObject factory =
-            FindNearestAliveFactory(
-                enemy.transform.position);
+            FindNearestAliveFactory(enemy.transform.position);
 
         if (factory == null)
         {
@@ -709,51 +454,34 @@ public sealed class RaidManager : MonoBehaviour
             return;
         }
 
-        enemy.SetTarget(
-            factory);
+        enemy.SetTarget(factory);
     }
 
-    private GameObject FindNearestAliveFactory(
-        Vector3 position)
+    private GameObject FindNearestAliveFactory(Vector3 position)
     {
         FactoryCore[] factories =
-            FindObjectsByType<
-                FactoryCore>(
-                FindObjectsSortMode.None);
+            FindObjectsByType<FactoryCore>(FindObjectsSortMode.None);
 
-        FactoryCore nearestFactory =
-            null;
+        FactoryCore nearestFactory = null;
+        float nearestDistanceSqr = float.MaxValue;
 
-        float nearestDistanceSqr =
-            float.MaxValue;
-
-        foreach (FactoryCore factory
-                 in factories)
+        foreach (FactoryCore factory in factories)
         {
             if (factory == null ||
-                !factory.TryGetComponent(
-                    out FactoryHealth health) ||
+                !factory.TryGetComponent(out FactoryHealth health) ||
                 !health.IsAlive)
             {
                 continue;
             }
 
             float distanceSqr =
-                (factory.transform.position -
-                 position)
-                .sqrMagnitude;
+                (factory.transform.position - position).sqrMagnitude;
 
-            if (distanceSqr >=
-                nearestDistanceSqr)
-            {
+            if (distanceSqr >= nearestDistanceSqr)
                 continue;
-            }
 
-            nearestDistanceSqr =
-                distanceSqr;
-
-            nearestFactory =
-                factory;
+            nearestDistanceSqr = distanceSqr;
+            nearestFactory = factory;
         }
 
         return nearestFactory != null
@@ -763,104 +491,97 @@ public sealed class RaidManager : MonoBehaviour
 
     private void CompleteFailedRaid()
     {
-        State =
-            RaidState.Inactive;
+        ResetRaidState();
 
+        gameTimeManager?.NotifyRaidResolved();
+
+        Debug.Log("RaidManager: 실패 레이드 종료", this);
+    }
+
+    private void ResetRaidState()
+    {
+        State = RaidState.Inactive;
         spawnedEnemies.Clear();
-
         activeSpawnBatchCount = 0;
-
         hasEnemyExisted = false;
-
         retreatDelayRemaining = 0f;
-
         retreatCountdownStarted = false;
-
         isRetreating = false;
-
-        Debug.Log(
-            "RaidManager: 실패 레이드 종료",
-            this);
     }
 
-    private int CalculateEnemiesPerSecond(
-        int currentDay)
+    private int CalculateEnemyCount(
+        int currentDay,
+        RaidEventType raidEventType)
     {
-        float value =
-            baseEnemiesPerSecond +
-            (float)currentDay /
-            spawnCountIncreaseCoefficient;
+        int safeDay = Mathf.Max(1, currentDay);
 
-        return Mathf.Max(
-            0,
-            Mathf.FloorToInt(
-                value));
-    }
+        int baseCount =
+            raidEventType == RaidEventType.Small
+                ? baseSmallRaidEnemyCount
+                : baseMediumRaidEnemyCount;
 
-    private int CalculateSpawnDuration(
-        int currentDay)
-    {
-        float value =
-            baseSpawnDuration +
-            (float)currentDay /
-            spawnDurationIncreaseCoefficient;
+        int increaseInterval =
+            raidEventType == RaidEventType.Small
+                ? smallRaidIncreaseIntervalDays
+                : mediumRaidIncreaseIntervalDays;
+
+        int increaseSteps =
+            (safeDay - 1) /
+            Mathf.Max(1, increaseInterval);
 
         return Mathf.Max(
             1,
-            Mathf.FloorToInt(
-                value));
+            baseCount +
+            increaseSteps * enemyCountIncreaseAmount);
     }
 
     private void CleanupEnemyList()
     {
-        for (int i =
-                spawnedEnemies.Count - 1;
-             i >= 0;
-             i--)
+        for (int i = spawnedEnemies.Count - 1; i >= 0; i--)
         {
-            if (spawnedEnemies[i] != null)
-            {
-                continue;
-            }
-
-            spawnedEnemies.RemoveAt(i);
+            if (spawnedEnemies[i] == null)
+                spawnedEnemies.RemoveAt(i);
         }
     }
 
 #if UNITY_EDITOR
-    [ContextMenu(
-        "Debug/Start Raid Spawn Event")]
-    private void DebugStartRaid()
+    [ContextMenu("Debug/Start Small Raid")]
+    private void DebugStartSmallRaid()
     {
-        // Failed 상태에서는
-        // 디버그 호출도 새 증원을 생성하지 않는다.
-        if (State == RaidState.Failed)
-        {
-            return;
-        }
-
         int day =
             gameTimeManager != null
                 ? gameTimeManager.CurrentDay
                 : 1;
 
-        BeginSpawnEvent(
-            day);
+        BeginSpawnEvent(day, RaidEventType.Small);
     }
 
-    [ContextMenu(
-        "Debug/Print Raid State")]
+    [ContextMenu("Debug/Start Medium Raid")]
+    private void DebugStartMediumRaid()
+    {
+        int day =
+            gameTimeManager != null
+                ? gameTimeManager.CurrentDay
+                : 1;
+
+        BeginSpawnEvent(day, RaidEventType.Medium);
+    }
+
+    [ContextMenu("Debug/Print Raid State")]
     private void DebugPrintRaidState()
     {
+        int day =
+            gameTimeManager != null
+                ? gameTimeManager.CurrentDay
+                : 1;
+
         Debug.Log(
             $"Raid State: {State}, " +
             $"Enemies: {ActiveEnemyCount}, " +
             $"Spawning: {IsSpawning}, " +
-            $"Retreat Countdown: " +
-            $"{retreatCountdownStarted}, " +
-            $"Retreating: {isRetreating}, " +
-            $"Retreat Delay: " +
-            $"{retreatDelayRemaining:F2}",
+            $"Small Count: {CalculateEnemyCount(day, RaidEventType.Small)}, " +
+            $"Medium Count: {CalculateEnemyCount(day, RaidEventType.Medium)}, " +
+            $"Retreating: {isRetreating}",
             this);
     }
 #endif

@@ -50,40 +50,88 @@ public sealed class GameTimeManager : MonoBehaviour
         timeIncreaseInterval;
 
     public event Action<int> TimeChanged;
-
     public event Action<int> DayChanged;
-
     public event Action<int, int> TimeTicked;
 
     private float elapsedIntervalTime;
 
-    public bool IsVictory { get; private set; }
+    public bool IsVictory
+    {
+        get;
+        private set;
+    }
 
-    public bool IsWaitingForRaid => CurrentTime == 60 &&
-        RaidManager.Instance != null && RaidManager.Instance.IsRaidActive;
+    public bool IsWaitingForRaid =>
+        CurrentTime == 60 &&
+        RaidManager.Instance != null &&
+        RaidManager.Instance.IsRaidActive;
 
     public void CheckFactoryDefeat()
     {
-        if (IsGameOver) return;
-        var factories = FindObjectsByType<FactoryHealth>(FindObjectsSortMode.None);
-        if (factories.Length == 0) return;
-        foreach (var factory in factories)
+        if (IsGameOver)
         {
-            if (factory.IsAlive) return;
+            return;
         }
+
+        FactoryHealth[] factories =
+            FindObjectsByType<FactoryHealth>(
+                FindObjectsSortMode.None);
+
+        if (factories.Length == 0)
+        {
+            return;
+        }
+
+        foreach (FactoryHealth factory in factories)
+        {
+            if (factory.IsAlive)
+            {
+                return;
+            }
+        }
+
         FinishGame(false);
     }
 
     public void NotifyRaidSucceeded()
     {
-        if (CurrentDay != 30 || CurrentTime != 60 || IsGameOver) return;
+        if (CurrentDay != 30 ||
+            CurrentTime != 60 ||
+            IsGameOver)
+        {
+            return;
+        }
+
         CheckFactoryDefeat();
-        if (!IsGameOver) FinishGame(true);
+
+        if (!IsGameOver)
+        {
+            FinishGame(true);
+        }
+    }
+
+    // 60에서 진행 중이던 레이드가 완전히 종료되면
+    // 추가 시간 대기 없이 바로 다음 날로 전환한다.
+    public void NotifyRaidResolved()
+    {
+        if (IsGameOver ||
+            CurrentTime != 60 ||
+            IsWaitingForRaid)
+        {
+            return;
+        }
+
+        elapsedIntervalTime = 0f;
+        AdvanceTime();
     }
 
     private void FinishGame(bool victory)
     {
-        if (IsGameOver) return;
+        if (IsGameOver)
+        {
+            return;
+        }
+
         IsVictory = victory;
         IsGameOver = true;
         Time.timeScale = 0f;
@@ -99,7 +147,6 @@ public sealed class GameTimeManager : MonoBehaviour
         }
 
         Instance = this;
-
         InitializeTime();
     }
 
@@ -126,7 +173,9 @@ public sealed class GameTimeManager : MonoBehaviour
                 timeIncreaseInterval;
 
             AdvanceTime();
-            if (!IsRunning || IsWaitingForRaid)
+
+            if (!IsRunning ||
+                IsWaitingForRaid)
             {
                 elapsedIntervalTime = 0f;
                 break;
@@ -138,7 +187,11 @@ public sealed class GameTimeManager : MonoBehaviour
     {
         if (Instance == this)
         {
-            if (IsGameOver) Time.timeScale = 1f;
+            if (IsGameOver)
+            {
+                Time.timeScale = 1f;
+            }
+
             Instance = null;
         }
     }
@@ -163,7 +216,12 @@ public sealed class GameTimeManager : MonoBehaviour
 
     private void AdvanceTime()
     {
-        if (!IsRunning || IsWaitingForRaid) return;
+        if (!IsRunning ||
+            IsWaitingForRaid)
+        {
+            return;
+        }
+
         CurrentTime++;
 
         if (CurrentTime > 60)
@@ -183,15 +241,18 @@ public sealed class GameTimeManager : MonoBehaviour
             CurrentTime);
     }
 
-    public void SetGameOver(
-        bool gameOver)
+    public void SetGameOver(bool gameOver)
     {
         IsGameOver = gameOver;
     }
 
     public void ResetTime()
     {
-        if (IsGameOver) Time.timeScale = 1f;
+        if (IsGameOver)
+        {
+            Time.timeScale = 1f;
+        }
+
         InitializeTime();
 
         DayChanged?.Invoke(
