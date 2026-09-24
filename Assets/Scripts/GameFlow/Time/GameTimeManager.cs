@@ -47,9 +47,29 @@ public sealed class GameTimeManager : MonoBehaviour
         private set;
     }
 
+    public bool IsVictory
+    {
+        get;
+        private set;
+    }
+
+    public bool IsDialogueBlocking
+    {
+        get;
+        private set;
+    }
+
+    public bool IsWaitingForDayEnd
+    {
+        get;
+        private set;
+    }
+
     public bool IsRunning =>
         !PauseMenu.IsPaused &&
-        !IsGameOver;
+        !IsGameOver &&
+        !IsDialogueBlocking &&
+        !IsWaitingForDayEnd;
 
     public float TimeIncreaseInterval =>
         timeIncreaseInterval;
@@ -57,22 +77,17 @@ public sealed class GameTimeManager : MonoBehaviour
     public int FinalDay =>
         finalDay;
 
-    public event Action<int> TimeChanged;
-    public event Action<int> DayChanged;
-    public event Action<int, int> TimeTicked;
-
-    private float elapsedIntervalTime;
-
-    public bool IsVictory
-    {
-        get;
-        private set;
-    }
-
     public bool IsWaitingForRaid =>
         CurrentTime == 60 &&
         RaidManager.Instance != null &&
         RaidManager.Instance.IsRaidActive;
+
+    public event Action<int> TimeChanged;
+    public event Action<int> DayChanged;
+    public event Action<int, int> TimeTicked;
+    public event Action<int> DayEndRequested;
+
+    private float elapsedIntervalTime;
 
     public void CheckFactoryDefeat()
     {
@@ -130,18 +145,75 @@ public sealed class GameTimeManager : MonoBehaviour
     }
 
     // 60에서 진행 중이던 레이드가 완전히 종료되면
-    // 추가 시간 대기 없이 바로 다음 날로 전환한다.
+    // 다음 날로 넘기기 전에 해당 일차의 종료 이벤트를 요청한다.
     public void NotifyRaidResolved()
     {
         if (IsGameOver ||
             CurrentTime != 60 ||
-            IsWaitingForRaid)
+            IsWaitingForRaid ||
+            IsWaitingForDayEnd)
         {
             return;
         }
 
+        RequestDayEnd();
+    }
+
+    public void CompleteDayEnd()
+    {
+        if (IsGameOver ||
+            !IsWaitingForDayEnd)
+        {
+            return;
+        }
+
+        IsWaitingForDayEnd = false;
         elapsedIntervalTime = 0f;
-        AdvanceTime();
+
+        AdvanceToNextDay();
+    }
+
+    public void SetDialogueBlocking(
+        bool blocked)
+    {
+        IsDialogueBlocking =
+            blocked;
+
+        if (blocked)
+        {
+            elapsedIntervalTime = 0f;
+        }
+    }
+
+    private void RequestDayEnd()
+    {
+        IsWaitingForDayEnd = true;
+        elapsedIntervalTime = 0f;
+
+        if (DayEndRequested == null)
+        {
+            CompleteDayEnd();
+            return;
+        }
+
+        DayEndRequested.Invoke(
+            CurrentDay);
+    }
+
+    private void AdvanceToNextDay()
+    {
+        CurrentTime = 1;
+        CurrentDay++;
+
+        DayChanged?.Invoke(
+            CurrentDay);
+
+        TimeChanged?.Invoke(
+            CurrentTime);
+
+        TimeTicked?.Invoke(
+            CurrentDay,
+            CurrentTime);
     }
 
     private bool IsFinalRaidResolutionTime()
@@ -238,6 +310,8 @@ public sealed class GameTimeManager : MonoBehaviour
         elapsedIntervalTime = 0f;
         IsGameOver = false;
         IsVictory = false;
+        IsDialogueBlocking = false;
+        IsWaitingForDayEnd = false;
     }
 
     private void AdvanceTime()
@@ -252,11 +326,8 @@ public sealed class GameTimeManager : MonoBehaviour
 
         if (CurrentTime > 60)
         {
-            CurrentTime = 1;
-            CurrentDay++;
-
-            DayChanged?.Invoke(
-                CurrentDay);
+            RequestDayEnd();
+            return;
         }
 
         TimeChanged?.Invoke(
@@ -267,9 +338,11 @@ public sealed class GameTimeManager : MonoBehaviour
             CurrentTime);
     }
 
-    public void SetGameOver(bool gameOver)
+    public void SetGameOver(
+        bool gameOver)
     {
-        IsGameOver = gameOver;
+        IsGameOver =
+            gameOver;
     }
 
     public void ResetTime()
