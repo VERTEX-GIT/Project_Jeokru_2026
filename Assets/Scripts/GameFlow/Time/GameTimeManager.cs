@@ -24,6 +24,11 @@ public sealed class GameTimeManager : MonoBehaviour
     [Min(0.01f)]
     private float timeIncreaseInterval = 1f;
 
+    [Header("Game End")]
+    [SerializeField]
+    [Min(1)]
+    private int finalDay = 30;
+
     public int CurrentDay
     {
         get;
@@ -48,6 +53,9 @@ public sealed class GameTimeManager : MonoBehaviour
 
     public float TimeIncreaseInterval =>
         timeIncreaseInterval;
+
+    public int FinalDay =>
+        finalDay;
 
     public event Action<int> TimeChanged;
     public event Action<int> DayChanged;
@@ -82,7 +90,8 @@ public sealed class GameTimeManager : MonoBehaviour
             return;
         }
 
-        foreach (FactoryHealth factory in factories)
+        foreach (FactoryHealth factory
+                 in factories)
         {
             if (factory.IsAlive)
             {
@@ -95,8 +104,7 @@ public sealed class GameTimeManager : MonoBehaviour
 
     public void NotifyRaidSucceeded()
     {
-        if (CurrentDay != 30 ||
-            CurrentTime != 60 ||
+        if (!IsFinalRaidResolutionTime() ||
             IsGameOver)
         {
             return;
@@ -108,6 +116,17 @@ public sealed class GameTimeManager : MonoBehaviour
         {
             FinishGame(true);
         }
+    }
+
+    public void NotifyRaidFailed()
+    {
+        if (!IsFinalRaidResolutionTime() ||
+            IsGameOver)
+        {
+            return;
+        }
+
+        FinishGame(false);
     }
 
     // 60에서 진행 중이던 레이드가 완전히 종료되면
@@ -123,6 +142,13 @@ public sealed class GameTimeManager : MonoBehaviour
 
         elapsedIntervalTime = 0f;
         AdvanceTime();
+    }
+
+    private bool IsFinalRaidResolutionTime()
+    {
+        return
+            CurrentDay >= finalDay &&
+            CurrentTime == 60;
     }
 
     private void FinishGame(bool victory)

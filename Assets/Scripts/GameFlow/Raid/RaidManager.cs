@@ -493,7 +493,13 @@ public sealed class RaidManager : MonoBehaviour
     {
         ResetRaidState();
 
-        gameTimeManager?.NotifyRaidResolved();
+        gameTimeManager?.NotifyRaidFailed();
+
+        if (gameTimeManager != null &&
+            !gameTimeManager.IsGameOver)
+        {
+            gameTimeManager.NotifyRaidResolved();
+        }
 
         Debug.Log("RaidManager: 실패 레이드 종료", this);
     }
