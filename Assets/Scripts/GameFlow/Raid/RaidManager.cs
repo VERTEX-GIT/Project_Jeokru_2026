@@ -272,7 +272,7 @@ public sealed class RaidManager : MonoBehaviour
     {
         if (State == RaidState.Active)
         {
-            if (!HasAvailableAlly())
+            if (!HasLivingActiveAlly())
             {
                 FailRaid();
                 return;
@@ -301,7 +301,7 @@ public sealed class RaidManager : MonoBehaviour
                State == RaidState.Active;
     }
 
-    private bool HasAvailableAlly()
+    private bool HasLivingActiveAlly()
     {
         UnitCore[] units =
             FindObjectsByType<UnitCore>(FindObjectsSortMode.None);
@@ -311,7 +311,13 @@ public sealed class RaidManager : MonoBehaviour
             if (unit == null ||
                 unit.Data == null ||
                 unit.Data.Team != UnitTeam.Ally ||
-                !unit.IsGameplayAvailable)
+                !unit.IsActive)
+            {
+                continue;
+            }
+
+            if (!unit.TryGetComponent(out UnitHealth health) ||
+                !health.IsAlive)
             {
                 continue;
             }

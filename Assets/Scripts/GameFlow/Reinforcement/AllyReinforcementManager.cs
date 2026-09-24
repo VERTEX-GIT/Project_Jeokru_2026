@@ -23,7 +23,7 @@ public sealed class AllyReinforcementManager : MonoBehaviour
     private int dailyReinforcementLimit = 1;
 
     [SerializeField]
-    [Min(0)]
+    [Min(1)]
     private int zeroAllyReinforcementLimit = 2;
 
     [SerializeField]
@@ -104,9 +104,7 @@ public sealed class AllyReinforcementManager : MonoBehaviour
             out int totalCount);
 
         if (activeCount >=
-                targetActiveAllies ||
-            totalCount >=
-                maxTotalAllies)
+            targetActiveAllies)
         {
             return;
         }
@@ -115,20 +113,37 @@ public sealed class AllyReinforcementManager : MonoBehaviour
             targetActiveAllies -
             activeCount;
 
-        int dailyLimit =
-            activeCount == 0
-                ? zeroAllyReinforcementLimit
-                : dailyReinforcementLimit;
+        int spawnCount;
 
-        int remainingCapacity =
-            maxTotalAllies -
-            totalCount;
+        if (activeCount == 0)
+        {
+            // 전멸 상태에서는 전체 인원 상한보다 복구 가능성을 우선한다.
+            // 다음 날 최소 한 명 이상이 합류해야 게임이 소프트락되지 않는다.
+            spawnCount =
+                Mathf.Min(
+                    missingActive,
+                    Mathf.Max(
+                        1,
+                        zeroAllyReinforcementLimit));
+        }
+        else
+        {
+            if (totalCount >=
+                maxTotalAllies)
+            {
+                return;
+            }
 
-        int spawnCount =
-            Mathf.Min(
-                missingActive,
-                dailyLimit,
-                remainingCapacity);
+            int remainingCapacity =
+                maxTotalAllies -
+                totalCount;
+
+            spawnCount =
+                Mathf.Min(
+                    missingActive,
+                    dailyReinforcementLimit,
+                    remainingCapacity);
+        }
 
         int spawnedCount = 0;
 
