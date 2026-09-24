@@ -1,42 +1,34 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class UnitSpawnEntryMover
-    : MonoBehaviour
+public sealed class UnitSpawnEntryMover : MonoBehaviour
 {
     private Vector3Int entryCell;
-
-    private TileOccupancyManager
-        occupancyManager;
-
+    private TileOccupancyManager occupancyManager;
     private TileObjectPlacement placement;
     private UnitCore unitCore;
-
     private bool isEntering;
+    private bool activateOnEntry = true;
+
+    public event Action EntryCompleted;
 
     public void Initialize(
         Vector3Int targetEntryCell,
-        TileOccupancyManager manager)
+        TileOccupancyManager manager,
+        bool shouldActivateOnEntry = true)
     {
-        entryCell =
-            targetEntryCell;
+        entryCell = targetEntryCell;
+        occupancyManager = manager;
+        activateOnEntry = shouldActivateOnEntry;
 
-        occupancyManager =
-            manager;
-
-        placement =
-            GetComponent<
-                TileObjectPlacement>();
-
-        unitCore =
-            GetComponent<
-                UnitCore>();
+        placement = GetComponent<TileObjectPlacement>();
+        unitCore = GetComponent<UnitCore>();
 
         if (placement == null ||
             unitCore == null ||
             occupancyManager == null ||
-            occupancyManager.CoordinateManager ==
-                null)
+            occupancyManager.CoordinateManager == null)
         {
             enabled = false;
             return;
@@ -45,16 +37,12 @@ public sealed class UnitSpawnEntryMover
         unitCore.SetUnitActive(false);
 
         isEntering = true;
+        enabled = true;
     }
 
     private void Update()
     {
-        if (!isEntering)
-        {
-            return;
-        }
-
-        if (PauseMenu.IsPaused)
+        if (!isEntering || PauseMenu.IsPaused)
         {
             return;
         }
@@ -68,23 +56,19 @@ public sealed class UnitSpawnEntryMover
             occupancyManager != null &&
             placement != null)
         {
-            occupancyManager
-                .ReleaseReservation(
-                    entryCell,
-                    placement);
+            occupancyManager.ReleaseReservation(
+                entryCell,
+                placement);
         }
     }
 
     private void MoveTowardEntry()
     {
         Vector3 targetPosition =
-            occupancyManager
-                .CoordinateManager
-                .CellToWorldCenter(
-                    entryCell);
+            occupancyManager.CoordinateManager
+                .CellToWorldCenter(entryCell);
 
-        targetPosition.z =
-            transform.position.z;
+        targetPosition.z = transform.position.z;
 
         float moveSpeed =
             unitCore.Data != null
@@ -95,16 +79,12 @@ public sealed class UnitSpawnEntryMover
             Vector3.MoveTowards(
                 transform.position,
                 targetPosition,
-                moveSpeed *
-                Time.deltaTime);
+                moveSpeed * Time.deltaTime);
 
-        if (transform.position !=
-            targetPosition)
+        if (transform.position == targetPosition)
         {
-            return;
+            CompleteEntry();
         }
-
-        CompleteEntry();
     }
 
     private void CompleteEntry()
@@ -113,12 +93,10 @@ public sealed class UnitSpawnEntryMover
             entryCell,
             placement);
 
-        if (!placement.TryPlace(
-                entryCell))
+        if (!placement.TryPlace(entryCell))
         {
             Debug.LogError(
-                $"{name}: 생성 진입 타일 " +
-                $"{entryCell} 배치 실패.",
+                $"{name}: 생성 진입 타일 {entryCell} 배치 실패.",
                 this);
 
             Destroy(gameObject);
@@ -127,8 +105,13 @@ public sealed class UnitSpawnEntryMover
 
         isEntering = false;
 
-        unitCore.SetUnitActive(true);
-        unitCore.SetAutoCombat(true);
+        if (activateOnEntry)
+        {
+            unitCore.SetUnitActive(true);
+            unitCore.SetAutoCombat(true);
+        }
+
+        EntryCompleted?.Invoke();
 
         enabled = false;
     }

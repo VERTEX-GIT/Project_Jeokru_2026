@@ -15,12 +15,15 @@ public sealed class AllySpawnZone : MonoBehaviour
     [SerializeField]
     private Transform[] entryPoints;
 
+    [Header("Rally Points")]
+    [SerializeField]
+    private Transform[] rallyPoints;
+
     [Header("References")]
     [SerializeField]
     private TileOccupancyManager occupancyManager;
 
-    private readonly List<int>
-        candidateIndices = new();
+    private readonly List<int> candidateIndices = new();
 
     private void Awake()
     {
@@ -43,8 +46,7 @@ public sealed class AllySpawnZone : MonoBehaviour
             return false;
         }
 
-        if (unitData.Team !=
-            UnitTeam.Ally)
+        if (unitData.Team != UnitTeam.Ally)
         {
             Debug.LogError(
                 "AllySpawnZone: 아군 UnitData만 생성할 수 있습니다.",
@@ -56,8 +58,7 @@ public sealed class AllySpawnZone : MonoBehaviour
         ResolveReferences();
 
         if (occupancyManager == null ||
-            occupancyManager.CoordinateManager ==
-                null)
+            occupancyManager.CoordinateManager == null)
         {
             return false;
         }
@@ -82,40 +83,32 @@ public sealed class AllySpawnZone : MonoBehaviour
                 Quaternion.identity);
 
         TileObjectPlacement placement =
-            spawnedObject.GetComponent<
-                TileObjectPlacement>();
+            spawnedObject.GetComponent<TileObjectPlacement>();
 
         UnitCore unitCore =
-            spawnedObject.GetComponent<
-                UnitCore>();
+            spawnedObject.GetComponent<UnitCore>();
 
         if (placement == null ||
             unitCore == null)
         {
             Debug.LogError(
-                $"{spawnedObject.name}: " +
-                "필수 유닛 컴포넌트가 없습니다.",
+                $"{spawnedObject.name}: 필수 유닛 컴포넌트가 없습니다.",
                 spawnedObject);
 
             Destroy(spawnedObject);
             return false;
         }
 
-        // 동적 생성 유닛은 SceneTilePlacementInitializer의
-        // Start 자동 배치를 사용하지 않고 진입 지점에서 등록한다.
-        SceneTilePlacementInitializer
-            sceneInitializer =
-                spawnedObject.GetComponent<
-                    SceneTilePlacementInitializer>();
+        SceneTilePlacementInitializer sceneInitializer =
+            spawnedObject.GetComponent<
+                SceneTilePlacementInitializer>();
 
         if (sceneInitializer != null)
         {
-            sceneInitializer.enabled =
-                false;
+            sceneInitializer.enabled = false;
         }
 
-        unitCore.SetData(
-            unitData);
+        unitCore.SetData(unitData);
 
         if (!TryReserveRandomEntry(
                 placement,
@@ -124,6 +117,21 @@ public sealed class AllySpawnZone : MonoBehaviour
             Destroy(spawnedObject);
             return false;
         }
+
+        AllyReinforcementArrivalMover arrivalMover =
+            spawnedObject.GetComponent<
+                AllyReinforcementArrivalMover>();
+
+        if (arrivalMover == null)
+        {
+            arrivalMover =
+                spawnedObject.AddComponent<
+                    AllyReinforcementArrivalMover>();
+        }
+
+        arrivalMover.Initialize(
+            rallyPoints,
+            occupancyManager);
 
         UnitSpawnEntryMover entryMover =
             spawnedObject.GetComponent<
@@ -136,12 +144,15 @@ public sealed class AllySpawnZone : MonoBehaviour
                     UnitSpawnEntryMover>();
         }
 
+        entryMover.EntryCompleted +=
+            arrivalMover.BeginArrival;
+
         entryMover.Initialize(
             entryCell,
-            occupancyManager);
+            occupancyManager,
+            false);
 
-        spawnedUnit =
-            unitCore;
+        spawnedUnit = unitCore;
 
         return true;
     }
@@ -171,8 +182,7 @@ public sealed class AllySpawnZone : MonoBehaviour
         if (entryPoints == null ||
             entryPoints.Length == 0 ||
             occupancyManager == null ||
-            occupancyManager.CoordinateManager ==
-                null)
+            occupancyManager.CoordinateManager == null)
         {
             return false;
         }
@@ -204,8 +214,7 @@ public sealed class AllySpawnZone : MonoBehaviour
                 randomListIndex);
 
             Vector3Int candidateCell =
-                occupancyManager
-                    .CoordinateManager
+                occupancyManager.CoordinateManager
                     .WorldToCell(
                         entryPoints[
                             pointIndex]
@@ -218,9 +227,7 @@ public sealed class AllySpawnZone : MonoBehaviour
                 continue;
             }
 
-            entryCell =
-                candidateCell;
-
+            entryCell = candidateCell;
             return true;
         }
 
