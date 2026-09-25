@@ -50,6 +50,11 @@ public sealed class DayDialogueController : MonoBehaviour
     private Coroutine dialogueRoutine;
     private bool isHandlingDayEnd;
 
+    private bool ShouldPlayOpeningDialogue =>
+        playOpeningDialogue &&
+        GameSession.StartMode ==
+            GameStartMode.NewGame;
+
     private void Awake()
     {
         ResolveReferences();
@@ -60,7 +65,7 @@ public sealed class DayDialogueController : MonoBehaviour
         SetDialogueInputEnabled(
             false);
 
-        if (playOpeningDialogue &&
+        if (ShouldPlayOpeningDialogue &&
             gameTimeManager != null)
         {
             gameTimeManager.SetDialogueBlocking(
@@ -81,7 +86,7 @@ public sealed class DayDialogueController : MonoBehaviour
 
     private void Start()
     {
-        if (!playOpeningDialogue)
+        if (!ShouldPlayOpeningDialogue)
         {
             return;
         }
