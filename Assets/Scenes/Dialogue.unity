@@ -178,8 +178,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Here's a big long line of dialogue, ready to be shown to the player.
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
-  m_sharedMaterial: {fileID: 2464405986921477177, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9257d2e699cee7449a83365ee290c5a3, type: 2}
+  m_sharedMaterial: {fileID: 6921862703714329065, guid: 9257d2e699cee7449a83365ee290c5a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -873,8 +873,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Character Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
-  m_sharedMaterial: {fileID: 2464405986921477177, guid: cbf30bc1e5f05d64bab416feab807962, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a1104acd80bb3e24ebcc0eb8c7480709, type: 2}
+  m_sharedMaterial: {fileID: -6789668243439993350, guid: a1104acd80bb3e24ebcc0eb8c7480709, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
