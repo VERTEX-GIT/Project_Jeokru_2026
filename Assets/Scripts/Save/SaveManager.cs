@@ -27,9 +27,21 @@ public static class SaveManager
             return false;
         }
 
+        ResourceInventory inventory =
+            ResourceInventory.Inventory;
+
+        if (inventory == null)
+        {
+            Debug.LogError(
+                "SaveManager: ResourceInventory가 없습니다.");
+
+            return false;
+        }
+
         GameSaveData saveData =
             CreateSaveData(
-                gameTimeManager);
+                gameTimeManager,
+                inventory);
 
         try
         {
@@ -65,6 +77,17 @@ public static class SaveManager
             return false;
         }
 
+        ResourceInventory inventory =
+            ResourceInventory.Inventory;
+
+        if (inventory == null)
+        {
+            Debug.LogError(
+                "SaveManager: ResourceInventory가 없습니다.");
+
+            return false;
+        }
+
         if (!TryReadSaveData(
                 out GameSaveData saveData))
         {
@@ -78,6 +101,17 @@ public static class SaveManager
 
             return false;
         }
+
+        if (saveData.resources == null)
+        {
+            Debug.LogError(
+                "SaveManager: 저장 파일에 Resource 데이터가 없습니다.");
+
+            return false;
+        }
+
+        inventory.RestoreResourceAmounts(
+            saveData.resources);
 
         gameTimeManager.RestoreTime(
             saveData.gameTime.day,
@@ -173,29 +207,50 @@ public static class SaveManager
     }
 
     private static GameSaveData CreateSaveData(
-        GameTimeManager gameTimeManager)
+        GameTimeManager gameTimeManager,
+        ResourceInventory inventory)
     {
-        return new GameSaveData
+        GameSaveData saveData =
+            new()
+            {
+                version =
+                    CurrentSaveVersion,
+
+                savedAtUtc =
+                    DateTime.UtcNow
+                        .ToString("O"),
+
+                gameTime =
+                    new GameTimeSaveData
+                    {
+                        day =
+                            gameTimeManager
+                                .CurrentDay,
+
+                        time =
+                            gameTimeManager
+                                .CurrentTime
+                    }
+            };
+
+        foreach (ResourceType resourceType
+                 in Enum.GetValues(
+                     typeof(ResourceType)))
         {
-            version =
-                CurrentSaveVersion,
-
-            savedAtUtc =
-                DateTime.UtcNow
-                    .ToString("O"),
-
-            gameTime =
-                new GameTimeSaveData
+            saveData.resources.Add(
+                new ResourceAmountSaveData
                 {
-                    day =
-                        gameTimeManager
-                            .CurrentDay,
+                    resourceType =
+                        resourceType,
 
-                    time =
-                        gameTimeManager
-                            .CurrentTime
-                }
-        };
+                    amount =
+                        inventory
+                            .GetResourceAmount(
+                                resourceType)
+                });
+        }
+
+        return saveData;
     }
 
 #if UNITY_EDITOR

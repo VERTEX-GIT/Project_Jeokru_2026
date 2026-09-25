@@ -96,6 +96,61 @@ public class ResourceInventory : MonoBehaviour
         }
     }
 
+    // 저장된 자원 보유량으로 교체
+    public void RestoreResourceAmounts(
+        IReadOnlyList<ResourceAmountSaveData>
+            savedResources)
+    {
+        Dictionary<ResourceType, int>
+            restoredAmounts = new();
+
+        foreach (ResourceType resourceType
+                 in Enum.GetValues(
+                     typeof(ResourceType)))
+        {
+            restoredAmounts[
+                resourceType] = 0;
+        }
+
+        if (savedResources != null)
+        {
+            foreach (ResourceAmountSaveData resource
+                     in savedResources)
+            {
+                if (resource == null ||
+                    !Enum.IsDefined(
+                        typeof(ResourceType),
+                        resource.resourceType))
+                {
+                    continue;
+                }
+
+                restoredAmounts[
+                    resource.resourceType] =
+                    Mathf.Max(
+                        0,
+                        resource.amount);
+            }
+        }
+
+        foreach (ResourceType resourceType
+                 in Enum.GetValues(
+                     typeof(ResourceType)))
+        {
+            int amount =
+                restoredAmounts[
+                    resourceType];
+
+            resourceAmounts[
+                resourceType] =
+                amount;
+
+            ResourceAmountChanged?.Invoke(
+                resourceType,
+                amount);
+        }
+    }
+
     // 특정 자원 보유량 반환
     public int GetResourceAmount(
         ResourceType resourceType)
