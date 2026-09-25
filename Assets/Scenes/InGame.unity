@@ -11186,9 +11186,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1485478430}
+  - component: {fileID: 1485478432}
   - component: {fileID: 1485478431}
   m_Layer: 0
-  m_Name: InGameLoad
+  m_Name: SaveLoadManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11227,6 +11228,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
   - {fileID: 11400000, guid: 31ee64edef76f2049a5e8d489eab74da, type: 2}
   - {fileID: 11400000, guid: 79955e01f4533874d9926305c0270f38, type: 2}
+--- !u!114 &1485478432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1485478429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 420c1a895c70d434e8b230e2d9a6a613, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoSaveController
+  gameTimeManager: {fileID: 1323874069}
 --- !u!1 &1514364956
 GameObject:
   m_ObjectHideFlags: 0

@@ -87,6 +87,10 @@ public sealed class GameTimeManager : MonoBehaviour
     public event Action<int, int> TimeTicked;
     public event Action<int> DayEndRequested;
 
+    // 다음 날 번호와 시작 시간으로 전환된 직후,
+    // 새 날의 DayChanged 처리 전에 체크포인트 저장을 요청한다.
+    public event Action<int> DayCheckpointReached;
+
     private float elapsedIntervalTime;
 
     public void CheckFactoryDefeat()
@@ -256,6 +260,9 @@ public sealed class GameTimeManager : MonoBehaviour
     {
         CurrentTime = 1;
         CurrentDay++;
+
+        DayCheckpointReached?.Invoke(
+            CurrentDay);
 
         DayChanged?.Invoke(
             CurrentDay);
