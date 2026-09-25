@@ -185,6 +185,43 @@ public sealed class GameTimeManager : MonoBehaviour
         }
     }
 
+    public void RestoreTime(
+        int day,
+        int time)
+    {
+        if (IsGameOver)
+        {
+            Time.timeScale = 1f;
+        }
+
+        CurrentDay =
+            Mathf.Max(
+                1,
+                day);
+
+        CurrentTime =
+            Mathf.Clamp(
+                time,
+                1,
+                60);
+
+        elapsedIntervalTime = 0f;
+        IsGameOver = false;
+        IsVictory = false;
+        IsDialogueBlocking = false;
+        IsWaitingForDayEnd = false;
+
+        DayChanged?.Invoke(
+            CurrentDay);
+
+        TimeChanged?.Invoke(
+            CurrentTime);
+
+        TimeTicked?.Invoke(
+            CurrentDay,
+            CurrentTime);
+    }
+
     private void RequestDayEnd()
     {
         IsWaitingForDayEnd = true;
@@ -370,6 +407,20 @@ public sealed class GameTimeManager : MonoBehaviour
     private void DebugAdvanceTime()
     {
         AdvanceTime();
+    }
+
+    [ContextMenu("Debug/Save Game Time")]
+    private void DebugSaveGameTime()
+    {
+        SaveManager.Save(
+            this);
+    }
+
+    [ContextMenu("Debug/Load Game Time")]
+    private void DebugLoadGameTime()
+    {
+        SaveManager.TryLoad(
+            this);
     }
 #endif
 }
