@@ -90,6 +90,7 @@ public sealed class GameTimeManager : MonoBehaviour
     // 다음 날 번호와 시작 시간으로 전환된 직후,
     // 새 날의 DayChanged 처리 전에 체크포인트 저장을 요청한다.
     public event Action<int> DayCheckpointReached;
+    public event Action<bool> GameFinished;
 
     private float elapsedIntervalTime;
 
@@ -296,6 +297,9 @@ public sealed class GameTimeManager : MonoBehaviour
             GameplayPauseController
                 .PauseReason.GameOver,
             true);
+
+        GameFinished?.Invoke(
+            victory);
 
         Time.timeScale = 0f;
     }
