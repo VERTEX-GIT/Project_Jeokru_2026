@@ -48,25 +48,32 @@ public sealed class CounselingRoom :
 
     private void Start()
     {
-        RegisterFixedPlacement();
+        EnsureFixedPlacement();
 
         NotifyCountChanged();
     }
 
-    private void RegisterFixedPlacement()
+    public bool EnsureFixedPlacement()
     {
+        if (placement == null)
+        {
+            placement =
+                GetComponent<
+                    TileObjectPlacement>();
+        }
+
         if (placement == null)
         {
             Debug.LogError(
                 $"{name}: TileObjectPlacement가 없습니다.",
                 this);
 
-            return;
+            return false;
         }
 
         if (placement.IsPlaced)
         {
-            return;
+            return true;
         }
 
         if (!placement.TryPlace(
@@ -76,7 +83,11 @@ public sealed class CounselingRoom :
                 $"{name}: 상담실을 " +
                 $"{anchorCell}에 배치하지 못했습니다.",
                 this);
+
+            return false;
         }
+
+        return true;
     }
 
     public void Register(

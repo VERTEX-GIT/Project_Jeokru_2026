@@ -11,6 +11,9 @@ public sealed class InGameLoadController :
     [SerializeField]
     private PlacementObjectProvider objectProvider;
 
+    [SerializeField]
+    private CounselingRoom counselingRoom;
+
     [Header("Unit Save Catalog")]
     [SerializeField]
     private UnitData[] unitDataCatalog;
@@ -57,6 +60,13 @@ public sealed class InGameLoadController :
             objectProvider =
                 FindAnyObjectByType<
                     PlacementObjectProvider>();
+        }
+
+        if (counselingRoom == null)
+        {
+            counselingRoom =
+                FindAnyObjectByType<
+                    CounselingRoom>();
         }
     }
 
@@ -108,6 +118,19 @@ public sealed class InGameLoadController :
             Debug.LogError(
                 "InGameLoadController: " +
                 "PlacementObjectProvider를 찾을 수 없습니다.",
+                this);
+
+            GameSession.StartNewGame();
+            return;
+        }
+
+        if (counselingRoom != null &&
+            !counselingRoom
+                .EnsureFixedPlacement())
+        {
+            Debug.LogError(
+                "InGameLoadController: " +
+                "상담실의 고정 타일 배치를 준비하지 못했습니다.",
                 this);
 
             GameSession.StartNewGame();

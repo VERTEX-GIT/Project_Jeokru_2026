@@ -11224,6 +11224,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGameLoadController
   gameTimeManager: {fileID: 1323874069}
   objectProvider: {fileID: 1331440346}
+  counselingRoom: {fileID: 532350714362729874}
   unitDataCatalog:
   - {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
   - {fileID: 11400000, guid: 31ee64edef76f2049a5e8d489eab74da, type: 2}
@@ -14622,6 +14623,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
+--- !u!114 &532350714362729874 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 830849258038282339, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
+  m_PrefabInstance: {fileID: 532350714362729873}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c68f69da390094081c51d67f4bc633, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CounselingRoom
 --- !u!1001 &3054007875983223839
 PrefabInstance:
   m_ObjectHideFlags: 0
