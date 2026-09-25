@@ -34,6 +34,12 @@ public sealed class UnitCounseling :
     [SerializeField]
     private float recoveryTimer;
 
+    public bool HasReturnCell =>
+        hasReturnCell;
+
+    public float RecoveryTimer =>
+        recoveryTimer;
+
     private UnitCore unitCore;
     private UnitHealth unitHealth;
     private UnitStress unitStress;
@@ -87,6 +93,61 @@ public sealed class UnitCounseling :
         }
 
         UpdateCounseling();
+    }
+
+    public bool RestoreState(
+        bool isCounseling,
+        bool restoreHasReturnCell,
+        Vector3Int restoreReturnCell,
+        float restoreRecoveryTimer)
+    {
+        if (!isCounseling)
+        {
+            IsCounseling = false;
+            hasReturnCell = false;
+            recoveryTimer = 0f;
+            return true;
+        }
+
+        if (unitCore == null ||
+            placement == null ||
+            counselingRoom == null)
+        {
+            return false;
+        }
+
+        if (placement.IsPlaced)
+        {
+            placement.RemoveFromTiles();
+        }
+
+        unitCore.SetUnitActive(false);
+        unitCore.SetAutoCombat(false);
+        unitCore.SetPlayerMoveCommandActive(false);
+        unitCore.ClearTarget();
+
+        IsCounseling = true;
+        hasReturnCell = restoreHasReturnCell;
+        ReturnCell = restoreReturnCell;
+        recoveryTimer =
+            Mathf.Max(
+                0f,
+                restoreRecoveryTimer);
+
+        counselingRoom.Register(
+            this);
+
+        Vector3 processingPosition =
+            counselingRoom
+                .ProcessingPosition;
+
+        processingPosition.z =
+            transform.position.z;
+
+        transform.position =
+            processingPosition;
+
+        return true;
     }
 
     private void TryEnterCounseling()

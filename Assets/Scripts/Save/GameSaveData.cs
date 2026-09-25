@@ -67,6 +67,7 @@ public sealed class UnitSaveData
     public string unitId;
     public CellSaveData cell = new();
 
+    public bool isActive;
     public float currentHp;
     public float currentStress;
 

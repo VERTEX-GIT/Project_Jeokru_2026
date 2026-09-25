@@ -19,6 +19,9 @@ public sealed class UnitData : ScriptableObject
 {
     [Header("기본 정보")]
     [SerializeField]
+    private string saveId;
+
+    [SerializeField]
     private string unitName;
 
     [SerializeField]
@@ -63,6 +66,7 @@ public sealed class UnitData : ScriptableObject
     [Min(0f)]
     private float preferredDistance = 1f;
 
+    public string SaveId => saveId;
     public string UnitName => unitName;
     public GameObject UnitPrefab => unitPrefab;
     public UnitTeam Team => team;

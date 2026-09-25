@@ -11223,6 +11223,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGameLoadController
   gameTimeManager: {fileID: 1323874069}
   objectProvider: {fileID: 1331440346}
+  unitDataCatalog:
+  - {fileID: 11400000, guid: a34f89971ba153d459238be635e0b42e, type: 2}
+  - {fileID: 11400000, guid: 31ee64edef76f2049a5e8d489eab74da, type: 2}
+  - {fileID: 11400000, guid: 79955e01f4533874d9926305c0270f38, type: 2}
 --- !u!1 &1514364956
 GameObject:
   m_ObjectHideFlags: 0

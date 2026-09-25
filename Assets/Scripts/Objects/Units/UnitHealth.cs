@@ -101,6 +101,18 @@ public sealed class UnitHealth :
             data.MaxHp;
     }
 
+    public void RestoreState(
+        float currentHp)
+    {
+        CurrentHp =
+            Mathf.Clamp(
+                currentHp,
+                0f,
+                MaxHp);
+
+        NotifyHealthChanged();
+    }
+
     public void TakeDamage(
         float attackPower,
         GameObject attacker)

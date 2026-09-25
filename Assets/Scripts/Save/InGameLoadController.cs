@@ -11,6 +11,10 @@ public sealed class InGameLoadController :
     [SerializeField]
     private PlacementObjectProvider objectProvider;
 
+    [Header("Unit Save Catalog")]
+    [SerializeField]
+    private UnitData[] unitDataCatalog;
+
     public bool IsInitialized
     {
         get;
@@ -112,7 +116,8 @@ public sealed class InGameLoadController :
 
         if (!SaveManager.TryLoad(
                 gameTimeManager,
-                objectProvider))
+                objectProvider,
+                unitDataCatalog))
         {
             Debug.LogError(
                 "InGameLoadController: " +

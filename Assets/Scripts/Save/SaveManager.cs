@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -71,12 +72,24 @@ public static class SaveManager
     {
         return TryLoad(
             gameTimeManager,
+            null,
             null);
     }
 
     public static bool TryLoad(
         GameTimeManager gameTimeManager,
         PlacementObjectProvider objectProvider)
+    {
+        return TryLoad(
+            gameTimeManager,
+            objectProvider,
+            null);
+    }
+
+    public static bool TryLoad(
+        GameTimeManager gameTimeManager,
+        PlacementObjectProvider objectProvider,
+        IReadOnlyList<UnitData> unitDataCatalog)
     {
         if (gameTimeManager == null)
         {
@@ -128,6 +141,17 @@ public static class SaveManager
             if (!RestoreFactories(
                     saveData.factories,
                     objectProvider))
+            {
+                return false;
+            }
+        }
+
+        if (unitDataCatalog != null &&
+            saveData.units != null)
+        {
+            if (!RestoreUnits(
+                    saveData.units,
+                    unitDataCatalog))
             {
                 return false;
             }
@@ -273,6 +297,9 @@ public static class SaveManager
         CaptureFactories(
             saveData);
 
+        CaptureUnits(
+            saveData);
+
         return saveData;
     }
 
@@ -336,10 +363,152 @@ public static class SaveManager
         }
     }
 
+    private static void CaptureUnits(
+        GameSaveData saveData)
+    {
+        UnitCore[] units =
+            UnityEngine.Object
+                .FindObjectsByType<
+                    UnitCore>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None);
+
+        foreach (UnitCore unit
+                 in units)
+        {
+            if (unit == null ||
+                unit.Data == null ||
+                unit.Data.Team !=
+                    UnitTeam.Ally ||
+                string.IsNullOrWhiteSpace(
+                    unit.Data.SaveId) ||
+                !unit.TryGetComponent(
+                    out UnitHealth health) ||
+                !unit.TryGetComponent(
+                    out TileObjectPlacement
+                        placement))
+            {
+                continue;
+            }
+
+            unit.TryGetComponent(
+                out UnitMovement movement);
+
+            unit.TryGetComponent(
+                out UnitStress stress);
+
+            unit.TryGetComponent(
+                out UnitCounseling counseling);
+
+            Vector3Int unitCell;
+
+            if (counseling != null &&
+                counseling.IsCounseling &&
+                counseling.HasReturnCell)
+            {
+                unitCell =
+                    counseling.ReturnCell;
+            }
+            else if (movement != null &&
+                     movement.IsMoving)
+            {
+                unitCell =
+                    movement.DestinationCell;
+            }
+            else if (placement.IsPlaced)
+            {
+                unitCell =
+                    placement.AnchorCell;
+            }
+            else
+            {
+                continue;
+            }
+
+            UnitSaveData unitSave =
+                new()
+                {
+                    unitId =
+                        unit.Data.SaveId,
+
+                    cell =
+                        ToSaveCell(
+                            unitCell),
+
+                    isActive =
+                        unit.IsActive,
+
+                    currentHp =
+                        health.CurrentHp,
+
+                    currentStress =
+                        stress != null
+                            ? stress.CurrentStress
+                            : 0f,
+
+                    attackPower =
+                        unit.AttackPower,
+
+                    defense =
+                        unit.Defense,
+
+                    attackCooldown =
+                        unit.AttackCooldown
+                };
+
+            CaptureFactoryAssignment(
+                unit,
+                unitSave);
+
+            if (counseling != null &&
+                counseling.IsCounseling)
+            {
+                unitSave.isCounseling =
+                    true;
+
+                unitSave.hasCounselingReturnCell =
+                    counseling.HasReturnCell;
+
+                unitSave.counselingReturnCell =
+                    ToSaveCell(
+                        counseling.ReturnCell);
+
+                unitSave.counselingRecoveryTimer =
+                    counseling.RecoveryTimer;
+            }
+
+            saveData.units.Add(
+                unitSave);
+        }
+    }
+
+    private static void CaptureFactoryAssignment(
+        UnitCore unit,
+        UnitSaveData unitSave)
+    {
+        if (unit.CurrentTarget == null ||
+            !unit.CurrentTarget.TryGetComponent(
+                out FactoryCore factory) ||
+            !factory.TryGetComponent(
+                out TileObjectPlacement
+                    factoryPlacement) ||
+            !factoryPlacement.IsPlaced)
+        {
+            return;
+        }
+
+        unitSave.hasFactoryAssignment =
+            true;
+
+        unitSave.assignedFactoryCell =
+            ToSaveCell(
+                factoryPlacement
+                    .AnchorCell);
+    }
+
     private static bool RestoreFactories(
-        System.Collections.Generic
-            .IReadOnlyList<FactorySaveData>
-                savedFactories,
+        IReadOnlyList<FactorySaveData>
+            savedFactories,
         PlacementObjectProvider objectProvider)
     {
         FactoryCore[] existingFactories =
@@ -440,6 +609,309 @@ public static class SaveManager
         }
 
         return true;
+    }
+
+    private static bool RestoreUnits(
+        IReadOnlyList<UnitSaveData>
+            savedUnits,
+        IReadOnlyList<UnitData>
+            unitDataCatalog)
+    {
+        UnitCore[] existingUnits =
+            UnityEngine.Object
+                .FindObjectsByType<
+                    UnitCore>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None);
+
+        foreach (UnitCore unit
+                 in existingUnits)
+        {
+            if (unit == null)
+            {
+                continue;
+            }
+
+            if (unit.TryGetComponent(
+                    out TileObjectPlacement
+                        placement) &&
+                placement.IsPlaced)
+            {
+                placement.RemoveFromTiles();
+            }
+
+            unit.gameObject.SetActive(
+                false);
+
+            UnityEngine.Object.Destroy(
+                unit.gameObject);
+        }
+
+        List<(UnitCore unit, UnitSaveData data)>
+            restoredUnits =
+                new();
+
+        foreach (UnitSaveData savedUnit
+                 in savedUnits)
+        {
+            if (savedUnit == null ||
+                string.IsNullOrWhiteSpace(
+                    savedUnit.unitId) ||
+                savedUnit.cell == null)
+            {
+                continue;
+            }
+
+            UnitData unitData =
+                FindUnitData(
+                    unitDataCatalog,
+                    savedUnit.unitId);
+
+            if (unitData == null ||
+                unitData.UnitPrefab == null)
+            {
+                Debug.LogError(
+                    $"SaveManager: UnitData '{savedUnit.unitId}'를 찾을 수 없습니다.");
+
+                return false;
+            }
+
+            GameObject unitObject =
+                UnityEngine.Object.Instantiate(
+                    unitData.UnitPrefab);
+
+            UnitCore unit =
+                unitObject.GetComponent<
+                    UnitCore>();
+
+            TileObjectPlacement placement =
+                unitObject.GetComponent<
+                    TileObjectPlacement>();
+
+            if (unit == null ||
+                placement == null)
+            {
+                Debug.LogError(
+                    $"{unitObject.name}: " +
+                    "유닛 복원에 필요한 컴포넌트가 없습니다.",
+                    unitObject);
+
+                UnityEngine.Object.Destroy(
+                    unitObject);
+
+                return false;
+            }
+
+            SceneTilePlacementInitializer
+                initializer =
+                    unitObject.GetComponent<
+                        SceneTilePlacementInitializer>();
+
+            if (initializer != null)
+            {
+                initializer.enabled =
+                    false;
+            }
+
+            unit.SetData(
+                unitData);
+
+            unit.SetCombatStats(
+                savedUnit.attackPower,
+                savedUnit.defense,
+                savedUnit.attackCooldown);
+
+            if (unit.TryGetComponent(
+                    out UnitHealth health))
+            {
+                health.RestoreState(
+                    savedUnit.currentHp);
+            }
+
+            if (unit.TryGetComponent(
+                    out UnitStress stress))
+            {
+                stress.SetStress(
+                    savedUnit.currentStress);
+            }
+
+            Vector3Int savedCell =
+                ToVector3Int(
+                    savedUnit.cell);
+
+            if (!savedUnit.isCounseling)
+            {
+                if (!placement.TryPlace(
+                        savedCell))
+                {
+                    Debug.LogError(
+                        $"SaveManager: 유닛 '{savedUnit.unitId}'를 " +
+                        $"{savedCell}에 복원하지 못했습니다.",
+                        unitObject);
+
+                    UnityEngine.Object.Destroy(
+                        unitObject);
+
+                    return false;
+                }
+
+                unit.SetUnitActive(
+                    savedUnit.isActive);
+            }
+
+            unit.SetAutoCombat(
+                false);
+
+            unit.SetPlayerMoveCommandActive(
+                false);
+
+            unit.ClearTarget();
+
+            if (unit.TryGetComponent(
+                    out UnitCounseling
+                        counseling) &&
+                savedUnit.isCounseling)
+            {
+                Vector3Int returnCell =
+                    savedUnit
+                            .counselingReturnCell !=
+                        null
+                        ? ToVector3Int(
+                            savedUnit
+                                .counselingReturnCell)
+                        : savedCell;
+
+                if (!counseling.RestoreState(
+                        true,
+                        savedUnit
+                            .hasCounselingReturnCell,
+                        returnCell,
+                        savedUnit
+                            .counselingRecoveryTimer))
+                {
+                    Debug.LogError(
+                        $"SaveManager: 유닛 '{savedUnit.unitId}'의 " +
+                        "상담 상태를 복원하지 못했습니다.",
+                        unitObject);
+
+                    UnityEngine.Object.Destroy(
+                        unitObject);
+
+                    return false;
+                }
+            }
+
+            restoredUnits.Add(
+                (unit, savedUnit));
+        }
+
+        RestoreFactoryAssignments(
+            restoredUnits);
+
+        return true;
+    }
+
+    private static void RestoreFactoryAssignments(
+        IReadOnlyList<
+            (UnitCore unit, UnitSaveData data)>
+                restoredUnits)
+    {
+        foreach (var restored in
+                 restoredUnits)
+        {
+            if (restored.unit == null ||
+                restored.data == null ||
+                restored.data.isCounseling ||
+                !restored.data.hasFactoryAssignment ||
+                restored.data.assignedFactoryCell ==
+                    null)
+            {
+                continue;
+            }
+
+            Vector3Int factoryCell =
+                ToVector3Int(
+                    restored.data
+                        .assignedFactoryCell);
+
+            FactoryCore factory =
+                FindFactoryAt(
+                    factoryCell);
+
+            if (factory == null)
+            {
+                continue;
+            }
+
+            restored.unit.SetAutoCombat(
+                false);
+
+            restored.unit.SetTarget(
+                factory.gameObject);
+        }
+    }
+
+    private static FactoryCore FindFactoryAt(
+        Vector3Int anchorCell)
+    {
+        FactoryCore[] factories =
+            UnityEngine.Object
+                .FindObjectsByType<
+                    FactoryCore>(
+                    FindObjectsSortMode.None);
+
+        foreach (FactoryCore factory
+                 in factories)
+        {
+            if (factory == null ||
+                !factory.TryGetComponent(
+                    out TileObjectPlacement
+                        placement) ||
+                !placement.IsPlaced)
+            {
+                continue;
+            }
+
+            if (placement.AnchorCell ==
+                anchorCell)
+            {
+                return factory;
+            }
+        }
+
+        return null;
+    }
+
+    private static UnitData FindUnitData(
+        IReadOnlyList<UnitData>
+            unitDataCatalog,
+        string saveId)
+    {
+        if (unitDataCatalog == null)
+        {
+            return null;
+        }
+
+        foreach (UnitData unitData
+                 in unitDataCatalog)
+        {
+            if (unitData == null ||
+                string.IsNullOrWhiteSpace(
+                    unitData.SaveId))
+            {
+                continue;
+            }
+
+            if (string.Equals(
+                    unitData.SaveId,
+                    saveId,
+                    StringComparison.Ordinal))
+            {
+                return unitData;
+            }
+        }
+
+        return null;
     }
 
     private static CellSaveData ToSaveCell(
