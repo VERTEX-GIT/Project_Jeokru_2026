@@ -179,6 +179,11 @@ public sealed class GameTimeManager : MonoBehaviour
         IsDialogueBlocking =
             blocked;
 
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.Dialogue,
+            blocked);
+
         if (blocked)
         {
             elapsedIntervalTime = 0f;
@@ -210,6 +215,16 @@ public sealed class GameTimeManager : MonoBehaviour
         IsVictory = false;
         IsDialogueBlocking = false;
         IsWaitingForDayEnd = false;
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.Dialogue,
+            false);
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.GameOver,
+            false);
 
         DayChanged?.Invoke(
             CurrentDay);
@@ -269,6 +284,12 @@ public sealed class GameTimeManager : MonoBehaviour
 
         IsVictory = victory;
         IsGameOver = true;
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.GameOver,
+            true);
+
         Time.timeScale = 0f;
     }
 
@@ -327,6 +348,16 @@ public sealed class GameTimeManager : MonoBehaviour
                 Time.timeScale = 1f;
             }
 
+            GameplayPauseController.SetPaused(
+                GameplayPauseController
+                    .PauseReason.Dialogue,
+                false);
+
+            GameplayPauseController.SetPaused(
+                GameplayPauseController
+                    .PauseReason.GameOver,
+                false);
+
             Instance = null;
         }
     }
@@ -349,6 +380,16 @@ public sealed class GameTimeManager : MonoBehaviour
         IsVictory = false;
         IsDialogueBlocking = false;
         IsWaitingForDayEnd = false;
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.Dialogue,
+            false);
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.GameOver,
+            false);
     }
 
     private void AdvanceTime()
@@ -380,6 +421,11 @@ public sealed class GameTimeManager : MonoBehaviour
     {
         IsGameOver =
             gameOver;
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.GameOver,
+            gameOver);
     }
 
     public void ResetTime()

@@ -53,12 +53,6 @@ public sealed class DialogueVisualController : MonoBehaviour
                 StringComparer
                     .OrdinalIgnoreCase);
 
-    private GameplayInputBlocker
-        gameplayInputBlocker;
-
-    private bool dialogueStateInitialized;
-    private bool lastDialogueRunning;
-
     private void Awake()
     {
         ResolveReferences();
@@ -76,37 +70,22 @@ public sealed class DialogueVisualController : MonoBehaviour
         HideAllVisuals();
 
         RegisterCommands();
-
-        ResolveGameplayInputBlocker();
-    }
-
-    private void Start()
-    {
-        RefreshDialogueState(
-            true);
-    }
-
-    private void Update()
-    {
-        RefreshDialogueState(
-            false);
     }
 
     private void OnDestroy()
     {
-        if (dialogueRunner != null)
+        if (dialogueRunner == null)
         {
-            dialogueRunner
-                .RemoveCommandHandler(
-                    "background");
-
-            dialogueRunner
-                .RemoveCommandHandler(
-                    "character");
+            return;
         }
 
-        ApplyDialogueBlocking(
-            false);
+        dialogueRunner
+            .RemoveCommandHandler(
+                "background");
+
+        dialogueRunner
+            .RemoveCommandHandler(
+                "character");
     }
 
     private void ResolveReferences()
@@ -131,66 +110,6 @@ public sealed class DialogueVisualController : MonoBehaviour
                 FindAnyObjectByType<
                     DialogueRunner>();
         }
-    }
-
-    private void ResolveGameplayInputBlocker()
-    {
-        if (gameplayInputBlocker != null)
-        {
-            return;
-        }
-
-        gameplayInputBlocker =
-            FindAnyObjectByType<
-                GameplayInputBlocker>();
-
-        if (gameplayInputBlocker == null)
-        {
-            gameplayInputBlocker =
-                gameObject.AddComponent<
-                    GameplayInputBlocker>();
-        }
-    }
-
-    private void RefreshDialogueState(
-        bool force)
-    {
-        bool isDialogueRunning =
-            dialogueRunner != null &&
-            dialogueRunner
-                .IsDialogueRunning;
-
-        if (!force &&
-            dialogueStateInitialized &&
-            isDialogueRunning ==
-            lastDialogueRunning)
-        {
-            return;
-        }
-
-        dialogueStateInitialized = true;
-        lastDialogueRunning =
-            isDialogueRunning;
-
-        ApplyDialogueBlocking(
-            isDialogueRunning);
-    }
-
-    private void ApplyDialogueBlocking(
-        bool blocked)
-    {
-        if (GameTimeManager.Instance != null)
-        {
-            GameTimeManager.Instance
-                .SetDialogueBlocking(
-                    blocked);
-        }
-
-        ResolveGameplayInputBlocker();
-
-        gameplayInputBlocker?
-            .SetDialogueBlocked(
-                blocked);
     }
 
     private void RegisterCommands()

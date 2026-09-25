@@ -27,12 +27,12 @@ public sealed class GameplayInputBlocker : MonoBehaviour
     }
 
     public static bool IsBlocked =>
-        PauseMenu.IsPaused ||
-        IsDialogueBlocked;
+        GameplayPauseController.IsPaused;
 
     public static bool IsDialogueBlocked =>
-        Instance != null &&
-        Instance.isDialogueBlocked;
+        GameplayPauseController.HasReason(
+            GameplayPauseController
+                .PauseReason.Dialogue);
 
     private ObjectPlacementController
         placementController;
@@ -48,7 +48,7 @@ public sealed class GameplayInputBlocker : MonoBehaviour
     private readonly List<RaycasterState>
         raycasterStates = new();
 
-    private bool isDialogueBlocked;
+    private bool isGameplayInputBlocked;
 
     private bool placementWasEnabled;
     private bool selectionWasEnabled;
@@ -67,6 +67,23 @@ public sealed class GameplayInputBlocker : MonoBehaviour
         dialogueRoot = transform;
 
         ResolveReferences();
+
+        ApplyDialogueBlocking(
+            IsDialogueBlocked);
+    }
+
+    private void OnEnable()
+    {
+        GameplayPauseController
+            .PauseStateChanged +=
+                HandlePauseStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameplayPauseController
+            .PauseStateChanged -=
+                HandlePauseStateChanged;
     }
 
     private void OnDestroy()
@@ -76,16 +93,31 @@ public sealed class GameplayInputBlocker : MonoBehaviour
             return;
         }
 
-        SetDialogueBlocked(
-            false);
+        RestoreGameplayInput();
+        RestoreGameplayUi();
 
         Instance = null;
     }
 
-    public void SetDialogueBlocked(
+    private void HandlePauseStateChanged(
+        GameplayPauseController
+            .PauseReason activeReasons)
+    {
+        bool dialogueBlocked =
+            (activeReasons &
+             GameplayPauseController
+                 .PauseReason.Dialogue) !=
+            GameplayPauseController
+                .PauseReason.None;
+
+        ApplyDialogueBlocking(
+            dialogueBlocked);
+    }
+
+    private void ApplyDialogueBlocking(
         bool blocked)
     {
-        if (isDialogueBlocked ==
+        if (isGameplayInputBlocked ==
             blocked)
         {
             return;
@@ -93,7 +125,7 @@ public sealed class GameplayInputBlocker : MonoBehaviour
 
         ResolveReferences();
 
-        isDialogueBlocked =
+        isGameplayInputBlocked =
             blocked;
 
         if (blocked)
@@ -178,6 +210,12 @@ public sealed class GameplayInputBlocker : MonoBehaviour
 
     private void RestoreGameplayInput()
     {
+        if (!isGameplayInputBlocked &&
+            raycasterStates.Count == 0)
+        {
+            return;
+        }
+
         if (placementController != null)
         {
             placementController.enabled =
@@ -226,7 +264,9 @@ public sealed class GameplayInputBlocker : MonoBehaviour
         }
 
         if (EventSystem.current != null &&
-            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current
+                .currentSelectedGameObject !=
+            null &&
             !IsDialogueUi(
                 EventSystem.current
                     .currentSelectedGameObject

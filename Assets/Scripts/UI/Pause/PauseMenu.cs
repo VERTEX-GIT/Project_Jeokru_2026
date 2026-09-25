@@ -17,19 +17,21 @@ public sealed class PauseMenu : MonoBehaviour
     private string mainMenuSceneName =
         "MainTitle";
 
-    private ObjectPlacementController placementController;
+    private ObjectPlacementController
+        placementController;
 
-    private static bool paused;
+    public static bool IsPaused =>
+        GameplayPauseController.IsPaused;
 
-    public static bool IsPaused
-    {
-        get => paused || (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver);
-        private set => paused = value;
-    }
+    public static bool IsManualPaused =>
+        GameplayPauseController.HasReason(
+            GameplayPauseController
+                .PauseReason.ManualPause);
 
     private void Start()
     {
-        SetPausePanelVisible(false);
+        SetPausePanelVisible(
+            false);
 
         if (settingsMenu != null &&
             settingsMenu.IsOpen)
@@ -37,13 +39,28 @@ public sealed class PauseMenu : MonoBehaviour
             settingsMenu.Close();
         }
 
-        Time.timeScale = 1f;
-        IsPaused = false;
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            false);
+
+        if (!GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.GameOver))
+        {
+            Time.timeScale = 1f;
+        }
     }
 
     private void Update()
     {
-        if (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver) return;
+        if (GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.GameOver))
+        {
+            return;
+        }
+
         if (IsMainMenuScene())
         {
             return;
@@ -65,10 +82,21 @@ public sealed class PauseMenu : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (IsPaused)
+        if (!IsManualPaused)
+        {
+            return;
+        }
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            false);
+
+        if (!GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.GameOver))
         {
             Time.timeScale = 1f;
-            IsPaused = false;
         }
     }
 
@@ -81,22 +109,36 @@ public sealed class PauseMenu : MonoBehaviour
 
     private void HandleEscapePressed()
     {
-        var medicine = MedicineUseController.Instance;
-        if (!IsPaused && medicine != null &&
-            (medicine.CancelMedicineSelection() || medicine.InputConsumedThisFrame))
+        if (GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.Dialogue))
+        {
+            return;
+        }
+
+        var medicine =
+            MedicineUseController.Instance;
+
+        if (!IsManualPaused &&
+            medicine != null &&
+            (medicine.CancelMedicineSelection() ||
+             medicine.InputConsumedThisFrame))
         {
             return;
         }
 
         if (placementController == null)
-            placementController = FindAnyObjectByType<ObjectPlacementController>();
+        {
+            placementController =
+                FindAnyObjectByType<
+                    ObjectPlacementController>();
+        }
 
         // 실행 순서와 관계없이 첫 Esc는 배치 취소에만 사용한다.
-        if (!IsPaused && placementController != null &&
-            (placementController.CancelPlacement() || placementController.InputConsumedThisFrame))
-            return;
-
-        if (IsMainMenuScene())
+        if (!IsManualPaused &&
+            placementController != null &&
+            (placementController.CancelPlacement() ||
+             placementController.InputConsumedThisFrame))
         {
             return;
         }
@@ -107,7 +149,7 @@ public sealed class PauseMenu : MonoBehaviour
             return;
         }
 
-        if (!IsPaused)
+        if (!IsManualPaused)
         {
             PauseGame();
             return;
@@ -130,30 +172,57 @@ public sealed class PauseMenu : MonoBehaviour
             return;
         }
 
-        if (IsPaused)
+        if (IsManualPaused ||
+            GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.Dialogue) ||
+            GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.GameOver))
         {
             return;
         }
 
-        SetPausePanelVisible(true);
+        SetPausePanelVisible(
+            true);
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            true);
 
         Time.timeScale = 0f;
-        IsPaused = true;
     }
 
     public void ResumeGame()
     {
-        if (GameTimeManager.Instance != null && GameTimeManager.Instance.IsGameOver) return;
+        if (!IsManualPaused)
+        {
+            return;
+        }
+
+        if (GameplayPauseController.HasReason(
+                GameplayPauseController
+                    .PauseReason.GameOver))
+        {
+            return;
+        }
+
         if (settingsMenu != null &&
             settingsMenu.IsOpen)
         {
             settingsMenu.Close();
         }
 
-        SetPausePanelVisible(false);
+        SetPausePanelVisible(
+            false);
+
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            false);
 
         Time.timeScale = 1f;
-        IsPaused = false;
     }
 
     public void OpenSettings()
@@ -163,9 +232,14 @@ public sealed class PauseMenu : MonoBehaviour
             return;
         }
 
-        if (!IsPaused)
+        if (!IsManualPaused)
         {
             PauseGame();
+        }
+
+        if (!IsManualPaused)
+        {
+            return;
         }
 
         if (settingsMenu == null)
@@ -201,10 +275,15 @@ public sealed class PauseMenu : MonoBehaviour
             return;
         }
 
-        IsPaused = false;
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            false);
+
         Time.timeScale = 1f;
 
-        SetPausePanelVisible(false);
+        SetPausePanelVisible(
+            false);
 
         if (settingsMenu != null &&
             settingsMenu.IsOpen)
@@ -218,7 +297,11 @@ public sealed class PauseMenu : MonoBehaviour
 
     public void QuitGame()
     {
-        IsPaused = false;
+        GameplayPauseController.SetPaused(
+            GameplayPauseController
+                .PauseReason.ManualPause,
+            false);
+
         Time.timeScale = 1f;
 
 #if UNITY_EDITOR
