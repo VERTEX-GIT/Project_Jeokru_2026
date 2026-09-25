@@ -45,6 +45,11 @@ public sealed class UnitCombat : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         UpdateCooldown();
 
         if (!CanCombat())

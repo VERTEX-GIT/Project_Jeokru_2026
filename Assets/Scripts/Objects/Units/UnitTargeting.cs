@@ -39,6 +39,11 @@ public sealed class UnitTargeting : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (!CanAutoTarget())
         {
             return;
@@ -157,7 +162,8 @@ public sealed class UnitTargeting : MonoBehaviour
 
     public bool TryAcquireTarget()
     {
-        if (!CanAutoTarget())
+        if (GameplayPauseController.IsPaused ||
+            !CanAutoTarget())
         {
             return false;
         }

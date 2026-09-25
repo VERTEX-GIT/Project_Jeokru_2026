@@ -65,6 +65,11 @@ public sealed class UnitMovement : MonoBehaviour
     // 이동 중인 유닛을 현재 경로의 다음 웨이포인트로 이동
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (IsMoving)
         {
             MoveTowardWaypoint();
@@ -84,6 +89,11 @@ public sealed class UnitMovement : MonoBehaviour
     // 이미 이동 중이라면 기존 목적지 예약과 경로를 새 명령으로 교체한다.
     public bool TryMoveTo(Vector3Int destinationCell)
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return false;
+        }
+
         if (placement == null ||
             occupancyManager == null ||
             coordinateManager == null ||

@@ -119,6 +119,11 @@ public class FactoryProduction : MonoBehaviour
     // 실시간 워커 수 변화 감지 및 처리
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         int curWorkerCount =
             workerManager.WorkingUnitCount();
 

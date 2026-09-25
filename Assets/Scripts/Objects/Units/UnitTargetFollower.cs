@@ -45,6 +45,11 @@ public sealed class UnitTargetFollower : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (!CanFollowTarget())
         {
             ClearTargetCache();

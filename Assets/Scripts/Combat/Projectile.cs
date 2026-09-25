@@ -17,6 +17,7 @@ public sealed class Projectile : MonoBehaviour
     private float attackPower;
     private UnitTeam ownerTeam;
     private bool initialized;
+    private float remainingLifetime;
 
     public void Initialize(
         Vector2 shootDirection,
@@ -37,15 +38,26 @@ public sealed class Projectile : MonoBehaviour
         ownerTeam = team;
         owner = projectileOwner;
 
-        initialized = true;
+        remainingLifetime =
+            lifetime;
 
-        Destroy(gameObject, lifetime);
+        initialized = true;
     }
 
     private void Update()
     {
-        if (!initialized)
+        if (!initialized ||
+            GameplayPauseController.IsPaused)
         {
+            return;
+        }
+
+        remainingLifetime -=
+            Time.deltaTime;
+
+        if (remainingLifetime <= 0f)
+        {
+            Destroy(gameObject);
             return;
         }
 
@@ -56,7 +68,9 @@ public sealed class Projectile : MonoBehaviour
     private void OnTriggerEnter2D(
         Collider2D other)
     {
-        if (!initialized || other == null)
+        if (!initialized ||
+            GameplayPauseController.IsPaused ||
+            other == null)
         {
             return;
         }

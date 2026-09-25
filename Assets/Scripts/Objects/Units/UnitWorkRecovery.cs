@@ -39,6 +39,11 @@ public sealed class UnitWorkRecovery : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (interruptedFactory == null ||
             unitCore == null ||
             !unitCore.IsActive)
