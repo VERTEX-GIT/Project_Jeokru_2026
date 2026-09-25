@@ -36,7 +36,7 @@ public sealed class ObjectHoverDetector
 
     private void Update()
     {
-        if (PauseMenu.IsPaused)
+        if (GameplayInputBlocker.IsBlocked)
         {
             ClearHover();
             return;

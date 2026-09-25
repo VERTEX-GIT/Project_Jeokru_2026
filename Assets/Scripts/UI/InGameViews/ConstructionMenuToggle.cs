@@ -19,9 +19,11 @@ public sealed class ConstructionMenuToggle : MonoBehaviour
     {
         if (viewers != null)
         {
-            foreach (GameObject viewer in viewers)
+            foreach (GameObject viewer
+                     in viewers)
             {
-                if (viewer != null && viewer.activeSelf)
+                if (viewer != null &&
+                    viewer.activeSelf)
                 {
                     return true;
                 }
@@ -35,24 +37,31 @@ public sealed class ConstructionMenuToggle : MonoBehaviour
     {
         if (buttonText != null)
         {
-            buttonText.text = HasVisibleViewer() ? "UI 끄기" : "UI 켜기";
+            buttonText.text =
+                HasVisibleViewer()
+                    ? "UI 끄기"
+                    : "UI 켜기";
         }
     }
 
     public void Toggle()
     {
-        if (viewers == null)
+        if (GameplayInputBlocker.IsBlocked ||
+            viewers == null)
         {
             return;
         }
 
-        bool show = !HasVisibleViewer();
+        bool show =
+            !HasVisibleViewer();
 
-        foreach (GameObject viewer in viewers)
+        foreach (GameObject viewer
+                 in viewers)
         {
             if (viewer != null)
             {
-                viewer.SetActive(show);
+                viewer.SetActive(
+                    show);
             }
         }
 
