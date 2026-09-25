@@ -75,6 +75,11 @@ public sealed class UnitCounseling :
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (!IsCounseling)
         {
             TryEnterCounseling();

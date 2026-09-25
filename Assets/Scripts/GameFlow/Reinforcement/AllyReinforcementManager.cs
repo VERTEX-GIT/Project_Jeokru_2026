@@ -81,6 +81,11 @@ public sealed class AllyReinforcementManager : MonoBehaviour
     private void HandleDayChanged(
         int day)
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         TryProvideDailyReinforcements(
             day);
     }
@@ -88,6 +93,11 @@ public sealed class AllyReinforcementManager : MonoBehaviour
     private void TryProvideDailyReinforcements(
         int day)
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (spawnZone == null ||
             allyUnitData == null)
         {

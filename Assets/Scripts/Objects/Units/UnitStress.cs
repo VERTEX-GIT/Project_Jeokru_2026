@@ -80,6 +80,11 @@ public sealed class UnitStress :
 
     private void Update()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (!CanAccumulateStress())
         {
             ResetInactiveTimers();

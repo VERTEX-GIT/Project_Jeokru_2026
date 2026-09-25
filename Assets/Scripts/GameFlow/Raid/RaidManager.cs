@@ -135,8 +135,11 @@ public sealed class RaidManager : MonoBehaviour
 
     private void Update()
     {
-        if (PauseMenu.IsPaused || State == RaidState.Inactive)
+        if (GameplayPauseController.IsPaused ||
+            State == RaidState.Inactive)
+        {
             return;
+        }
 
         CleanupEnemyList();
         EvaluateRaidState();
@@ -153,8 +156,11 @@ public sealed class RaidManager : MonoBehaviour
 
     private void HandleTimeTicked(int currentDay, int currentTime)
     {
-        if (State == RaidState.Failed)
+        if (GameplayPauseController.IsPaused ||
+            State == RaidState.Failed)
+        {
             return;
+        }
 
         if (currentTime == smallRaidTime)
         {
@@ -168,8 +174,11 @@ public sealed class RaidManager : MonoBehaviour
 
     private void BeginSpawnEvent(int currentDay, RaidEventType raidEventType)
     {
-        if (State == RaidState.Failed)
+        if (GameplayPauseController.IsPaused ||
+            State == RaidState.Failed)
+        {
             return;
+        }
 
         if (enemySpawnZone == null)
         {
@@ -212,8 +221,12 @@ public sealed class RaidManager : MonoBehaviour
 
         for (int spawnedCount = 0; spawnedCount < enemyCount;)
         {
-            while (gameTimeManager != null && !gameTimeManager.IsRunning)
+            while (GameplayPauseController.IsPaused ||
+                   gameTimeManager != null &&
+                   !gameTimeManager.IsRunning)
+            {
                 yield return null;
+            }
 
             if (!TrySpawnEnemy())
             {
@@ -230,8 +243,12 @@ public sealed class RaidManager : MonoBehaviour
 
             while (elapsedInterval < spawnInterval)
             {
-                if (gameTimeManager == null || gameTimeManager.IsRunning)
+                if (!GameplayPauseController.IsPaused &&
+                    (gameTimeManager == null ||
+                     gameTimeManager.IsRunning))
+                {
                     elapsedInterval += Time.deltaTime;
+                }
 
                 yield return null;
             }
@@ -242,6 +259,11 @@ public sealed class RaidManager : MonoBehaviour
 
     private bool TrySpawnEnemy()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return false;
+        }
+
         UnitData selectedData =
             UnityEngine.Random.value < 0.5f
                 ? meleeEnemyData

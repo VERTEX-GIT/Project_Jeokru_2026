@@ -33,6 +33,11 @@ public sealed class AllyReinforcementArrivalMover : MonoBehaviour
 
     public void BeginArrival()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return;
+        }
+
         if (unitCore == null ||
             movement == null ||
             placement == null ||
@@ -61,7 +66,8 @@ public sealed class AllyReinforcementArrivalMover : MonoBehaviour
 
     private void Update()
     {
-        if (!isJoining)
+        if (GameplayPauseController.IsPaused ||
+            !isJoining)
         {
             return;
         }
