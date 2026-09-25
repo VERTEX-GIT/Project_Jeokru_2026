@@ -30,7 +30,7 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
 
             CurrentHp = 0f;
             IsDestroyed = true;
-            
+
             return;
         }
 
@@ -41,7 +41,8 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
 
     public void TakeDamage(float attackPower, GameObject attacker)
     {
-        if (!IsAlive)
+        if (GameplayPauseController.IsPaused ||
+            !IsAlive)
         {
             return;
         }
@@ -68,6 +69,11 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
     // 공장 수리(HP 100% 회복)
     public bool Repair()
     {
+        if (GameplayPauseController.IsPaused)
+        {
+            return false;
+        }
+
         // 수리 불가 조건: factoryCore 또는 factoryCore.Definition이 null, 현재 HP가 최대 HP 이상
         if(factoryCore == null || factoryCore.Definition == null || CurrentHp >= factoryCore.Definition.MaxHealth)
         {

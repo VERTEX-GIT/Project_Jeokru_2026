@@ -105,7 +105,8 @@ public sealed class UnitHealth :
         float attackPower,
         GameObject attacker)
     {
-        if (!IsAlive ||
+        if (GameplayPauseController.IsPaused ||
+            !IsAlive ||
             unitCore == null ||
             !unitCore.IsActive ||
             unitCore.Data == null)
