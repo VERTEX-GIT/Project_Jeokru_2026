@@ -8,6 +8,9 @@ public sealed class InGameLoadController :
     [SerializeField]
     private GameTimeManager gameTimeManager;
 
+    [SerializeField]
+    private PlacementObjectProvider objectProvider;
+
     public bool IsInitialized
     {
         get;
@@ -43,6 +46,13 @@ public sealed class InGameLoadController :
             gameTimeManager =
                 FindAnyObjectByType<
                     GameTimeManager>();
+        }
+
+        if (objectProvider == null)
+        {
+            objectProvider =
+                FindAnyObjectByType<
+                    PlacementObjectProvider>();
         }
     }
 
@@ -89,8 +99,20 @@ public sealed class InGameLoadController :
             return;
         }
 
+        if (objectProvider == null)
+        {
+            Debug.LogError(
+                "InGameLoadController: " +
+                "PlacementObjectProvider를 찾을 수 없습니다.",
+                this);
+
+            GameSession.StartNewGame();
+            return;
+        }
+
         if (!SaveManager.TryLoad(
-                gameTimeManager))
+                gameTimeManager,
+                objectProvider))
         {
             Debug.LogError(
                 "InGameLoadController: " +

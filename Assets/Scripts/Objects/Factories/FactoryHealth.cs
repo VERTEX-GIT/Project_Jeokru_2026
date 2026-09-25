@@ -49,12 +49,33 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
 
         float damage = Mathf.Max(0f, attackPower - factoryCore.Definition.Defense);
 
-        CurrentHp =Mathf.Max(0f, CurrentHp - damage);
+        CurrentHp = Mathf.Max(0f, CurrentHp - damage);
 
         if (CurrentHp <= 0f)
         {
             HandleDestroyed();
         }
+    }
+
+    public void RestoreState(
+        float currentHp,
+        bool isDestroyed)
+    {
+        if (factoryCore == null ||
+            factoryCore.Definition == null)
+        {
+            return;
+        }
+
+        CurrentHp =
+            Mathf.Clamp(
+                currentHp,
+                0f,
+                MaxHp);
+
+        IsDestroyed =
+            isDestroyed ||
+            CurrentHp <= 0f;
     }
 
     private void HandleDestroyed()

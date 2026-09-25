@@ -10728,6 +10728,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlacementObjectProvider
   factoryPrefab: {fileID: 932181232136673035, guid: 7fe70a61e0b932a42b7a5ba6ce5b3d30, type: 3}
+  factoryPrefabs:
+  - factoryType: 0
+    prefab: {fileID: 2646159800887148575, guid: 07ace5fa5b46e1a44a728952d986ae2b, type: 3}
+  - factoryType: 1
+    prefab: {fileID: 4414256976141453487, guid: e40da62983c1ffa4b930446f00f2c1a6, type: 3}
+  - factoryType: 2
+    prefab: {fileID: 6945176113920510874, guid: 73fdb70ea527f0a4aa7a49821c399382, type: 3}
+  - factoryType: 3
+    prefab: {fileID: 6410982153969848698, guid: cbae784afca6beb49b2378a873f69718, type: 3}
+  - factoryType: 4
+    prefab: {fileID: 1357878550238072310, guid: eca388c73891bf342bc7b5a5b1a882ae, type: 3}
 --- !u!114 &1331440347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11211,6 +11222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGameLoadController
   gameTimeManager: {fileID: 1323874069}
+  objectProvider: {fileID: 1331440346}
 --- !u!1 &1514364956
 GameObject:
   m_ObjectHideFlags: 0

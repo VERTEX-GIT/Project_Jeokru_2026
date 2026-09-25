@@ -51,6 +51,9 @@ public class FactoryProduction : MonoBehaviour
     public int WorkingUnitCount =>
         workerUnitCount;
 
+    public bool IsProductionCycleActive =>
+        isProductionCycleActive;
+
     // 생산 진행률
     public float ProductionProgressRate =>
         productionTime > 0f
@@ -165,6 +168,26 @@ public class FactoryProduction : MonoBehaviour
         {
             CompleteProduction();
         }
+    }
+
+    public void RestoreState(
+        float progressRate,
+        bool productionCycleActive)
+    {
+        workerUnitCount =
+            0;
+
+        productionTime =
+            CalculateProductionTime(
+                workerUnitCount);
+
+        productionProgress =
+            productionTime *
+            Mathf.Clamp01(
+                progressRate);
+
+        isProductionCycleActive =
+            productionCycleActive;
     }
 
     /* =< 생산 관련 메서드 >==================================================================================== */
