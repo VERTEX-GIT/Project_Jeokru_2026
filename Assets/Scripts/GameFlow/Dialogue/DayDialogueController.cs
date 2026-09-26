@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Yarn.Unity;
 
 [DisallowMultipleComponent]
@@ -19,6 +21,9 @@ public sealed class DayDialogueController : MonoBehaviour
     [Header("References")]
     [SerializeField]
     private DialogueRunner dialogueRunner;
+
+    [SerializeField]
+    private LineAdvancer lineAdvancer;
 
     [SerializeField]
     private DialogueVisualController visualController;
@@ -47,13 +52,53 @@ public sealed class DayDialogueController : MonoBehaviour
         }
     };
 
+    [Header("Skip")]
+    [SerializeField, Min(0.1f)]
+    private float skipHoldDuration = 1f;
+
+    [SerializeField, Min(0f)]
+    private float initialSkipGuideDuration = 2f;
+
+    [SerializeField, Min(0f)]
+    private float releaseSkipGuideDuration = 1f;
+
+    [SerializeField, Min(0f)]
+    private float skipFillRevealDelay = 0.2f;
+
+    [SerializeField, Min(0f)]
+    private float skipGuideRevealLeadTime = 0.05f;
+
+    [SerializeField, Min(0.01f)]
+    private float skipGuideFadeDuration = 0.15f;
+
+    [SerializeField]
+    private CanvasGroup skipGuideGroup;
+
+    [SerializeField]
+    private TMP_Text skipBaseText;
+
+    [SerializeField]
+    private TMP_Text skipFillText;
+
+    [SerializeField]
+    private RectTransform skipFillMask;
+
     private Coroutine dialogueRoutine;
     private bool isHandlingDayEnd;
+
+    private float skipHoldTimer;
+    private float skipGuideTimer;
+    private float skipGuideTargetAlpha;
+    private bool skipRequested;
+    private bool isTrackingSpacePress;
 
     private bool ShouldPlayOpeningDialogue =>
         playOpeningDialogue &&
         GameSession.StartMode ==
             GameStartMode.NewGame;
+
+    private bool IsDialogueFlowActive =>
+        dialogueRoutine != null;
 
     private void Awake()
     {
@@ -65,12 +110,7 @@ public sealed class DayDialogueController : MonoBehaviour
         SetDialogueInputEnabled(
             false);
 
-        if (ShouldPlayOpeningDialogue &&
-            gameTimeManager != null)
-        {
-            gameTimeManager.SetDialogueBlocking(
-                true);
-        }
+        ResetSkipState();
     }
 
     private void OnEnable()
@@ -91,6 +131,12 @@ public sealed class DayDialogueController : MonoBehaviour
             return;
         }
 
+        if (gameTimeManager != null)
+        {
+            gameTimeManager.SetDialogueBlocking(
+                true);
+        }
+
         if (string.IsNullOrWhiteSpace(
                 openingNodeName))
         {
@@ -105,6 +151,13 @@ public sealed class DayDialogueController : MonoBehaviour
             false);
     }
 
+    private void Update()
+    {
+        UpdateSkipInput();
+        UpdateSkipGuideVisibility();
+        UpdateSkipGuideFade();
+    }
+
     private void OnDisable()
     {
         if (gameTimeManager != null)
@@ -115,6 +168,8 @@ public sealed class DayDialogueController : MonoBehaviour
 
         SetDialogueInputEnabled(
             false);
+
+        ResetSkipState();
     }
 
     private void ResolveReferences()
@@ -124,6 +179,23 @@ public sealed class DayDialogueController : MonoBehaviour
             dialogueRunner =
                 FindAnyObjectByType<
                     DialogueRunner>();
+        }
+
+        if (lineAdvancer == null &&
+            dialogueRunner != null)
+        {
+            lineAdvancer =
+                dialogueRunner
+                    .GetComponentInChildren<
+                        LineAdvancer>(
+                        true);
+        }
+
+        if (lineAdvancer == null)
+        {
+            lineAdvancer =
+                FindAnyObjectByType<
+                    LineAdvancer>();
         }
 
         if (visualController == null)
@@ -248,6 +320,8 @@ public sealed class DayDialogueController : MonoBehaviour
                 dialogueRoutine);
         }
 
+        ResetSkipState();
+
         dialogueRoutine =
             StartCoroutine(
                 RunDialogue(
@@ -296,6 +370,9 @@ public sealed class DayDialogueController : MonoBehaviour
 
         yield return null;
 
+        ShowSkipGuide(
+            initialSkipGuideDuration);
+
         while (dialogueRunner
                .IsDialogueRunning)
         {
@@ -304,6 +381,190 @@ public sealed class DayDialogueController : MonoBehaviour
 
         FinishDialogueFlow(
             completeDayEndAfterDialogue);
+    }
+
+    private void UpdateSkipInput()
+    {
+        if (!IsDialogueFlowActive ||
+            skipRequested ||
+            Keyboard.current == null)
+        {
+            return;
+        }
+
+        Keyboard keyboard =
+            Keyboard.current;
+
+        var spaceKey =
+            keyboard.spaceKey;
+
+        if (spaceKey.wasPressedThisFrame)
+        {
+            isTrackingSpacePress =
+                true;
+
+            skipHoldTimer =
+                0f;
+
+            HideSkipGuide();
+
+            RefreshSkipFill();
+
+            return;
+        }
+
+        if (isTrackingSpacePress)
+        {
+            if (spaceKey.isPressed)
+            {
+                skipHoldTimer +=
+                    Time.unscaledDeltaTime;
+
+                float guideRevealTime =
+                    Mathf.Max(
+                        0f,
+                        skipFillRevealDelay -
+                        skipGuideRevealLeadTime);
+
+                if (skipHoldTimer >=
+                    guideRevealTime)
+                {
+                    ShowSkipGuide(
+                        float.PositiveInfinity);
+                }
+
+                RefreshSkipFill();
+
+                if (skipHoldTimer >=
+                    skipHoldDuration)
+                {
+                    RequestSkipCurrentDialogue();
+                }
+
+                return;
+            }
+
+            if (spaceKey.wasReleasedThisFrame)
+            {
+                float heldDuration =
+                    skipHoldTimer;
+
+                isTrackingSpacePress =
+                    false;
+
+                skipHoldTimer =
+                    0f;
+
+                RefreshSkipFill();
+
+                HideSkipGuide();
+
+                if (heldDuration <
+                    skipHoldDuration)
+                {
+                    AdvanceDialogue();
+                }
+
+                return;
+            }
+
+            return;
+        }
+
+        if (keyboard.anyKey.wasPressedThisFrame)
+        {
+            AdvanceDialogue();
+        }
+    }
+
+    private void UpdateSkipGuideVisibility()
+    {
+        if (skipGuideGroup == null ||
+            !IsDialogueFlowActive ||
+            isTrackingSpacePress)
+        {
+            return;
+        }
+
+        if (float.IsPositiveInfinity(
+                skipGuideTimer))
+        {
+            return;
+        }
+
+        if (skipGuideTimer <= 0f)
+        {
+            HideSkipGuide();
+            return;
+        }
+
+        skipGuideTimer -=
+            Time.unscaledDeltaTime;
+
+        if (skipGuideTimer <= 0f)
+        {
+            HideSkipGuide();
+        }
+    }
+
+    private void UpdateSkipGuideFade()
+    {
+        if (skipGuideGroup == null)
+        {
+            return;
+        }
+
+        float fadeDuration =
+            Mathf.Max(
+                0.01f,
+                skipGuideFadeDuration);
+
+        skipGuideGroup.alpha =
+            Mathf.MoveTowards(
+                skipGuideGroup.alpha,
+                skipGuideTargetAlpha,
+                Time.unscaledDeltaTime /
+                fadeDuration);
+    }
+
+    private void AdvanceDialogue()
+    {
+        if (dialogueRunner == null ||
+            !dialogueRunner.IsDialogueRunning)
+        {
+            return;
+        }
+
+        if (lineAdvancer != null)
+        {
+            lineAdvancer.OnInputHurryUpLines();
+            return;
+        }
+
+        dialogueRunner.RequestHurryUpLine();
+    }
+
+    private void RequestSkipCurrentDialogue()
+    {
+        if (skipRequested ||
+            dialogueRunner == null ||
+            !dialogueRunner.IsDialogueRunning)
+        {
+            return;
+        }
+
+        skipRequested =
+            true;
+
+        isTrackingSpacePress =
+            false;
+
+        skipHoldTimer =
+            skipHoldDuration;
+
+        RefreshSkipFill();
+
+        dialogueRunner.Stop();
     }
 
     private void FinishDialogueFlow(
@@ -317,6 +578,8 @@ public sealed class DayDialogueController : MonoBehaviour
 
         SetDialogueInputEnabled(
             false);
+
+        ResetSkipState();
 
         if (gameTimeManager != null)
         {
@@ -334,6 +597,105 @@ public sealed class DayDialogueController : MonoBehaviour
 
         gameTimeManager?
             .CompleteDayEnd();
+    }
+
+    private void ResetSkipState()
+    {
+        skipHoldTimer =
+            0f;
+
+        skipGuideTimer =
+            0f;
+
+        skipGuideTargetAlpha =
+            0f;
+
+        skipRequested =
+            false;
+
+        isTrackingSpacePress =
+            false;
+
+        RefreshSkipFill();
+
+        if (skipGuideGroup != null)
+        {
+            skipGuideGroup.alpha =
+                0f;
+
+            skipGuideGroup.interactable =
+                false;
+
+            skipGuideGroup.blocksRaycasts =
+                false;
+        }
+    }
+
+    private void ShowSkipGuide(
+        float duration)
+    {
+        skipGuideTimer =
+            duration;
+
+        skipGuideTargetAlpha =
+            1f;
+    }
+
+    private void HideSkipGuide()
+    {
+        skipGuideTimer =
+            0f;
+
+        skipGuideTargetAlpha =
+            0f;
+    }
+
+    private void RefreshSkipFill()
+    {
+        if (skipFillMask == null ||
+            skipBaseText == null)
+        {
+            return;
+        }
+
+        float holdDuration =
+            Mathf.Max(
+                0.1f,
+                skipHoldDuration);
+
+        float revealDelay =
+            Mathf.Clamp(
+                skipFillRevealDelay,
+                0f,
+                holdDuration - 0.01f);
+
+        float visibleDuration =
+            Mathf.Max(
+                0.01f,
+                holdDuration -
+                revealDelay);
+
+        float progress =
+            Mathf.Clamp01(
+                (skipHoldTimer -
+                 revealDelay) /
+                visibleDuration);
+
+        float fullWidth =
+            skipBaseText
+                .rectTransform
+                .rect
+                .width;
+
+        Vector2 size =
+            skipFillMask.sizeDelta;
+
+        size.x =
+            fullWidth *
+            progress;
+
+        skipFillMask.sizeDelta =
+            size;
     }
 
     private void SetDialogueInputEnabled(
