@@ -34,6 +34,9 @@ public sealed class DayDialogueController : MonoBehaviour
     [SerializeField]
     private GameTimeManager gameTimeManager;
 
+    [SerializeField]
+    private CutsceneFadeController cutsceneFadeController;
+
     [Header("Opening Dialogue")]
     [SerializeField]
     private bool playOpeningDialogue = true;
@@ -104,6 +107,20 @@ public sealed class DayDialogueController : MonoBehaviour
     {
         ResolveReferences();
 
+        if (cutsceneFadeController != null)
+        {
+            if (ShouldPlayOpeningDialogue)
+            {
+                cutsceneFadeController
+                    .SetBlackImmediate();
+            }
+            else
+            {
+                cutsceneFadeController
+                    .SetClearImmediate();
+            }
+        }
+
         visualController?
             .HideAllVisuals();
 
@@ -148,7 +165,8 @@ public sealed class DayDialogueController : MonoBehaviour
 
         StartDialogueRoutine(
             openingNodeName,
-            false);
+            false,
+            true);
     }
 
     private void Update()
@@ -225,6 +243,13 @@ public sealed class DayDialogueController : MonoBehaviour
                 FindAnyObjectByType<
                     GameTimeManager>();
         }
+
+        if (cutsceneFadeController == null)
+        {
+            cutsceneFadeController =
+                FindAnyObjectByType<
+                    CutsceneFadeController>();
+        }
     }
 
     private CanvasGroup FindDialogueInputGroup(
@@ -284,7 +309,8 @@ public sealed class DayDialogueController : MonoBehaviour
 
         StartDialogueRoutine(
             nodeName,
-            true);
+            true,
+            false);
     }
 
     private string FindDayEndNode(
@@ -312,7 +338,8 @@ public sealed class DayDialogueController : MonoBehaviour
 
     private void StartDialogueRoutine(
         string nodeName,
-        bool completeDayEndAfterDialogue)
+        bool completeDayEndAfterDialogue,
+        bool startsFromBlack)
     {
         if (dialogueRoutine != null)
         {
@@ -326,12 +353,14 @@ public sealed class DayDialogueController : MonoBehaviour
             StartCoroutine(
                 RunDialogue(
                     nodeName,
-                    completeDayEndAfterDialogue));
+                    completeDayEndAfterDialogue,
+                    startsFromBlack));
     }
 
     private IEnumerator RunDialogue(
         string nodeName,
-        bool completeDayEndAfterDialogue)
+        bool completeDayEndAfterDialogue,
+        bool startsFromBlack)
     {
         ResolveReferences();
 
@@ -343,6 +372,15 @@ public sealed class DayDialogueController : MonoBehaviour
 
             FinishDialogueFlow(
                 completeDayEndAfterDialogue);
+
+            dialogueRoutine =
+                null;
+
+            if (cutsceneFadeController != null)
+            {
+                cutsceneFadeController
+                    .SetClearImmediate();
+            }
 
             yield break;
         }
@@ -357,12 +395,19 @@ public sealed class DayDialogueController : MonoBehaviour
             .HideAllVisuals();
 
         SetDialogueInputEnabled(
-            true);
+            false);
 
         while (dialogueRunner
                .IsDialogueRunning)
         {
             yield return null;
+        }
+
+        if (!startsFromBlack &&
+            cutsceneFadeController != null)
+        {
+            yield return cutsceneFadeController
+                .FadeOut();
         }
 
         dialogueRunner.StartDialogue(
@@ -370,8 +415,17 @@ public sealed class DayDialogueController : MonoBehaviour
 
         yield return null;
 
+        SetDialogueInputEnabled(
+            true);
+
         ShowSkipGuide(
             initialSkipGuideDuration);
+
+        if (cutsceneFadeController != null)
+        {
+            yield return cutsceneFadeController
+                .FadeIn();
+        }
 
         while (dialogueRunner
                .IsDialogueRunning)
@@ -379,8 +433,30 @@ public sealed class DayDialogueController : MonoBehaviour
             yield return null;
         }
 
+        SetDialogueInputEnabled(
+            false);
+
+        HideSkipGuide();
+
+        if (cutsceneFadeController != null)
+        {
+            yield return cutsceneFadeController
+                .FadeOut();
+        }
+
         FinishDialogueFlow(
             completeDayEndAfterDialogue);
+
+        yield return null;
+
+        if (cutsceneFadeController != null)
+        {
+            yield return cutsceneFadeController
+                .FadeIn();
+        }
+
+        dialogueRoutine =
+            null;
     }
 
     private void UpdateSkipInput()
@@ -570,9 +646,6 @@ public sealed class DayDialogueController : MonoBehaviour
     private void FinishDialogueFlow(
         bool completeDayEndAfterDialogue)
     {
-        dialogueRoutine =
-            null;
-
         visualController?
             .HideAllVisuals();
 
