@@ -43,8 +43,10 @@ public sealed class UnitSpriteAnimator : MonoBehaviour
         attacking = false;
         down = false;
         spriteRenderer.flipX = false;
-        if (animationSet != null && animationSet.walk.Length > 0)
-            spriteRenderer.sprite = animationSet.walk[0];
+        if (animationSet != null && (animationSet.idle != null || animationSet.walk.Length > 0))
+            spriteRenderer.sprite = animationSet.idle != null
+                ? animationSet.idle
+                : animationSet.walk[0];
     }
 
     private void PlayAttack()
@@ -92,26 +94,28 @@ public sealed class UnitSpriteAnimator : MonoBehaviour
             else return;
         }
 
-        if (movement.IsMoving && animationSet.walk.Length > 1)
+        if (movement.IsMoving && animationSet.walk.Length > (animationSet.idle == null ? 1 : 0))
         {
             if (Mathf.Abs(dx) > 0.001f) spriteRenderer.flipX = dx < 0f;
             Advance(animationSet.walk, true);
         }
-        else if (animationSet.walk.Length > 0)
+        else if (animationSet.idle != null || animationSet.walk.Length > 0)
         {
             frame = 0;
             elapsed = 0f;
             spriteRenderer.flipX = false;
-            spriteRenderer.sprite = animationSet.walk[0];
+            spriteRenderer.sprite = animationSet.idle != null
+                ? animationSet.idle
+                : animationSet.walk[0];
         }
     }
 
-    // walk의 첫 프레임은 Idle이므로 반복 구간에서 제외합니다.
+    // 별도 Idle이 없는 기존 시트만 walk의 첫 프레임을 반복에서 제외합니다.
     private bool Advance(Sprite[] sprites, bool walk)
     {
         if (sprites.Length == 0) return true;
         elapsed += Time.deltaTime;
-        int first = walk ? 1 : 0;
+        int first = walk && animationSet.idle == null ? 1 : 0;
         int next = first + Mathf.FloorToInt(elapsed * animationSet.framesPerSecond);
         bool finished = next >= sprites.Length;
         frame = walk ? first + (next - first) % (sprites.Length - first) : Mathf.Min(next, sprites.Length - 1);
