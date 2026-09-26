@@ -198,7 +198,8 @@ public sealed class AllyReinforcementManager : MonoBehaviour
                 unit.Data == null ||
                 unit.Data.Team !=
                     UnitTeam.Ally ||
-                !unit.Data.IsBasicUnit)
+                (unit.TryGetComponent(out UnitHealth health) &&
+                 !health.IsAlive && !unit.Data.IsBasicUnit))
             {
                 continue;
             }

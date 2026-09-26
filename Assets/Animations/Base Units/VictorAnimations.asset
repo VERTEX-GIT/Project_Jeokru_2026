@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca6dd4eca7431465561b1aff859383, type: 3}
+  m_Name: VictorAnimations
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimationSet
+  walk:
+  - {fileID: 2572421949987079547, guid: bebbeeee1886dae4082377f0115d3f82, type: 3}
+  - {fileID: 7710313576137699724, guid: bebbeeee1886dae4082377f0115d3f82, type: 3}
+  - {fileID: 1692294902378287417, guid: bebbeeee1886dae4082377f0115d3f82, type: 3}
+  - {fileID: 7508104497584633993, guid: bebbeeee1886dae4082377f0115d3f82, type: 3}
+  attack: []
+  down:
+  - {fileID: -8930773219066705626, guid: d94166ffffbd6a448b4d53521946463f, type: 3}
+  - {fileID: -1783523734789605248, guid: d94166ffffbd6a448b4d53521946463f, type: 3}
+  - {fileID: -5565216975388744722, guid: d94166ffffbd6a448b4d53521946463f, type: 3}
+  - {fileID: 8164212640443401716, guid: d94166ffffbd6a448b4d53521946463f, type: 3}
+  framesPerSecond: 8

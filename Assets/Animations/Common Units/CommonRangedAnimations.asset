@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca6dd4eca7431465561b1aff859383, type: 3}
+  m_Name: CommonRangedAnimations
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimationSet
+  idle: {fileID: 21300000, guid: c8c0172c06428bd44b847d89073d6f49, type: 3}
+  walk:
+  - {fileID: 7599009147120672794, guid: b77dd548820309646bb5e37857eab60b, type: 3}
+  - {fileID: -3543355313679072296, guid: b77dd548820309646bb5e37857eab60b, type: 3}
+  - {fileID: -1602108160417870473, guid: b77dd548820309646bb5e37857eab60b, type: 3}
+  attack:
+  - {fileID: -7717597077335847593, guid: c641ad12ccdc6c44e835979e4eff9cb2, type: 3}
+  - {fileID: -1963345845542182790, guid: c641ad12ccdc6c44e835979e4eff9cb2, type: 3}
+  - {fileID: -332874081440999490, guid: c641ad12ccdc6c44e835979e4eff9cb2, type: 3}
+  down:
+  - {fileID: 8373485523431716853, guid: 4c8f30be914df7d4fabd6089e23dcfe1, type: 3}
+  - {fileID: -1943097302999128214, guid: 4c8f30be914df7d4fabd6089e23dcfe1, type: 3}
+  - {fileID: 40316764289617830, guid: 4c8f30be914df7d4fabd6089e23dcfe1, type: 3}
+  framesPerSecond: 8

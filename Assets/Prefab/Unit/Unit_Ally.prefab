@@ -113,6 +113,7 @@ GameObject:
   - component: {fileID: 8475515237543357723}
   - component: {fileID: 7473038426347916597}
   - component: {fileID: -7999307707097842433}
+  - component: {fileID: 47538912803271155}
   - component: {fileID: 1395412719836097015}
   - component: {fileID: 9082989572240566767}
   m_Layer: 0
@@ -188,7 +189,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cdd14e0549e84f64abd5cde11c350781, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -398,6 +399,18 @@ MonoBehaviour:
   <CooldownRemaining>k__BackingField: 0
   projectilePrefab: {fileID: 6775409285779183715, guid: 04e2fd2751f47fd448048731121c62eb, type: 3}
   projectileSpawnPoint: {fileID: 726084371705134374}
+--- !u!114 &47538912803271155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498002034028064540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b4c499930b62a3dcdf6673cf23bc268, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::UnitSpriteAnimator
 --- !u!114 &1395412719836097015
 MonoBehaviour:
   m_ObjectHideFlags: 0

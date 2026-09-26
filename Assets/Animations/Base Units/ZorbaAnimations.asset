@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca6dd4eca7431465561b1aff859383, type: 3}
+  m_Name: ZorbaAnimations
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimationSet
+  walk:
+  - {fileID: 2452569358290856091, guid: c7b8c47d419b5134c9493e2406bbae76, type: 3}
+  - {fileID: -3269338152624322483, guid: c7b8c47d419b5134c9493e2406bbae76, type: 3}
+  - {fileID: -6841387454458861071, guid: c7b8c47d419b5134c9493e2406bbae76, type: 3}
+  attack: 
+  - {fileID: -6451097184658556716, guid: ad3d4819d78c5b442bf604b2875ff446, type: 3}
+  - {fileID: -3208474400890032619, guid: ad3d4819d78c5b442bf604b2875ff446, type: 3}
+  - {fileID: 5151306598361780474, guid: ad3d4819d78c5b442bf604b2875ff446, type: 3}
+  - {fileID: -2405306407623529600, guid: ad3d4819d78c5b442bf604b2875ff446, type: 3}
+  down:
+  - {fileID: 4780480303510592059, guid: fe30634f7bbb3254ba13f82b4ced7e5b, type: 3}
+  - {fileID: -8488828397747862833, guid: fe30634f7bbb3254ba13f82b4ced7e5b, type: 3}
+  - {fileID: 4725695992550521288, guid: fe30634f7bbb3254ba13f82b4ced7e5b, type: 3}
+  - {fileID: 2239291899370713258, guid: fe30634f7bbb3254ba13f82b4ced7e5b, type: 3}
+  framesPerSecond: 8

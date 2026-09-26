@@ -60,7 +60,8 @@ public sealed class FactoryRepair : MonoBehaviour
     // 수리 비용을 소비하고 공장 HP를 최대치까지 회복
     public FactoryRepairResult TryRepair()
     {
-        if (GameplayPauseController.IsPaused)
+        if (GameplayPauseController.HasReason(
+                GameplayPauseController.PauseReason.GameOver))
         {
             return FactoryRepairResult.Unavailable;
         }

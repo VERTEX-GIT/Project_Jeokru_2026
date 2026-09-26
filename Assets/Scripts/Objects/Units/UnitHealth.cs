@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -239,18 +240,40 @@ public sealed class UnitHealth :
             return;
         }
 
+        StopDeadUnit();
+
         if (unitCore.Data.Team ==
                 UnitTeam.Ally &&
             unitCore.Data.IsBasicUnit)
         {
-            HandleBasicAllyDown();
             return;
         }
 
+        UnitAnimationSet animation = unitCore.Data.AnimationSet;
+        if (TryGetComponent(out UnitSpriteAnimator _) &&
+            animation != null && animation.down.Length > 0)
+        {
+            StartCoroutine(RemoveAfterDeathAnimation(
+                animation.down.Length / Mathf.Max(1f, animation.framesPerSecond)));
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private IEnumerator RemoveAfterDeathAnimation(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            yield return null;
+            if (!GameplayPauseController.IsPaused) elapsed += Time.deltaTime;
+        }
         Destroy(gameObject);
     }
 
-    private void HandleBasicAllyDown()
+    private void StopDeadUnit()
     {
         unitCore.SetUnitActive(
             false);

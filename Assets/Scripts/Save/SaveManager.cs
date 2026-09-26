@@ -384,6 +384,7 @@ public static class SaveManager
                     unit.Data.SaveId) ||
                 !unit.TryGetComponent(
                     out UnitHealth health) ||
+                (!health.IsAlive && !unit.Data.IsBasicUnit) ||
                 !unit.TryGetComponent(
                     out TileObjectPlacement
                         placement))
@@ -674,6 +675,11 @@ public static class SaveManager
                     $"SaveManager: UnitData '{savedUnit.unitId}'를 찾을 수 없습니다.");
 
                 return false;
+            }
+
+            if (savedUnit.currentHp <= 0f && !unitData.IsBasicUnit)
+            {
+                continue;
             }
 
             GameObject unitObject =
