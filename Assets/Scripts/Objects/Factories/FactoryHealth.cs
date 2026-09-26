@@ -90,7 +90,8 @@ public sealed class FactoryHealth : MonoBehaviour, IDamageable
     // 공장 수리(HP 100% 회복)
     public bool Repair()
     {
-        if (GameplayPauseController.IsPaused)
+        if (GameplayPauseController.HasReason(
+                GameplayPauseController.PauseReason.GameOver))
         {
             return false;
         }
