@@ -79,6 +79,14 @@ public sealed class UnitCounseling :
         }
     }
 
+    private void OnDestroy()
+    {
+        if (IsCounseling && counselingRoom != null)
+        {
+            counselingRoom.Unregister(this);
+        }
+    }
+
     private void Update()
     {
         if (GameplayPauseController.IsPaused)
@@ -318,16 +326,7 @@ public sealed class UnitCounseling :
             return;
         }
 
-        // 원래 타일이 다른 오브젝트에게
-        // 점유됐다면 복귀를 기다린다.
-        if (!placement.CanPlace(
-                ReturnCell))
-        {
-            return;
-        }
-
-        if (!placement.TryPlace(
-                ReturnCell))
+        if (!TryPlaceExitCell())
         {
             return;
         }
@@ -349,5 +348,29 @@ public sealed class UnitCounseling :
 
         counselingRoom.Unregister(
             this);
+    }
+
+    private bool TryPlaceExitCell()
+    {
+        if (placement.TryPlace(ReturnCell))
+        {
+            return true;
+        }
+
+        for (int radius = 1; radius <= 3; radius++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
+                {
+                    if (placement.TryPlace(ReturnCell + new Vector3Int(x, y, 0)))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

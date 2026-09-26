@@ -28,6 +28,9 @@ public sealed class UnitData : ScriptableObject
     private GameObject unitPrefab;
 
     [SerializeField]
+    private UnitAnimationSet animationSet;
+
+    [SerializeField]
     private UnitTeam team;
 
     [SerializeField]
@@ -69,6 +72,7 @@ public sealed class UnitData : ScriptableObject
     public string SaveId => saveId;
     public string UnitName => unitName;
     public GameObject UnitPrefab => unitPrefab;
+    public UnitAnimationSet AnimationSet => animationSet;
     public UnitTeam Team => team;
     public bool IsBasicUnit => isBasicUnit;
 

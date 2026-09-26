@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(UnitCore))]
 public sealed class UnitCombat : MonoBehaviour
 {
+    public event Action AttackPerformed;
     [field: SerializeField]
     public float CooldownRemaining { get; private set; }
 
@@ -193,6 +195,7 @@ public sealed class UnitCombat : MonoBehaviour
 
         CooldownRemaining =
             unitCore.AttackCooldown;
+        AttackPerformed?.Invoke();
     }
 
     private bool IsUnitInAttackRange(
@@ -366,6 +369,7 @@ public sealed class UnitCombat : MonoBehaviour
 
         CooldownRemaining =
             unitCore.AttackCooldown;
+        AttackPerformed?.Invoke();
     }
 
     private Vector3 GetProjectileTargetPosition(

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca6dd4eca7431465561b1aff859383, type: 3}
+  m_Name: ErnistAnimations
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimationSet
+  walk:
+  - {fileID: 5319418357790461422, guid: eb33e01a39b5afa4f87b042118375fdf, type: 3}
+  - {fileID: 3450791726058373178, guid: eb33e01a39b5afa4f87b042118375fdf, type: 3}
+  - {fileID: 2631494057867285366, guid: eb33e01a39b5afa4f87b042118375fdf, type: 3}
+  attack: 
+  - {fileID: -5761853059279928217, guid: b11c1ef624539bd489e8b6ed2a559d71, type: 3}
+  - {fileID: -2788349795621988154, guid: b11c1ef624539bd489e8b6ed2a559d71, type: 3}
+  - {fileID: 7439217775080380255, guid: b11c1ef624539bd489e8b6ed2a559d71, type: 3}
+  - {fileID: 1166399603305112379, guid: b11c1ef624539bd489e8b6ed2a559d71, type: 3}
+  down:
+  - {fileID: 7974893271615549036, guid: 25e719710fd07a741ad154712215279d, type: 3}
+  - {fileID: 5302330192560604846, guid: 25e719710fd07a741ad154712215279d, type: 3}
+  - {fileID: -6389618100925527377, guid: 25e719710fd07a741ad154712215279d, type: 3}
+  - {fileID: -2239010764764270123, guid: 25e719710fd07a741ad154712215279d, type: 3}
+  framesPerSecond: 8
