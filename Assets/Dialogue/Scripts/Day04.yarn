@@ -1,0 +1,52 @@
+﻿title: Day04
+---
+
+<<background 4>>
+// 4일차 (한 개비) (심요연, 조르바)
+
+// (복도)
+
+<<character j1>>
+조르바: 로비에서 피지 말라고 하니까 복도에서 피네.
+
+<<character s1>>
+심요연: 로비에서 피면 민폐라며.
+
+<<character j1>>
+조르바: 복도에서 피라는 소리는 아니었을 텐데.
+
+<<character s1>>
+심요연: 마땅히 피울 곳도 없고.. 복도가 편해 혼자 피울 땐.
+
+<<character j1>>
+조르바: 차라리 옥상 가서 담배 피우지.
+
+<<character s1>>
+심요연: 담배 피우다 내가 여기 회사에 있는 거 정부한테 걸릴라.
+
+<<character s2>>
+심요연: 너도 한 대 피울래?
+
+<<character j1>>
+조르바: 싫어, 난 빨리 뒤질 의향 없어서.
+
+<<character j4>>
+조르바: 싫다는데 왜 주냐?
+
+<<character s1>>
+심요연: 지난번에 향수 빌려준 값.
+
+<<character j4>>
+조르바: 안 피운다니까.
+
+<<character s2>>
+심요연: 나중에 한번쯤 피워봐, 안 좋은 시도란 건 없으니까.
+
+<<character j1>>
+조르바: 버리던가 해야지.
+
+<<character s1>>
+심요연: 마음대로.
+<<character none>>
+<<background none>>
+===

@@ -1,0 +1,62 @@
+﻿title: Day09
+---
+
+<<background 4>>
+// 9일차 (창과 방패)
+
+<<character s1>>
+심요연: 맨날 너 마시는 차 그거 먹을 만하냐?
+
+<<character j1>>
+조르바: 담배보단.
+
+<<character s1>>
+심요연: 내가 준 거 피워봤어?
+
+조르바가 주머니에서 꺼내서 보여준다.
+
+<<character s2>>
+심요연: 아직 안 버렸네.
+
+<<character j1>>
+조르바: 뒤질 때까지 안 피울 거니까 걱정하지 마.
+
+<<character s2>>
+심요연: 그럼 진짜 뒤질 거 같을 땐 피워볼 거야?
+
+<<character j4>>
+조르바: 말장난하지 마.
+
+<<character s4>>
+심요연: 재미없는 놈.
+
+<<character j1>>
+조르바: 내일 정부 요원 올 텐데 안 무서워?
+
+<<character s1>>
+심요연: 난 그런 애들이랑 몇 년을 싸워왔는데 뭐.
+
+<<character j1>>
+조르바: 진짜 안 쫄려?
+
+<<character s3>>
+심요연: 존나 쫄리지 매 순간.
+
+<<character j2>>
+조르바: 멋진 대답을 기대한 내가 병신이지.
+
+<<character s1>>
+심요연: 근데 내가 피할 수 있는 것도 아니고. 그 불안한만큼 더 준비를 하면 되겠지.
+
+<<character j2>>
+조르바: 그걸 2시간째 소파에 앉아서 담배 피우며 말하니 참 설득력 있다?
+
+<<character s1>>
+심요연: 심신 안정도 준비야.
+
+<<character j2>>
+조르바: 그러시겠죠.
+
+<<character none>>
+<<background none>>
+===

@@ -16,11 +16,30 @@ public sealed class DialogueVisualController : MonoBehaviour
         [SerializeField]
         private Sprite sprite;
 
-        public string Key =>
-            key;
+        public string Key => key;
+        public Sprite Sprite => sprite;
+    }
 
-        public Sprite Sprite =>
-            sprite;
+    [Serializable]
+    private sealed class CharacterEntry
+    {
+        [SerializeField]
+        private string key;
+
+        [SerializeField]
+        private Sprite sprite;
+
+        [Header("Default Size")]
+        [SerializeField]
+        private bool overrideHeight;
+
+        [SerializeField, Min(0f)]
+        private float height = 900f;
+
+        public string Key => key;
+        public Sprite Sprite => sprite;
+        public bool OverrideHeight => overrideHeight;
+        public float Height => height;
     }
 
     [Header("References")]
@@ -39,33 +58,22 @@ public sealed class DialogueVisualController : MonoBehaviour
 
     [Header("Characters")]
     [SerializeField]
-    private VisualEntry[] characters;
+    private CharacterEntry[] characters;
 
     private readonly Dictionary<string, Sprite>
         backgroundLookup =
-            new(
-                StringComparer
-                    .OrdinalIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly Dictionary<string, Sprite>
+    private readonly Dictionary<string, CharacterEntry>
         characterLookup =
-            new(
-                StringComparer
-                    .OrdinalIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
     private void Awake()
     {
         ResolveReferences();
 
-        BuildLookup(
-            backgrounds,
-            backgroundLookup,
-            "배경");
-
-        BuildLookup(
-            characters,
-            characterLookup,
-            "캐릭터");
+        BuildBackgroundLookup();
+        BuildCharacterLookup();
 
         HideAllVisuals();
 
@@ -79,13 +87,17 @@ public sealed class DialogueVisualController : MonoBehaviour
             return;
         }
 
-        dialogueRunner
-            .RemoveCommandHandler(
-                "background");
+        dialogueRunner.RemoveCommandHandler(
+            "background");
 
-        dialogueRunner
-            .RemoveCommandHandler(
-                "character");
+        dialogueRunner.RemoveCommandHandler(
+            "character");
+
+        dialogueRunner.RemoveCommandHandler(
+            "character_position");
+
+        dialogueRunner.RemoveCommandHandler(
+            "character_height");
     }
 
     private void ResolveReferences()
@@ -93,22 +105,19 @@ public sealed class DialogueVisualController : MonoBehaviour
         if (dialogueRunner == null)
         {
             dialogueRunner =
-                GetComponent<
-                    DialogueRunner>();
+                GetComponent<DialogueRunner>();
         }
 
         if (dialogueRunner == null)
         {
             dialogueRunner =
-                GetComponentInParent<
-                    DialogueRunner>();
+                GetComponentInParent<DialogueRunner>();
         }
 
         if (dialogueRunner == null)
         {
             dialogueRunner =
-                FindAnyObjectByType<
-                    DialogueRunner>();
+                FindAnyObjectByType<DialogueRunner>();
         }
     }
 
@@ -123,35 +132,36 @@ public sealed class DialogueVisualController : MonoBehaviour
             return;
         }
 
-        dialogueRunner
-            .AddCommandHandler<string>(
-                "background",
-                SetBackground);
+        dialogueRunner.AddCommandHandler<string>(
+            "background",
+            SetBackground);
 
-        dialogueRunner
-            .AddCommandHandler<string>(
-                "character",
-                SetCharacter);
+        dialogueRunner.AddCommandHandler<string>(
+            "character",
+            SetCharacter);
+
+        dialogueRunner.AddCommandHandler<float, float>(
+            "character_position",
+            SetCharacterPosition);
+
+        dialogueRunner.AddCommandHandler<float>(
+            "character_height",
+            SetCharacterHeight);
     }
 
-    private void BuildLookup(
-        VisualEntry[] entries,
-        Dictionary<string, Sprite> lookup,
-        string categoryName)
+    private void BuildBackgroundLookup()
     {
-        lookup.Clear();
+        backgroundLookup.Clear();
 
-        if (entries == null)
+        if (backgrounds == null)
         {
             return;
         }
 
-        foreach (VisualEntry entry
-                 in entries)
+        foreach (VisualEntry entry in backgrounds)
         {
             if (entry == null ||
-                string.IsNullOrWhiteSpace(
-                    entry.Key))
+                string.IsNullOrWhiteSpace(entry.Key))
             {
                 continue;
             }
@@ -159,7 +169,7 @@ public sealed class DialogueVisualController : MonoBehaviour
             if (entry.Sprite == null)
             {
                 Debug.LogWarning(
-                    $"{name}: {categoryName} 키 '{entry.Key}'에 Sprite가 없습니다.",
+                    $"{name}: 배경 키 '{entry.Key}'에 Sprite가 없습니다.",
                     this);
 
                 continue;
@@ -168,12 +178,52 @@ public sealed class DialogueVisualController : MonoBehaviour
             string normalizedKey =
                 entry.Key.Trim();
 
-            if (!lookup.TryAdd(
+            if (!backgroundLookup.TryAdd(
                     normalizedKey,
                     entry.Sprite))
             {
                 Debug.LogWarning(
-                    $"{name}: {categoryName} 키 '{normalizedKey}'가 중복되었습니다.",
+                    $"{name}: 배경 키 '{normalizedKey}'가 중복되었습니다.",
+                    this);
+            }
+        }
+    }
+
+    private void BuildCharacterLookup()
+    {
+        characterLookup.Clear();
+
+        if (characters == null)
+        {
+            return;
+        }
+
+        foreach (CharacterEntry entry in characters)
+        {
+            if (entry == null ||
+                string.IsNullOrWhiteSpace(entry.Key))
+            {
+                continue;
+            }
+
+            if (entry.Sprite == null)
+            {
+                Debug.LogWarning(
+                    $"{name}: 캐릭터 키 '{entry.Key}'에 Sprite가 없습니다.",
+                    this);
+
+                continue;
+            }
+
+            string normalizedKey =
+                entry.Key.Trim();
+
+            if (!characterLookup.TryAdd(
+                    normalizedKey,
+                    entry))
+            {
+                Debug.LogWarning(
+                    $"{name}: 캐릭터 키 '{normalizedKey}'가 중복되었습니다.",
                     this);
             }
         }
@@ -182,40 +232,16 @@ public sealed class DialogueVisualController : MonoBehaviour
     private void SetBackground(
         string key)
     {
-        SetVisual(
-            key,
-            backgroundImage,
-            backgroundLookup,
-            "배경");
-    }
-
-    private void SetCharacter(
-        string key)
-    {
-        SetVisual(
-            key,
-            characterImage,
-            characterLookup,
-            "캐릭터");
-    }
-
-    private void SetVisual(
-        string key,
-        Image targetImage,
-        Dictionary<string, Sprite> lookup,
-        string categoryName)
-    {
-        if (targetImage == null)
+        if (backgroundImage == null)
         {
             Debug.LogError(
-                $"{name}: {categoryName} Image가 연결되지 않았습니다.",
+                $"{name}: 배경 Image가 연결되지 않았습니다.",
                 this);
 
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(
-                key))
+        if (string.IsNullOrWhiteSpace(key))
         {
             return;
         }
@@ -225,31 +251,146 @@ public sealed class DialogueVisualController : MonoBehaviour
 
         if (normalizedKey.Equals(
                 "none",
-                StringComparison
-                    .OrdinalIgnoreCase))
+                StringComparison.OrdinalIgnoreCase))
         {
             HideVisual(
-                targetImage);
+                backgroundImage);
 
             return;
         }
 
-        if (!lookup.TryGetValue(
+        if (!backgroundLookup.TryGetValue(
                 normalizedKey,
                 out Sprite sprite))
         {
             Debug.LogWarning(
-                $"{name}: 등록되지 않은 {categoryName} 키 '{normalizedKey}'입니다.",
+                $"{name}: 등록되지 않은 배경 키 '{normalizedKey}'입니다.",
                 this);
 
             return;
         }
 
-        targetImage.sprite =
+        backgroundImage.sprite =
             sprite;
 
-        targetImage.enabled =
+        backgroundImage.enabled =
             true;
+    }
+
+    private void SetCharacter(
+        string key)
+    {
+        if (characterImage == null)
+        {
+            Debug.LogError(
+                $"{name}: 캐릭터 Image가 연결되지 않았습니다.",
+                this);
+
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+
+        string normalizedKey =
+            key.Trim();
+
+        if (normalizedKey.Equals(
+                "none",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            HideVisual(
+                characterImage);
+
+            return;
+        }
+
+        if (!characterLookup.TryGetValue(
+                normalizedKey,
+                out CharacterEntry entry))
+        {
+            Debug.LogWarning(
+                $"{name}: 등록되지 않은 캐릭터 키 '{normalizedKey}'입니다.",
+                this);
+
+            return;
+        }
+
+        characterImage.sprite =
+            entry.Sprite;
+
+        characterImage.enabled =
+            true;
+
+        if (entry.OverrideHeight)
+        {
+            ApplyCharacterHeight(
+                entry.Height);
+        }
+    }
+
+    private void SetCharacterPosition(
+        float x,
+        float y)
+    {
+        if (characterImage == null)
+        {
+            return;
+        }
+
+        characterImage.rectTransform
+            .anchoredPosition =
+            new Vector2(
+                x,
+                y);
+    }
+
+    private void SetCharacterHeight(
+        float height)
+    {
+        ApplyCharacterHeight(
+            height);
+    }
+
+    private void ApplyCharacterHeight(
+        float height)
+    {
+        if (characterImage == null ||
+            characterImage.sprite == null ||
+            height <= 0f)
+        {
+            return;
+        }
+
+        Sprite sprite =
+            characterImage.sprite;
+
+        float spriteWidth =
+            sprite.rect.width;
+
+        float spriteHeight =
+            sprite.rect.height;
+
+        if (spriteHeight <= 0f)
+        {
+            return;
+        }
+
+        float aspectRatio =
+            spriteWidth /
+            spriteHeight;
+
+        float width =
+            height *
+            aspectRatio;
+
+        characterImage.rectTransform
+            .sizeDelta =
+            new Vector2(
+                width,
+                height);
     }
 
     public void HideAllVisuals()

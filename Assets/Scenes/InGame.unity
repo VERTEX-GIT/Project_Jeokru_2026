@@ -7149,8 +7149,78 @@ MonoBehaviour:
   dialogueRunner: {fileID: 537696460}
   backgroundImage: {fileID: 2118681046}
   characterImage: {fileID: 1514364957}
-  backgrounds: []
-  characters: []
+  backgrounds:
+  - key: a
+    sprite: {fileID: 21300000, guid: bf913e946f1ddc842ae3d2a388628f13, type: 3}
+  - key: b
+    sprite: {fileID: 21300000, guid: d3365ad6962e92c4c937f37742eb120c, type: 3}
+  - key: c
+    sprite: {fileID: 21300000, guid: fa07b91e7b567d441aa3d7f4da3189df, type: 3}
+  - key: 1
+    sprite: {fileID: 21300000, guid: 4dcf6ed7991f38f40ae88da76056f23b, type: 3}
+  - key: 2
+    sprite: {fileID: 21300000, guid: 7a942aa7522547f4b9d045033d54b2fb, type: 3}
+  - key: 3
+    sprite: {fileID: 21300000, guid: 0c6adcdbfbf643049a7a53f04fbcc3c5, type: 3}
+  - key: 4
+    sprite: {fileID: 21300000, guid: c6be1cd5f17065d459eaa75fe5936abe, type: 3}
+  - key: 5
+    sprite: {fileID: 21300000, guid: 1a5166401fab01a45ade5c81b02b8e29, type: 3}
+  - key: 6
+    sprite: {fileID: 21300000, guid: 47417cf59d563854480358567c9225b5, type: 3}
+  characters:
+  - key: j1
+    sprite: {fileID: 21300000, guid: 71b2f2e6277dddd4983df2d421e7fb0f, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: j2
+    sprite: {fileID: 21300000, guid: aafade2eefd0dcf4ab2cfa806b8fc680, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: j3
+    sprite: {fileID: 21300000, guid: c4337db167b2a2d4a8cb67e46f1b5c79, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: j4
+    sprite: {fileID: 21300000, guid: 2325f07139445e04d808753eb62543df, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: a1
+    sprite: {fileID: 21300000, guid: 9273c957ae2a7384cb4d69aba0a9b502, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: a2
+    sprite: {fileID: 21300000, guid: 9fe4b476505b5e044af4c0bb0aebd290, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: s3
+    sprite: {fileID: 21300000, guid: ea93f95d093a68c4ab6b58175981da67, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: o
+    sprite: {fileID: 21300000, guid: c4ffefa210bdb2549b5f1c32ed158e4d, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: s1
+    sprite: {fileID: 21300000, guid: 4d8b17d1d5b11ff4fb97439181e02870, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: s2
+    sprite: {fileID: 21300000, guid: 9010188370ba3b14796c6b8436f6097b, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: s4
+    sprite: {fileID: 21300000, guid: 91f89e9a01d8b9f48a4b85d2c5d875b5, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: v1
+    sprite: {fileID: 21300000, guid: 0b2cd6dbba2ff4543bbcd9d114fafe05, type: 3}
+    overrideHeight: 1
+    height: 900
+  - key: v2
+    sprite: {fileID: 21300000, guid: 92fd0994404d616478d0349c0c0e9a41, type: 3}
+    overrideHeight: 1
+    height: 900
 --- !u!114 &537696460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10548,12 +10618,48 @@ MonoBehaviour:
   dialogueInputGroup: {fileID: 1404697481}
   gameTimeManager: {fileID: 1323874069}
   playOpeningDialogue: 1
-  openingNodeName: Day00_Nightmare
+  openingNodeName: Prologue
   dayEndDialogues:
   - day: 1
-    nodeName: Day01_Lobby
+    nodeName: Day01
   - day: 2
-    nodeName: Day02_Whatever
+    nodeName: Day02
+  - day: 3
+    nodeName: Day03
+  - day: 4
+    nodeName: Day04
+  - day: 5
+    nodeName: Day05
+  - day: 6
+    nodeName: Day06
+  - day: 7
+    nodeName: Day07
+  - day: 8
+    nodeName: Day08
+  - day: 9
+    nodeName: Day09
+  - day: 10
+    nodeName: Day10
+  - day: 11
+    nodeName: Day11
+  - day: 12
+    nodeName: Day12
+  - day: 13
+    nodeName: Day13
+  - day: 14
+    nodeName: Day14
+  - day: 15
+    nodeName: Day15
+  - day: 16
+    nodeName: Day16
+  - day: 17
+    nodeName: Day17
+  - day: 18
+    nodeName: Day18
+  - day: 19
+    nodeName: Day19
+  - day: 20
+    nodeName: Day20
 --- !u!1 &1327067456
 GameObject:
   m_ObjectHideFlags: 0
@@ -14487,6 +14593,14 @@ PrefabInstance:
       propertyPath: anchorCell.y
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 3300005551741749151, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 3300005551741749151, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 4280184795454498564, guid: 3e554417f960c2644a7ffa38fcc0dd2a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -14
