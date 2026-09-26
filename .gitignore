@@ -108,3 +108,6 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Auto-generated files by Yarn Spinner
+ProjectSettings/Packages/dev.yarnspinner/*-generated.ysls.json
